@@ -1,19 +1,19 @@
 #!/usr/bin/env node
 /**
  * Usage:
- *   node spotify_list.js "https://open.spotify.com/playlist/..."
- *   node spotify_list.js "https://open.spotify.com/album/..."
+ *   node src/spotify_list.js "https://open.spotify.com/playlist/..."
+ *   node src/spotify_list.js "https://open.spotify.com/album/..."
  *
- * Output:
+ * Prints:
  *   Song Title - Artist 1, Artist 2
  */
 
-const { chromium } = require('playwright');
+import { chromium } from 'playwright';
 
 const SPOTIFY_HOSTS = new Set(['open.spotify.com', 'www.open.spotify.com']);
 
 function usageAndExit() {
-  console.error('Usage: node spotify_list.js "<spotify album/playlist url>"');
+  console.error('Usage: node src/spotify_list.js "<spotify album/playlist url>"');
   process.exit(1);
 }
 
@@ -40,8 +40,8 @@ function usageAndExit() {
   await context.route('**/*', route => {
     const req = route.request();
     const type = req.resourceType();
-    const url = req.url();
-    if (type === 'media' || url.includes('.mp3') || url.includes('.m4a')) {
+    const u = req.url();
+    if (type === 'media' || u.includes('.mp3') || u.includes('.m4a')) {
       return route.abort();
     }
     route.continue();
@@ -52,7 +52,7 @@ function usageAndExit() {
   try {
     await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60_000 });
 
-    // Try hard to accept/dismiss cookie banners/overlays
+    // Cookie/consent buttons
     const consentSelectors = [
       'button:has-text("Accept")',
       'button:has-text("Accept All")',
@@ -66,10 +66,10 @@ function usageAndExit() {
       if (btn) { await btn.click().catch(() => {}); }
     }
 
-    // Wait for ANY track anchor to exist anywhere on the page (less brittle)
+    // Wait for any track anchor
     await page.waitForSelector('a[href^="/track"]', { timeout: 60_000 });
 
-    // Auto-scroll the main scroll container to load all items
+    // Auto-scroll to load all items
     const maxScrollMs = 60_000;
     const start = Date.now();
     let stableRounds = 0;
@@ -83,27 +83,24 @@ function usageAndExit() {
         ].filter(Boolean);
 
         const countBefore = document.querySelectorAll('a[href^="/track"]').length;
-
         for (const el of scrollers) el.scrollTop = el.scrollHeight;
 
         return new Promise(resolve => {
-          const t = setTimeout(() => {
+          setTimeout(() => {
             const countAfter = document.querySelectorAll('a[href^="/track"]').length;
             resolve(countAfter - countBefore);
           }, 700);
         });
       });
-      stableRounds = added > 0 ? 0 : (stableRounds + 1);
+      stableRounds = (added > 0) ? 0 : (stableRounds + 1);
     }
 
-    // Extract lines (robust selectors for both album & playlist layouts)
+    // Extract lines
     const lines = await page.evaluate(() => {
       const txt = el => (el?.textContent || '').trim();
       const uniq = arr => Array.from(new Set(arr));
 
-      // A “row” can be a variety of elements; we derive rows from track links’ nearest row container
       const trackLinks = Array.from(document.querySelectorAll('a[href^="/track"]'));
-
       const rows = uniq(
         trackLinks
           .map(a => a.closest('[data-testid="tracklist-row"], [role="row"], div[draggable="true"]'))
@@ -111,13 +108,11 @@ function usageAndExit() {
       );
 
       const parsed = rows.map(row => {
-        // Title
         const titleEl =
           row.querySelector('[data-testid="internal-track-link"]') ||
           row.querySelector('a[href^="/track"]');
         const title = txt(titleEl);
 
-        // Artists (anchors to /artist)
         const artistEls = Array.from(row.querySelectorAll('a[href^="/artist"]'));
         const artists = uniq(artistEls.map(a => txt(a))).filter(Boolean).join(', ');
 
@@ -125,12 +120,11 @@ function usageAndExit() {
         return `${title} - ${artists}`;
       }).filter(Boolean);
 
-      // De-dup in case of shadow rows/placeholders
       return uniq(parsed);
     });
 
     if (!lines.length) {
-      console.error('No tracks found. If this is a private playlist, open it in your browser first to confirm access.');
+      console.error('No tracks found. If this is a private playlist, open it in the browser to confirm access.');
       process.exit(2);
     }
 

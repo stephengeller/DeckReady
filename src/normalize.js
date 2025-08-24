@@ -1,53 +1,64 @@
 // Utilities to clean titles/artists into better search strings
 
-const FEAT_PAT = /\b(feat\.?|ft\.?)\b/gi;
-
 export function primaryArtist(artists) {
-  // "Artist 1, Artist 2" -> "Artist 1"
-  // "Artist 1 & Artist 2" -> "Artist 1"
   if (!artists) return artists;
-  const firstSplit = artists.split(/,|&|x|×|\band\b/i).map(s => s.trim()).filter(Boolean);
-  return firstSplit[0] || artists.trim();
+  const parts = artists
+    .split(/\s*,\s*|\s*&\s*|\s+x\s+|\s*×\s*|\s+\band\s+/gi) // only split on ' x ' (with spaces), not the letter 'x'
+    .map(s => s.trim())
+    .filter(Boolean);
+  return parts[0] || artists.trim();
 }
 
 export function stripDecorations(title) {
   if (!title) return title;
-
   let t = title;
 
-  // Remove common trailing decorations: " - Remastered 2011", " - 2012 Mix"
-  t = t.replace(/\s*-\s*(remaster(?:ed)?(?:\s*\d{2,4})?|mix|mono|stereo|live|demo|radio edit|single edit|album version)\b.*$/i, '');
+  // Drop trailing decorations like "- Remastered 2011", "- Radio Edit", but KEEP Remix/VIP/Edit tokens
+  t = t.replace(/\s*-\s*(?:remaster(?:ed)?(?:\s*\d{2,4})?|mono|stereo|live|demo|radio edit|single edit|album version)\b.*$/i, '');
 
-  // Drop bracketed/parenthetical junk at the end, keep “Remix”/“Edit”/“VIP” if it’s the *only* info
+  // Remove (feat./ft.) or (live/remaster...) if they are bracketed at the END
   t = t
-    .replace(/\s*\((?:feat\.?.*?|with .*?|.*?version|.*?remaster.*?|.*?live.*?)\)\s*$/i, '')
-    .replace(/\s*\[(?:feat\.?.*?|with .*?|.*?version|.*?remaster.*?|.*?live.*?)\]\s*$/i, '');
+    .replace(/\s*\((?:feat\.?|ft\.?)\s+[^)]+\)\s*$/i, '')
+    .replace(/\s*\[(?:feat\.?|ft\.?)\s+[^\]]+\]\s*$/i, '')
+    .replace(/\s*\((?:.*?\b(remaster|live)\b.*?)\)\s*$/i, '')
+    .replace(/\s*\[(?:.*?\b(remaster|live)\b.*?)\]\s*$/i, '');
 
-  // Normalise spaces
-  t = t.replace(/\s+/g, ' ').trim();
-  return t;
+  return t.replace(/\s+/g, ' ').trim();
 }
 
 export function splitArtists(artistStr) {
   if (!artistStr) return [];
   return artistStr
-    .split(/,|&|x|×|\band\b/gi)
+    .split(/\s*,\s*|\s*&\s*|\s+x\s+|\s*×\s*|\s+\band\s+/gi)
     .map(s => s.trim())
     .filter(Boolean);
 }
 
+// Only strip feat./ft. if bracketed at the end; don't touch words like "Left"
 export function stripFeat(text) {
   if (!text) return text;
-  // Remove "feat. XYZ" and variants
-  return text.replace(/\s*\(?(feat\.?|ft\.?)\s+[^)\]]+\)?/gi, '').replace(/\s+/g, ' ').trim();
+  return text
+    .replace(/\s*\((?:feat\.?|ft\.?)\s+[^)]+\)\s*$/i, '')
+    .replace(/\s*\[(?:feat\.?|ft\.?)\s+[^\]]+\]\s*$/i, '')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 export function looksLikeRemix(title) {
   return /\b(remix|vip|edit|bootleg)\b/i.test(title);
 }
 
+// Remove most punctuation/diacritics that hurt search, keep quotes for exact title variant
+export function normaliseForSearch(s) {
+  return s
+    .normalize('NFD').replace(/\p{Diacritic}/gu, '')
+    .replace(/[“”‘’]/g, '"')
+    .replace(/[^\w\s"'.&+-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 export function makeBaseParts(line) {
-  // Input "Title - Artist A, Artist B"
   const [rawTitle, rawArtists] = line.split(' - ');
   const title = stripDecorations(stripFeat(rawTitle || ''));
   const artists = (rawArtists || '').trim();

@@ -2,21 +2,20 @@
 set -euo pipefail
 
 # -----------------------
+# Resolve repo paths (no npm link needed)
+# -----------------------
+SCRIPT_DIR="$(cd -- "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+RUN_LUCKY_JS="${RUN_LUCKY_JS:-"$SCRIPT_DIR/../src/runLuckyForTracklist.js"}"
+SPOTIFY_LIST_JS="${SPOTIFY_LIST_JS:-"$SCRIPT_DIR/../src/spotify_list.js"}"
+
+# -----------------------
 # Config defaults
 # -----------------------
-OUT_DIR="${OUT_DIR:-$HOME/Music/qobuz-dl}"   # where qobuz-dl writes
-CONCURRENCY="${CONCURRENCY:-3}"              # parallel tracks for qobuz
-QUALITY="${QUALITY:-6}"                      # 6 = Lossless (qobuz-dl)
-DRY_RUN="${DRY_RUN:-0}"                      # 1 = show commands only
-TRACKLIST_FILE=""                            # optional: reuse tracklist instead of scraping
-
-# Flags:
-#   --dir /path/to/out
-#   --concurrency N
-#   --quality 5|6|7|27
-#   --dry
-#   --tracklist /path/to/file.txt  # skip scraping, reuse a prepared list
-#   --convert                      # (placeholder) enable FFmpeg conversion step later
+OUT_DIR="${OUT_DIR:-$HOME/Music/qobuz-dl}"
+CONCURRENCY="${CONCURRENCY:-3}"
+QUALITY="${QUALITY:-6}"
+DRY_RUN="${DRY_RUN:-0}"
+TRACKLIST_FILE=""
 DO_CONVERT=0
 
 usage() {
@@ -30,12 +29,12 @@ Options:
   --quality Q          5=320, 6=LOSSLESS, 7=24b<=96k, 27=>96k (default: $QUALITY)
   --dry                Dry-run: print qobuz commands; no downloads
   --tracklist FILE     Use an existing "Song - Artist" list; skip Spotify scraping
-  --convert            (placeholder) enable FFmpeg to AIFF conversion (step 4, to be added)
+  --convert            (placeholder) enable FFmpeg→AIFF conversion
   -h, --help           Show this help
 
-Examples:
-  $(basename "$0") "https://open.spotify.com/album/..." --dir "$HOME/Music/qobuz-dl" --concurrency 4
-  $(basename "$0") "https://open.spotify.com/playlist/..." --dry
+Env overrides:
+  RUN_LUCKY_JS=/path/to/runLuckyForTracklist.js
+  SPOTIFY_LIST_JS=/path/to/spotify_list.js
 EOF
 }
 
@@ -67,25 +66,17 @@ fi
 # Checks
 # -----------------------
 need() { command -v "$1" >/dev/null 2>&1 || { echo "Missing: $1"; exit 1; }; }
-
 need node
 need qobuz-dl
-
-# Ensure our Node CLI exists
-if ! command -v run-lucky >/dev/null 2>&1; then
-  echo "run-lucky not found. From project root run: npm i && npm link"
-  exit 1
-fi
-
-# spotify_list.js for scraping
+[[ -f "$RUN_LUCKY_JS" ]] || { echo "runLucky script not found at: $RUN_LUCKY_JS"; exit 1; }
 if [[ -z "$TRACKLIST_FILE" ]]; then
-  [[ -f "./spotify_list.js" ]] || { echo "spotify_list.js not found in current dir."; exit 1; }
+  [[ -f "$SPOTIFY_LIST_JS" ]] || { echo "spotify_list.js not found at: $SPOTIFY_LIST_JS"; exit 1; }
 fi
 
 mkdir -p "$OUT_DIR"
 
 # -----------------------
-# Create temp workspace
+# Temp workspace
 # -----------------------
 TMP_ROOT="$(mktemp -d -t s2r.XXXXXX)"
 trap 'rm -rf "$TMP_ROOT"' EXIT
@@ -94,7 +85,7 @@ TRACKS_TXT="$TRACKLIST_FILE"
 if [[ -z "$TRACKLIST_FILE" ]]; then
   TRACKS_TXT="$TMP_ROOT/tracklist.txt"
   echo "Scraping Spotify → tracklist..."
-  node ./spotify_list.js "$SPOTIFY_URL" > "$TRACKS_TXT"
+  node "$SPOTIFY_LIST_JS" "$SPOTIFY_URL" > "$TRACKS_TXT"
 fi
 
 LINES=$(grep -c ' - ' "$TRACKS_TXT" || true)
@@ -105,33 +96,24 @@ fi
 echo "Found $LINES tracks."
 
 # -----------------------
-# Step 2: qobuz-dl lucky
+# Step 2: run qobuz-dl lucky via local JS
 # -----------------------
 echo "Starting qobuz downloads…"
 if [[ "$DRY_RUN" -eq 1 ]]; then
-  run-lucky "$TRACKS_TXT" --dir "$OUT_DIR" --concurrency "$CONCURRENCY" --quality "$QUALITY" --dry
+  node "$RUN_LUCKY_JS" "$TRACKS_TXT" --dir "$OUT_DIR" --concurrency "$CONCURRENCY" --quality "$QUALITY" --dry
 else
-  run-lucky "$TRACKS_TXT" --dir "$OUT_DIR" --concurrency "$CONCURRENCY" --quality "$QUALITY"
+  node "$RUN_LUCKY_JS" "$TRACKS_TXT" --dir "$OUT_DIR" --concurrency "$CONCURRENCY" --quality "$QUALITY"
 fi
 
 # -----------------------
-# Step 3 (hook): prefer LOSSLESS, else 320
-# We'll wire this in the Node runner next so it retries with -q 5 when -q 6 fails.
-# -----------------------
-
-# -----------------------
-# Step 4 (hook): FFmpeg → AIFF preserving tags
-# We'll flip this on when we finish step 3. Example pipeline kept here for reference:
+# Step 4 (optional placeholder): FFmpeg → AIFF
 # -----------------------
 if [[ "$DO_CONVERT" -eq 1 ]]; then
   need ffmpeg
-  echo "Converting to AIFF (placeholder demo) ..."
-  # Example: convert any FLAC/MP3/WAV under OUT_DIR to AIFF next to originals.
-  # NOTE: We'll refine discovery & idempotency later.
+  echo "Converting to AIFF (placeholder) ..."
   while IFS= read -r -d '' f; do
     base="${f%.*}"
     aiff="${base}.aiff"
-    # pcm_s16be is typical AIFF encoding; map metadata from source
     ffmpeg -y -i "$f" -map_metadata 0 -c:a pcm_s16be "$aiff"
   done < <(find "$OUT_DIR" -type f \( -iname '*.flac' -o -iname '*.wav' -o -iname '*.mp3' -o -iname '*.m4a' \) -print0)
 fi
