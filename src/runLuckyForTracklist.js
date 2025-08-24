@@ -47,9 +47,9 @@ export async function main() {
 
       for (const q of candidates) {
         // Lossless
-        const res6 = await runQobuzLuckyStrict(q, { directory: dir, quality: 6, dryRun: dry });
+        const res6 = (await runQobuzLuckyStrict(q, { directory: dir, quality: 6, dryRun: dry })) || {};
         if (dry) {
-          console.log(`  [dry-run] ${res6.cmd}`);
+          console.log(`  [dry-run] ${res6.cmd || ''}`);
           console.log(`  ✓ would try lossless first for: ${q}`);
           matched = true;
           break; // in dry-run we stop at first planned candidate
@@ -87,7 +87,14 @@ function indent(s, n = 2) {
   return (s || '').split('\n').map(l => pad + l).join('\n');
 }
 
-main().catch(e => {
-  console.error(e?.message || String(e));
-  process.exit(1);
-});
+export default main;
+
+// Only run when executed directly, not when imported by tests or other modules.
+// Some environments (Jest + Babel) don't support `import.meta`. Use a pragmatic check
+// based on process.argv[1] containing the script filename.
+if (typeof process !== 'undefined' && process.argv && process.argv[1] && process.argv[1].endsWith('runLuckyForTracklist.js')) {
+  main().catch(e => {
+    console.error(e?.message || String(e));
+    process.exit(1);
+  });
+}

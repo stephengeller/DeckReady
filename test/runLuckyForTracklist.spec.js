@@ -37,15 +37,26 @@ describe('runLuckyForTracklist dry-run workflow', () => {
     const tl = path.join(tmp, 'tracks.txt');
     await fs.writeFile(tl, 'Winning Track - Winner\nLosing Track - Loser\n');
 
-    // run the script as a child process in dry mode and capture output
-    const cmd = `node src/runLuckyForTracklist.js ${tl} --dir ${tmp} --dry`;
-    const out = await new Promise((res) => {
-      exec(cmd, { cwd: process.cwd() }, (err, stdout, stderr) => res(stdout + stderr));
-    });
+    // run the script in-process (so our Jest mock is used)
+    const oldArgv = process.argv;
+    const logs = [];
+    const logSpy = jest.spyOn(console, 'log').mockImplementation((...args) => logs.push(args.join(' ')));
+    const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
+    process.argv = ['node', 'src/runLuckyForTracklist.js', tl, '--dir', tmp, '--dry'];
+
+    try {
+      await runScript();
+    } finally {
+      process.argv = oldArgv;
+      logSpy.mockRestore();
+      errSpy.mockRestore();
+    }
+
+    const out = logs.join('\n');
     // should have attempted candidates (dry-run prints commands)
     expect(out).toMatch(/\[dry-run\]/);
-    // our mock runQobuzLuckyStrict not called with dryRun true in dry-run must be true for first pass - script stops early in dry-run
+    // our mock should have been called
     expect(runQobuzLuckyStrict).toHaveBeenCalled();
   });
 });
