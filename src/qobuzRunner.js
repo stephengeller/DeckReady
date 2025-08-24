@@ -52,7 +52,6 @@ export async function runQobuzLuckyStrict(query, {
 
     // Make probing clean and predictable:
     '--no-db',          // don't poison DB during candidate tries
-    '--no-cover',       // speed + we verify audio creation explicitly
     '--no-m3u',
     '--no-fallback',    // we implement our own fallback (q=6 -> q=5)
 
