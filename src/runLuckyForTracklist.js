@@ -2,6 +2,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import readline from 'node:readline';
+import { parseCliArgs } from './parseCliArgs.js';
+
 import pLimit from 'p-limit';
 import { makeBaseParts } from './normalize.js';
 import { buildQueries } from './queryBuilders.js';
@@ -23,8 +25,8 @@ function validLine(line) {
   return /\s-\s/.test(line.trim());
 }
 
-async function main() {
-  const { file, dir, concurrency, dry } = parseArgs(process.argv);
+export async function main() {
+  const { file, dir, concurrency, dry } = parseCliArgs(process.argv);
   if (!dir) throw new Error('--dir is required so we can verify files were actually written');
 
   const limit = pLimit(concurrency);

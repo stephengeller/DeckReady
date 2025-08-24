@@ -14,7 +14,7 @@ export async function walkFiles(dir, out = []) {
   return out;
 }
 
-async function snapshot(dir) {
+export async function snapshot(dir) {
   try { return new Set(await walkFiles(dir)); }
   catch { return new Set(); }
 }

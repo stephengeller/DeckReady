@@ -3,5 +3,6 @@ module.exports = {
   transform: {
     '^.+\\.js$': ['babel-jest', { configFile: './babel.config.cjs' }]
   },
-  transformIgnorePatterns: ['/node_modules/'],
+  // transform p-limit (and its dependencies) which are ESM and use `import`
+  transformIgnorePatterns: ['/node_modules/(?!(p-limit|yocto-queue)/)'],
 };

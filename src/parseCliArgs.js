@@ -1,4 +1,4 @@
-export function parseArgs(argv) {
+export function parseCliArgs(argv) {
   const out = { file: null, dir: null, concurrency: 3, dry: false };
   for (let i = 2; i < argv.length; i++) {
     const a = argv[i];
