@@ -1,0 +1,11 @@
+{
+  "name": "spotify-to-rekordbox",
+  "version": "0.1.0",
+  "type": "module",
+  "bin": {
+    "run-lucky": "src/runLuckyForTracklist.js"
+  },
+  "dependencies": {
+    "p-limit": "^5.0.0"
+  }
+}
