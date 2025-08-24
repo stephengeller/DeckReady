@@ -2,6 +2,20 @@ import { spawn } from 'node:child_process';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
+export async function walkFiles(dir) {
+  const { files } = await walk(dir);
+  return files;
+}
+
+export async function snapshot(dir) {
+  try {
+    const { files, dirs } = await walk(dir);
+    return { files: new Set(files), dirs: new Set(dirs) };
+  } catch {
+    return { files: new Set(), dirs: new Set() };
+  }
+}
+
 const AUDIO_EXT = /\.(flac|mp3|m4a|wav|aiff)$/i;
 const TMP_EXT = /\.tmp$/i;
 
@@ -17,15 +31,6 @@ async function walk(dir, files = [], dirs = []) {
     }
   }
   return { files, dirs };
-}
-
-async function snapshot(dir) {
-  try {
-    const { files, dirs } = await walk(dir);
-    return { files: new Set(files), dirs: new Set(dirs) };
-  } catch {
-    return { files: new Set(), dirs: new Set() };
-  }
 }
 
 function diffNew(beforeSet, afterSet) {
@@ -85,7 +90,7 @@ export async function runQobuzLuckyStrict(query, {
   embedArt = false,      // we avoid covers so “cover-only” can't mask failures
   dryRun = false,
   quiet = false          // noisy by default; set true to silence
-}) {
+} = {}) {
   const args = [
     'lucky',
     '-t', type,
