@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { exec } from 'node:child_process';
-import { parseArgs } from '../src/parseArgs.js';
+import { parseCliArgs } from '../src/parseCliArgs.js';
 
 jest.mock('../src/qobuzRunner.js', () => ({
   runQobuzLuckyStrict: jest.fn(async (q, opts) => {
@@ -25,9 +25,9 @@ describe('runLuckyForTracklist dry-run workflow', () => {
     jest.resetAllMocks();
   });
 
-  test('parseArgs works', () => {
+  test('parseCliArgs works', () => {
     const argv = ['node', 'r', 'http://spotify.com', '--dir', 'out', '--concurrency', '2', '--dry'];
-    const p = parseArgs(argv);
+    const p = parseCliArgs(argv);
     expect(p.dir).toBe('out');
     expect(p.dry).toBe(true);
   });
