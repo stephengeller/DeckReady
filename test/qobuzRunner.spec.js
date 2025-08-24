@@ -1,11 +1,18 @@
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import { walkFiles, runQobuzLuckyStrict } from '../src/qobuzRunner.js';
 
 describe('qobuzRunner filesystem helpers', () => {
   let tmp;
+  let walkFiles;
+  let runQobuzLuckyStrict;
+
   beforeEach(async () => {
+    jest.resetModules();
+    const mod = await import('../src/qobuzRunner.js');
+    walkFiles = mod.walkFiles;
+    runQobuzLuckyStrict = mod.runQobuzLuckyStrict;
+
     tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'qobuz-'));
   });
   afterEach(async () => {

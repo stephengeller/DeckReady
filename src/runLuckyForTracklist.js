@@ -26,7 +26,7 @@ function validLine(line) {
 }
 
 export async function main() {
-  const { file, dir, concurrency, dry } = parseCliArgs(process.argv);
+  const { file, dir, concurrency, dry, quiet } = parseCliArgs(process.argv);
   if (!dir) throw new Error('--dir is required so we can verify files were actually written');
 
   const limit = pLimit(concurrency);
@@ -47,7 +47,7 @@ export async function main() {
 
       for (const q of candidates) {
         // Lossless
-        const res6 = (await runQobuzLuckyStrict(q, { directory: dir, quality: 6, dryRun: dry })) || {};
+        const res6 = (await runQobuzLuckyStrict(q, { directory: dir, quality: 6, dryRun: dry, quiet })) || {};
         if (dry) {
           console.log(`  [dry-run] ${res6.cmd || ''}`);
           console.log(`  ✓ would try lossless first for: ${q}`);
@@ -62,7 +62,7 @@ export async function main() {
         }
 
         // 320 fallback
-        const res5 = await runQobuzLuckyStrict(q, { directory: dir, quality: 5, dryRun: false });
+        const res5 = await runQobuzLuckyStrict(q, { directory: dir, quality: 5, dryRun: false, quiet });
         if (res5.ok) {
           console.log(`  ✓ matched (320) via: ${q}`);
           for (const p of res5.added) console.log(`    → ${p}`);
