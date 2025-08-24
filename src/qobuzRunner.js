@@ -4,7 +4,7 @@ import path from 'node:path';
 
 const AUDIO_EXT = /\.(flac|mp3|m4a|wav|aiff)$/i;
 
-async function walkFiles(dir, out = []) {
+export async function walkFiles(dir, out = []) {
   const entries = await fs.readdir(dir, { withFileTypes: true });
   for (const e of entries) {
     const p = path.join(dir, e.name);
