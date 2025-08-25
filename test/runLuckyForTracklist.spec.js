@@ -1,10 +1,10 @@
-import fs from 'node:fs/promises';
-import os from 'node:os';
-import path from 'node:path';
-import { exec } from 'node:child_process';
-import { parseCliArgs } from '../src/parseCliArgs.js';
+const fs = require('node:fs/promises');
+const os = require('node:os');
+const path = require('node:path');
+const { exec } = require('node:child_process');
+const { parseCliArgs } = require('../src/parseCliArgs.ts');
 
-jest.mock('../src/qobuzRunner.js', () => ({
+jest.mock('../src/qobuzRunner.ts', () => ({
   runQobuzLuckyStrict: jest.fn(async (q, opts) => {
     // simulate: if query contains 'win' succeed, else fail
     if (q.includes('win')) return { ok: true, added: ['/out/track.flac'], cmd: 'cmd' };
@@ -12,8 +12,8 @@ jest.mock('../src/qobuzRunner.js', () => ({
   }),
 }));
 
-import { runQobuzLuckyStrict } from '../src/qobuzRunner.js';
-import { default as runScript } from '../src/runLuckyForTracklist.js';
+const { runQobuzLuckyStrict } = require('../src/qobuzRunner.ts');
+const runScript = require('../src/runLuckyForTracklist.ts').default;
 
 describe('runLuckyForTracklist dry-run workflow', () => {
   let tmp;
@@ -26,7 +26,7 @@ describe('runLuckyForTracklist dry-run workflow', () => {
   });
 
   test('parseCliArgs works', () => {
-    const argv = ['node', 'r', 'http://spotify.com', '--dir', 'out', '--concurrency', '2', '--dry'];
+    const argv = ['node', 'r', 'http://spotify.com', '--dir', 'out', '--dry'];
     const p = parseCliArgs(argv);
     expect(p.dir).toBe('out');
     expect(p.dry).toBe(true);
@@ -43,7 +43,7 @@ describe('runLuckyForTracklist dry-run workflow', () => {
     const logSpy = jest.spyOn(console, 'log').mockImplementation((...args) => logs.push(args.join(' ')));
     const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
-    process.argv = ['node', 'src/runLuckyForTracklist.js', tl, '--dir', tmp, '--dry'];
+    process.argv = ['node', 'src/runLuckyForTracklist.ts', tl, '--dir', tmp, '--dry'];
 
     try {
       await runScript();

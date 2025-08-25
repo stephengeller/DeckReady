@@ -1,6 +1,6 @@
-import fs from 'node:fs/promises';
-import os from 'node:os';
-import path from 'node:path';
+const fs = require('node:fs/promises');
+const os = require('node:os');
+const path = require('node:path');
 
 jest.setTimeout(10000);
 
@@ -44,7 +44,7 @@ describe('runQobuzLuckyStrict spawn integration (mocked spawn)', () => {
       }
     }));
 
-    const { runQobuzLuckyStrict } = await import('../src/qobuzRunner.js');
+    const { runQobuzLuckyStrict } = require('../src/qobuzRunner.ts');
 
     const res = await runQobuzLuckyStrict('test', { directory: tmp, dryRun: false });
     expect(res.ok).toBe(true);
@@ -73,7 +73,7 @@ describe('runQobuzLuckyStrict spawn integration (mocked spawn)', () => {
       }
     }));
 
-    const { runQobuzLuckyStrict } = await import('../src/qobuzRunner.js');
+    const { runQobuzLuckyStrict } = require('../src/qobuzRunner.ts');
 
     const res = await runQobuzLuckyStrict('test', { directory: tmp, dryRun: false });
     expect(res.ok).toBe(false);

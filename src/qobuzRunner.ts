@@ -2,24 +2,24 @@ import { spawn } from 'node:child_process';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-export async function walkFiles(dir) {
+export async function walkFiles(dir: string): Promise<string[]> {
   const { files } = await walk(dir);
   return files;
 }
 
-export async function snapshot(dir) {
+export async function snapshot(dir: string): Promise<{ files: Set<string>; dirs: Set<string> }> {
   try {
     const { files, dirs } = await walk(dir);
     return { files: new Set(files), dirs: new Set(dirs) };
   } catch {
-    return { files: new Set(), dirs: new Set() };
+    return { files: new Set<string>(), dirs: new Set<string>() };
   }
 }
 
 const AUDIO_EXT = /\.(flac|mp3|m4a|wav|aiff)$/i;
 const TMP_EXT = /\.tmp$/i;
 
-async function walk(dir, files = [], dirs = []) {
+async function walk(dir: string, files: string[] = [], dirs: string[] = []) {
   const entries = await fs.readdir(dir, { withFileTypes: true });
   for (const e of entries) {
     const p = path.join(dir, e.name);
@@ -33,17 +33,17 @@ async function walk(dir, files = [], dirs = []) {
   return { files, dirs };
 }
 
-function diffNew(beforeSet, afterSet) {
-  const added = [];
+function diffNew(beforeSet: Set<string>, afterSet: Set<string>) {
+  const added: string[] = [];
   for (const p of afterSet) if (!beforeSet.has(p)) added.push(p);
   return added;
 }
 
-function diffNewAudio(beforeFiles, afterFiles) {
+function diffNewAudio(beforeFiles: Set<string>, afterFiles: Set<string>) {
   return diffNew(beforeFiles, afterFiles).filter(p => AUDIO_EXT.test(p));
 }
 
-async function rmIfOldTmp(p, maxAgeMs = 15 * 60 * 1000) {
+async function rmIfOldTmp(p: string, maxAgeMs = 15 * 60 * 1000) {
   try {
     if (!TMP_EXT.test(p)) return;
     const st = await fs.stat(p);
@@ -51,7 +51,7 @@ async function rmIfOldTmp(p, maxAgeMs = 15 * 60 * 1000) {
   } catch {}
 }
 
-async function pruneEmptyDirs(root) {
+async function pruneEmptyDirs(root: string) {
   try {
     const entries = await fs.readdir(root, { withFileTypes: true });
     await Promise.all(entries.map(async e => {
@@ -64,8 +64,8 @@ async function pruneEmptyDirs(root) {
   } catch {}
 }
 
-function spawnStreaming(cmd, args, { quiet = false } = {}) {
-  return new Promise(resolve => {
+function spawnStreaming(cmd: string, args: string[], { quiet = false } = {}) {
+  return new Promise<{ code: number; stdout: string; stderr: string }>(resolve => {
     const child = spawn(cmd, args, { stdio: ['ignore', 'pipe', 'pipe'] });
     let stdout = '', stderr = '';
     child.stdout.on('data', d => {
@@ -86,7 +86,7 @@ function spawnStreaming(cmd, args, { quiet = false } = {}) {
   });
 }
 
-export async function runQobuzLuckyStrict(query, {
+export async function runQobuzLuckyStrict(query: string, {
   directory,
   quality = 6,
   number = 1,
@@ -94,7 +94,7 @@ export async function runQobuzLuckyStrict(query, {
   embedArt = false,      // we avoid covers so “cover-only” can't mask failures
   dryRun = false,
   quiet = false          // noisy by default; set true to silence
-} = {}) {
+} : { directory?: string; quality?: number; number?: number; type?: string; embedArt?: boolean; dryRun?: boolean; quiet?: boolean } = {}) {
   const args = [
     'lucky',
     '-t', type,
@@ -119,13 +119,13 @@ export async function runQobuzLuckyStrict(query, {
 
   if (dryRun) {
     if (!quiet) console.log(cmd);
-    return { ok: true, added: [], cmd, stdout: '', stderr: '', code: 0, dry: true };
+    return { ok: true, added: [] as string[], cmd, stdout: '', stderr: '', code: 0, dry: true } as any;
   }
 
   // Take a filesystem snapshot before running
-  const before = await snapshot(directory);
+  const before = await snapshot(directory || '.');
   const res = await spawnStreaming('qobuz-dl', args, { quiet });
-  const after = await snapshot(directory);
+  const after = await snapshot(directory || '.');
 
   const addedAudio = diffNewAudio(before.files, after.files);
 
@@ -141,11 +141,11 @@ export async function runQobuzLuckyStrict(query, {
         if (left.length === 0) await fs.rmdir(d);
       } catch {}
     }
-    await pruneEmptyDirs(directory);
+    await pruneEmptyDirs(directory || '.');
   }
 
   // Write full qobuz-dl output to a per-run log file so we always have the complete output available
-  let logPath = null;
+  let logPath: string | null = null;
   try {
     if (directory) {
       const logDir = path.join(directory, '.qobuz-logs');
@@ -161,5 +161,5 @@ export async function runQobuzLuckyStrict(query, {
   }
 
   const ok = res.code === 0 && addedAudio.length > 0;
-  return { ok, added: addedAudio, cmd, logPath, ...res };
+  return { ok, added: addedAudio, cmd, logPath, ...res } as any;
 }

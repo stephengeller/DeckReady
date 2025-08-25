@@ -1,4 +1,4 @@
-import { buildQueries } from '../src/queryBuilders.js';
+const { buildQueries } = require('../src/queryBuilders.ts');
 
 describe('buildQueries', () => {
   test('remixy behavior', () => {
