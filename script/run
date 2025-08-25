@@ -86,7 +86,7 @@ TRACKS_TXT="$TRACKLIST_FILE"
 if [[ -z "$TRACKLIST_FILE" ]]; then
   TRACKS_TXT="$TMP_ROOT/tracklist.txt"
   echo "Scraping Spotify → tracklist..."
-  node "$SPOTIFY_LIST_JS" "$SPOTIFY_URL" > "$TRACKS_TXT"
+  "$SPOTIFY_LIST_JS" "$SPOTIFY_URL" > "$TRACKS_TXT"
 fi
 
 LINES=$(grep -c ' - ' "$TRACKS_TXT" || true)
