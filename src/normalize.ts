@@ -1,6 +1,6 @@
 // Utilities to clean titles/artists into better search strings
 
-export function primaryArtist(artists) {
+export function primaryArtist(artists: string | null | undefined): string | null | undefined {
   if (!artists) return artists;
   const parts = artists
     .split(/\s*,\s*|\s*&\s*|\s+x\s+|\s*×\s*|\s+\band\s+/gi) // only split on ' x ' (with spaces), not the letter 'x'
@@ -9,7 +9,7 @@ export function primaryArtist(artists) {
   return parts[0] || artists.trim();
 }
 
-export function stripDecorations(title) {
+export function stripDecorations(title: string | null | undefined): string | null | undefined {
   if (!title) return title;
   let t = title;
 
@@ -26,7 +26,7 @@ export function stripDecorations(title) {
   return t.replace(/\s+/g, ' ').trim();
 }
 
-export function splitArtists(artistStr) {
+export function splitArtists(artistStr: string | null | undefined): string[] {
   if (!artistStr) return [];
   return artistStr
     .split(/\s*,\s*|\s*&\s*|\s+x\s+|\s*×\s*|\s+\band\s+/gi)
@@ -35,7 +35,7 @@ export function splitArtists(artistStr) {
 }
 
 // Only strip feat./ft. if bracketed at the end; don't touch words like "Left"
-export function stripFeat(text) {
+export function stripFeat(text: string | null | undefined): string | null | undefined {
   if (!text) return text;
   return text
     .replace(/\s*\((?:feat\.?|ft\.?)\s+[^)]+\)\s*$/i, '')
@@ -44,12 +44,12 @@ export function stripFeat(text) {
     .trim();
 }
 
-export function looksLikeRemix(title) {
-  return /\b(remix|vip|edit|bootleg)\b/i.test(title);
+export function looksLikeRemix(title: string | null | undefined): boolean {
+  return Boolean(title && /\b(remix|vip|edit|bootleg)\b/i.test(title));
 }
 
 // Remove most punctuation/diacritics that hurt search, keep quotes for exact title variant
-export function normaliseForSearch(s) {
+export function normaliseForSearch(s: string): string {
   return s
     .normalize('NFD').replace(/\p{Diacritic}/gu, '')
     .replace(/[“”‘’]/g, '"')
@@ -58,10 +58,10 @@ export function normaliseForSearch(s) {
     .trim();
 }
 
-export function makeBaseParts(line) {
+export function makeBaseParts(line: string): { title: string; artists: string; primArtist: string } {
   const [rawTitle, rawArtists] = line.split(' - ');
-  const title = stripDecorations(stripFeat(rawTitle || ''));
+  const title = (stripDecorations(stripFeat(rawTitle || '')) || '').toString();
   const artists = (rawArtists || '').trim();
-  const primArtist = primaryArtist(artists);
+  const primArtist = (primaryArtist(artists) || '').toString();
   return { title, artists, primArtist };
 }

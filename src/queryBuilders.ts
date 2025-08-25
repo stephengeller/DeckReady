@@ -1,13 +1,13 @@
-import { splitArtists, stripFeat, looksLikeRemix, normaliseForSearch } from './normalize.js';
+import { splitArtists, stripFeat, looksLikeRemix, normaliseForSearch } from './normalize';
 
-export function buildQueries({ title, artists, primArtist }) {
-  const artistList = splitArtists(artists);
-  const cleanTitle = stripFeat(title);
-  const remixy = looksLikeRemix(title);
+export function buildQueries({ title, artists, primArtist }: { title: string; artists: string; primArtist: string }) {
+  const artistList = splitArtists(artists || '');
+  const cleanTitle = stripFeat(title || '');
+  const remixy = looksLikeRemix(title || '');
 
-  const Q = (t, a) => normaliseForSearch(`${t} ${a}`.trim());
+  const Q = (t: string, a: string) => normaliseForSearch(`${t} ${a}`.trim());
 
-  const queries = [];
+  const queries: string[] = [];
 
   // tight variants (quoted and unquoted artist-first)
   queries.push(`${primArtist} "${cleanTitle}"`);

@@ -11,7 +11,7 @@ Quick usage
 1. Make an output directory, e.g. `mkdir -p out`
 2. Run the high-level helper script:
 
-  ./script/run <spotify_url> --dir out [--dry] [--concurrency N] [--quality Q]
+  ./script/run <spotify_url> --dir out [--dry] [--quality Q]
 
 Example (dry-run):
 
@@ -19,7 +19,6 @@ Example (dry-run):
 
 Options (summary)
 - --dir DIR: output directory for downloads (required for verifying files)
-- --concurrency N: number of concurrent qobuz jobs (default 3)
 - --quality Q: 5=320, 6=LOSSLESS, 7=24b=>96k, 27=>96k (default 6)
 - --dry: dry-run mode — commands will be printed but nothing downloaded
 - --tracklist FILE: skip Spotify scraping and use an existing "Song - Artist" file

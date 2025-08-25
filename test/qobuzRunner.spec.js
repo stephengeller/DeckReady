@@ -1,6 +1,6 @@
-import fs from 'node:fs/promises';
-import os from 'node:os';
-import path from 'node:path';
+const fs = require('node:fs/promises');
+const os = require('node:os');
+const path = require('node:path');
 
 describe('qobuzRunner filesystem helpers', () => {
   let tmp;
@@ -9,7 +9,7 @@ describe('qobuzRunner filesystem helpers', () => {
 
   beforeEach(async () => {
     jest.resetModules();
-    const mod = await import('../src/qobuzRunner.js');
+    const mod = require('../src/qobuzRunner.ts');
     walkFiles = mod.walkFiles;
     runQobuzLuckyStrict = mod.runQobuzLuckyStrict;
 

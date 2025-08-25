@@ -5,14 +5,14 @@ set -euo pipefail
 # Resolve repo paths (no npm link needed)
 # -----------------------
 SCRIPT_DIR="$(cd -- "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
-RUN_LUCKY_JS="${RUN_LUCKY_JS:-"$SCRIPT_DIR/../src/runLuckyForTracklist.js"}"
-SPOTIFY_LIST_JS="${SPOTIFY_LIST_JS:-"$SCRIPT_DIR/../src/spotify_list.js"}"
+# Use our ts-node shims by default so the CLI runs TypeScript entrypoints directly
+RUN_LUCKY_JS="${RUN_LUCKY_JS:-"$SCRIPT_DIR/run-lucky"}"
+SPOTIFY_LIST_JS="${SPOTIFY_LIST_JS:-"$SCRIPT_DIR/spotify-list"}"
 
 # -----------------------
 # Config defaults
 # -----------------------
 OUT_DIR="${OUT_DIR:-$HOME/Music/qobuz-dl}"
-CONCURRENCY="${CONCURRENCY:-1}"
 QUALITY="${QUALITY:-6}"
 DRY_RUN="${DRY_RUN:-0}"
 TRACKLIST_FILE=""
@@ -25,7 +25,6 @@ Usage:
 
 Options:
   --dir DIR            Output directory for downloads (default: $OUT_DIR)
-  --concurrency N      Concurrent qobuz jobs (default: $CONCURRENCY)
   --quality Q          5=320, 6=LOSSLESS, 7=24b<=96k, 27=>96k (default: $QUALITY)
   --dry                Dry-run: print qobuz commands; no downloads
   --tracklist FILE     Use an existing "Song - Artist" list; skip Spotify scraping
@@ -47,7 +46,6 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     -h|--help) usage; exit 0 ;;
     --dir) OUT_DIR="$2"; shift 2 ;;
-    --concurrency) CONCURRENCY="$2"; shift 2 ;;
     --quality) QUALITY="$2"; shift 2 ;;
     --dry) DRY_RUN=1; shift ;;
     --tracklist) TRACKLIST_FILE="$2"; shift 2 ;;
@@ -85,7 +83,7 @@ TRACKS_TXT="$TRACKLIST_FILE"
 if [[ -z "$TRACKLIST_FILE" ]]; then
   TRACKS_TXT="$TMP_ROOT/tracklist.txt"
   echo "Scraping Spotify → tracklist..."
-  node "$SPOTIFY_LIST_JS" "$SPOTIFY_URL" > "$TRACKS_TXT"
+  "$SPOTIFY_LIST_JS" "$SPOTIFY_URL" > "$TRACKS_TXT"
 fi
 
 LINES=$(grep -c ' - ' "$TRACKS_TXT" || true)
@@ -100,9 +98,9 @@ echo "Found $LINES tracks."
 # -----------------------
 echo "Starting qobuz downloads…"
 if [[ "$DRY_RUN" -eq 1 ]]; then
-  node "$RUN_LUCKY_JS" "$TRACKS_TXT" --dir "$OUT_DIR" --concurrency "$CONCURRENCY" --quality "$QUALITY" --dry
+  "$RUN_LUCKY_JS" "$TRACKS_TXT" --dir "$OUT_DIR" --quality "$QUALITY" --dry
 else
-  node "$RUN_LUCKY_JS" "$TRACKS_TXT" --dir "$OUT_DIR" --concurrency "$CONCURRENCY" --quality "$QUALITY"
+  "$RUN_LUCKY_JS" "$TRACKS_TXT" --dir "$OUT_DIR" --quality "$QUALITY"
 fi
 
 # -----------------------
