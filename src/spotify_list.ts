@@ -3,6 +3,7 @@
  * Usage:
  *   node src/spotify_list.ts "https://open.spotify.com/playlist/..."
  *   node src/spotify_list.ts "https://open.spotify.com/album/..."
+ *   node src/spotify_list.ts "https://open.spotify.com/track/..."
  *
  * Prints:
  *   Song Title - Artist 1, Artist 2
@@ -13,7 +14,7 @@ import { chromium } from 'playwright';
 const SPOTIFY_HOSTS = new Set(['open.spotify.com', 'www.open.spotify.com']);
 
 function usageAndExit() {
-  console.error('Usage: node src/spotify_list.ts "<spotify album/playlist url>"');
+  console.error('Usage: node src/spotify_list.ts "<spotify album/playlist/track url>"');
   process.exit(1);
 }
 
@@ -27,6 +28,7 @@ function usageAndExit() {
     console.error('Provide an open.spotify.com link.');
     process.exit(1);
   }
+  const isTrack = parsed.pathname.startsWith('/track/');
 
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({
@@ -64,6 +66,25 @@ function usageAndExit() {
     for (const sel of consentSelectors) {
       const btn = await page.$(sel);
       if (btn) { await btn.click().catch(() => {}); }
+    }
+
+    if (isTrack) {
+      await page.waitForSelector('h1', { timeout: 60_000 });
+      const line = await page.evaluate(() => {
+        const txt = (el: Element | null) => (el?.textContent || '').trim();
+        const uniq = (arr: string[]) => Array.from(new Set(arr));
+        const title = txt(document.querySelector('h1'));
+        const artistEls = Array.from(document.querySelectorAll('a[href^="/artist"]'));
+        const artists = uniq(artistEls.map(a => txt(a))).filter(Boolean).join(', ');
+        if (!title || !artists) return null;
+        return `${title} - ${artists}`;
+      });
+      if (!line) {
+        console.error('No track info found.');
+        process.exit(2);
+      }
+      process.stdout.write(line + '\n');
+      return;
     }
 
     // Wait for any track anchor
