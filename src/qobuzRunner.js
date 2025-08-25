@@ -104,9 +104,9 @@ export async function runQobuzLuckyStrict(query, {
 
     // Your preferences:
     '--no-db',           // always attempt fresh download (ignore DB)
-    '--no-cover',        // progress remains clear; we verify by audio files
     '--no-m3u',
     '--no-fallback',     // we control fallback explicitly (q=6 then q=5)
+    // '--no-cover',        // progress remains clear; we verify by audio files
 
     // Consistent names (no slashes):
     '-ff', '{artist} - {album} ({year}) [{bit_depth}B-{sampling_rate}kHz]',
