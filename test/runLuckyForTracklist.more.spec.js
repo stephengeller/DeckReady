@@ -1,6 +1,6 @@
-import fs from 'node:fs/promises';
-import os from 'node:os';
-import path from 'node:path';
+const fs = require('node:fs/promises');
+const os = require('node:os');
+const path = require('node:path');
 
 jest.setTimeout(15000);
 
@@ -20,7 +20,7 @@ describe('runLuckyForTracklist main workflow (various match outcomes)', () => {
     await fs.writeFile(tl, 'T - A\n');
 
     // import without mocking
-    const { default: runScript } = await import('../src/runLuckyForTracklist.ts');
+    const runScript = require('../src/runLuckyForTracklist.ts').default;
 
     const oldArgv = process.argv;
     process.argv = ['node', 'src/runLuckyForTracklist.ts', tl];
@@ -44,8 +44,8 @@ describe('runLuckyForTracklist main workflow (various match outcomes)', () => {
       })
     }));
 
-    const { runQobuzLuckyStrict } = await import('../src/qobuzRunner.ts');
-    const { default: runScript } = await import('../src/runLuckyForTracklist.ts');
+    const { runQobuzLuckyStrict } = require('../src/qobuzRunner.ts');
+    const runScript = require('../src/runLuckyForTracklist.ts').default;
 
     const logs = [];
     const logSpy = jest.spyOn(console, 'log').mockImplementation((...args) => logs.push(args.join(' ')));
@@ -81,8 +81,8 @@ describe('runLuckyForTracklist main workflow (various match outcomes)', () => {
       })
     }));
 
-    const { runQobuzLuckyStrict } = await import('../src/qobuzRunner.ts');
-    const { default: runScript } = await import('../src/runLuckyForTracklist.ts');
+    const { runQobuzLuckyStrict } = require('../src/qobuzRunner.ts');
+    const runScript = require('../src/runLuckyForTracklist.ts').default;
 
     const logs = [];
     const logSpy = jest.spyOn(console, 'log').mockImplementation((...args) => logs.push(args.join(' ')));
@@ -114,8 +114,8 @@ describe('runLuckyForTracklist main workflow (various match outcomes)', () => {
       runQobuzLuckyStrict: jest.fn(async (q, opts) => ({ ok: false, stdout: '', stderr: 'no', code: 1, cmd: 'cmd' }))
     }));
 
-    const { runQobuzLuckyStrict } = await import('../src/qobuzRunner.ts');
-    const { default: runScript } = await import('../src/runLuckyForTracklist.ts');
+    const { runQobuzLuckyStrict } = require('../src/qobuzRunner.ts');
+    const runScript = require('../src/runLuckyForTracklist.ts').default;
 
     const logs = [];
     const logSpy = jest.spyOn(console, 'log').mockImplementation((...args) => logs.push(args.join(' ')));
