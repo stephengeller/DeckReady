@@ -1,8 +1,8 @@
-import fs from 'node:fs/promises';
-import os from 'node:os';
-import path from 'node:path';
-import { exec } from 'node:child_process';
-import { parseCliArgs } from '../src/parseCliArgs.ts';
+const fs = require('node:fs/promises');
+const os = require('node:os');
+const path = require('node:path');
+const { exec } = require('node:child_process');
+const { parseCliArgs } = require('../src/parseCliArgs.ts');
 
 jest.mock('../src/qobuzRunner.ts', () => ({
   runQobuzLuckyStrict: jest.fn(async (q, opts) => {
@@ -12,8 +12,8 @@ jest.mock('../src/qobuzRunner.ts', () => ({
   }),
 }));
 
-import { runQobuzLuckyStrict } from '../src/qobuzRunner.ts';
-import { default as runScript } from '../src/runLuckyForTracklist.ts';
+const { runQobuzLuckyStrict } = require('../src/qobuzRunner.ts');
+const runScript = require('../src/runLuckyForTracklist.ts').default;
 
 describe('runLuckyForTracklist dry-run workflow', () => {
   let tmp;
