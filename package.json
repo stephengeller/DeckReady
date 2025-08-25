@@ -5,7 +5,8 @@
     "typecheck": "tsc --noEmit",
     "start": "ts-node src/runLuckyForTracklist.ts",
     "test": "jest --runInBand --reporters=default",
-    "lint": "git ls-files '*.js' '*.cjs' | xargs -n1 node --check"
+    "lint": "eslint --ext .ts src test",
+    "format:check": "prettier --check ."
   },
   "bin": {
     "run-lucky": "script/run-lucky"
@@ -15,9 +16,10 @@
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
-    "@types/node": "18",
-    "@typescript-eslint/eslint-plugin": "^8.40.0",
+    "@types.node": "18",
+    "@typescript-eslint.eslint-plugin": "^8.40.0",
     "@typescript-eslint/parser": "^8.40.0",
+    "@typescript-eslint/eslint-plugin": "^8.40.0",
     "eslint": "^9.34.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-import-resolver-typescript": "^4.4.4",
