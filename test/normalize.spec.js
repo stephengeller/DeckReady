@@ -1,4 +1,4 @@
-import {
+const {
   primaryArtist,
   stripDecorations,
   splitArtists,
@@ -6,7 +6,7 @@ import {
   looksLikeRemix,
   normaliseForSearch,
   makeBaseParts,
-} from '../src/normalize.ts';
+} = require('../src/normalize.ts');
 
 describe('normalize', () => {
   test('primary artist', () => {
