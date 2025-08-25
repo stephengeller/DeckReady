@@ -69,11 +69,14 @@ function usageAndExit() {
     }
 
     if (isTrack) {
-      await page.waitForSelector('h1', { timeout: 60_000 });
+      await page.waitForSelector('[data-testid="track-name"], h1', { timeout: 60_000 });
       const line = await page.evaluate(() => {
         const txt = (el: Element | null) => (el?.textContent || '').trim();
         const uniq = (arr: string[]) => Array.from(new Set(arr));
-        const title = txt(document.querySelector('h1'));
+        const titleEl =
+          document.querySelector('[data-testid="track-name"]') ||
+          document.querySelector('h1');
+        const title = txt(titleEl);
         const artistEls = Array.from(document.querySelectorAll('a[href^="/artist"]'));
         const artists = uniq(artistEls.map(a => txt(a))).filter(Boolean).join(', ');
         if (!title || !artists) return null;
