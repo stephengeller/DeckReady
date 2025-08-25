@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "test": "jest --runInBand --reporters=default"
+    "test": "jest --runInBand --reporters=default",
+    "lint": "git ls-files '*.js' '*.cjs' | xargs -n1 node --check"
   },
   "bin": {
     "run-lucky": "src/runLuckyForTracklist.js"
