@@ -5,6 +5,7 @@ This repository contains helper scripts to take a Spotify playlist, album, or si
 Prerequisites
 - node (v16+)
 - qobuz-dl in your PATH
+- Spotify API credentials in env `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET`
 
 Quick usage
 
@@ -13,7 +14,9 @@ Quick usage
 
   ./script/run <spotify_url> --dir out [--dry] [--quality Q]
 
-The `spotify_url` may be a playlist, album, or single track link.
+The `spotify_url` may be a playlist, album, or single track link. The script
+uses the Spotify Web API (no browser automation) to resolve the tracklist, so
+ensure the above credentials are set.
 
 Example (playlist, dry-run):
 
