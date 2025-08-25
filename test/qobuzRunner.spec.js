@@ -9,7 +9,7 @@ describe('qobuzRunner filesystem helpers', () => {
 
   beforeEach(async () => {
     jest.resetModules();
-    const mod = await import('../src/qobuzRunner.js');
+    const mod = await import('../src/qobuzRunner.ts');
     walkFiles = mod.walkFiles;
     runQobuzLuckyStrict = mod.runQobuzLuckyStrict;
 

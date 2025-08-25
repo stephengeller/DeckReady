@@ -44,7 +44,7 @@ describe('runQobuzLuckyStrict spawn integration (mocked spawn)', () => {
       }
     }));
 
-    const { runQobuzLuckyStrict } = await import('../src/qobuzRunner.js');
+    const { runQobuzLuckyStrict } = await import('../src/qobuzRunner.ts');
 
     const res = await runQobuzLuckyStrict('test', { directory: tmp, dryRun: false });
     expect(res.ok).toBe(true);
@@ -73,7 +73,7 @@ describe('runQobuzLuckyStrict spawn integration (mocked spawn)', () => {
       }
     }));
 
-    const { runQobuzLuckyStrict } = await import('../src/qobuzRunner.js');
+    const { runQobuzLuckyStrict } = await import('../src/qobuzRunner.ts');
 
     const res = await runQobuzLuckyStrict('test', { directory: tmp, dryRun: false });
     expect(res.ok).toBe(false);

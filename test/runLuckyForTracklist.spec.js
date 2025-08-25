@@ -2,9 +2,9 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { exec } from 'node:child_process';
-import { parseCliArgs } from '../src/parseCliArgs.js';
+import { parseCliArgs } from '../src/parseCliArgs.ts';
 
-jest.mock('../src/qobuzRunner.js', () => ({
+jest.mock('../src/qobuzRunner.ts', () => ({
   runQobuzLuckyStrict: jest.fn(async (q, opts) => {
     // simulate: if query contains 'win' succeed, else fail
     if (q.includes('win')) return { ok: true, added: ['/out/track.flac'], cmd: 'cmd' };
@@ -12,8 +12,8 @@ jest.mock('../src/qobuzRunner.js', () => ({
   }),
 }));
 
-import { runQobuzLuckyStrict } from '../src/qobuzRunner.js';
-import { default as runScript } from '../src/runLuckyForTracklist.js';
+import { runQobuzLuckyStrict } from '../src/qobuzRunner.ts';
+import { default as runScript } from '../src/runLuckyForTracklist.ts';
 
 describe('runLuckyForTracklist dry-run workflow', () => {
   let tmp;
@@ -43,7 +43,7 @@ describe('runLuckyForTracklist dry-run workflow', () => {
     const logSpy = jest.spyOn(console, 'log').mockImplementation((...args) => logs.push(args.join(' ')));
     const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
-    process.argv = ['node', 'src/runLuckyForTracklist.js', tl, '--dir', tmp, '--dry'];
+    process.argv = ['node', 'src/runLuckyForTracklist.ts', tl, '--dir', tmp, '--dry'];
 
     try {
       await runScript();

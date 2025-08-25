@@ -6,7 +6,7 @@ import {
   looksLikeRemix,
   normaliseForSearch,
   makeBaseParts,
-} from '../src/normalize.js';
+} from '../src/normalize.ts';
 
 describe('normalize', () => {
   test('primary artist', () => {

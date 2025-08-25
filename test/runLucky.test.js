@@ -1,4 +1,4 @@
-import { parseCliArgs } from '../src/parseCliArgs.js';
+import { parseCliArgs } from '../src/parseCliArgs.ts';
 
 // We need to export parseCliArgs from file; this test will be a smoke test once export exists
 

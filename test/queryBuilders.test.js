@@ -1,4 +1,4 @@
-import { buildQueries } from '../src/queryBuilders.js';
+import { buildQueries } from '../src/queryBuilders.ts';
 
 test('buildQueries basic', () => {
   const q = buildQueries({ title: 'Song (Remix)', artists: 'Artist A, Artist B', primArtist: 'Artist A' });

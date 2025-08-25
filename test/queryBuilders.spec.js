@@ -1,4 +1,4 @@
-import { buildQueries } from '../src/queryBuilders.js';
+import { buildQueries } from '../src/queryBuilders.ts';
 
 describe('buildQueries', () => {
   test('remixy behavior', () => {

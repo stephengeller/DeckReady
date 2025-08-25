@@ -1,4 +1,4 @@
-import { runQobuzLuckyStrict } from '../src/qobuzRunner.js';
+import { runQobuzLuckyStrict } from '../src/qobuzRunner.ts';
 
 jest.setTimeout(10000);
 
