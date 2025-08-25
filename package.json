@@ -4,7 +4,7 @@
   "scripts": {
     "test": "jest",
     "typecheck": "tsc --noEmit",
-    "start": "script/run <spotify_url> --dir out"
+    "start": "ts-node src/runLuckyForTracklist.ts"
   },
   "bin": {
     "run-lucky": "script/run-lucky"
