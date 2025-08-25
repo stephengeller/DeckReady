@@ -95,14 +95,29 @@ function usageAndExit() {
       stableRounds = (added > 0) ? 0 : (stableRounds + 1);
     }
 
-    // Extract lines
+    // Extract lines (exclude "Recommended" section)
     const lines = await page.evaluate(() => {
       const txt = el => (el?.textContent || '').trim();
       const uniq = arr => Array.from(new Set(arr));
 
-      const trackLinks = Array.from(document.querySelectorAll('a[href^="/track"]'));
+      // Prefer to scope to the playlist's tracklist container instead of the whole page.
+      const allAnchors = Array.from(document.querySelectorAll('a[href^="/track"]'));
+      if (allAnchors.length === 0) return [];
+
+      const firstAnchor = allAnchors[0];
+      // Find a reasonable container that likely contains the playlist tracks.
+      const containerSelectors = ['[data-testid="playlist-tracklist"]', '[data-testid="tracklist"]', '[data-testid="scrolling-wrapper"]', 'main[role="main"]', 'section', 'div[role="main"]'];
+      let container = null;
+      for (const sel of containerSelectors) {
+        const c = firstAnchor.closest(sel);
+        if (c) { container = c; break; }
+      }
+      if (!container) container = firstAnchor.closest('div') || document;
+
+      const anchors = Array.from(container.querySelectorAll('a[href^="/track"]'));
+
       const rows = uniq(
-        trackLinks
+        anchors
           .map(a => a.closest('[data-testid="tracklist-row"], [role="row"], div[draggable="true"]'))
           .filter(Boolean)
       );
