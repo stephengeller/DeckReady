@@ -11,7 +11,7 @@
     "run-lucky": "script/run-lucky"
   },
   "dependencies": {
-    "p-limit": "^5.0.0",
+    "p-limit": "^3.1.0",
     "playwright": "^1.55.0"
   },
   "devDependencies": {

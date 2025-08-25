@@ -101,9 +101,9 @@ echo "Found $LINES tracks."
 # -----------------------
 echo "Starting qobuz downloads…"
 if [[ "$DRY_RUN" -eq 1 ]]; then
-  node "$RUN_LUCKY_JS" "$TRACKS_TXT" --dir "$OUT_DIR" --concurrency "$CONCURRENCY" --quality "$QUALITY" --dry
+  "$RUN_LUCKY_JS" "$TRACKS_TXT" --dir "$OUT_DIR" --concurrency "$CONCURRENCY" --quality "$QUALITY" --dry
 else
-  node "$RUN_LUCKY_JS" "$TRACKS_TXT" --dir "$OUT_DIR" --concurrency "$CONCURRENCY" --quality "$QUALITY"
+  "$RUN_LUCKY_JS" "$TRACKS_TXT" --dir "$OUT_DIR" --concurrency "$CONCURRENCY" --quality "$QUALITY"
 fi
 
 # -----------------------
