@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "test": "jest --runInBand --reporters=default",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "start": "script/run <spotify_url> --dir out"
   },
   "bin": {
     "run-lucky": "script/run-lucky"
