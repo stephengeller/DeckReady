@@ -1,6 +1,6 @@
 # Spotify → Rekordbox (helper scripts)
 
-This repository contains helper scripts to take a Spotify playlist/album and try to download matching tracks from Qobuz using the `qobuz-dl` tool.
+This repository contains helper scripts to take a Spotify playlist, album, or single track and try to download matching tracks from Qobuz using the `qobuz-dl` tool.
 
 Prerequisites
 - node (v16+)
@@ -13,9 +13,15 @@ Quick usage
 
   ./script/run <spotify_url> --dir out [--dry] [--quality Q]
 
-Example (dry-run):
+The `spotify_url` may be a playlist, album, or single track link.
+
+Example (playlist, dry-run):
 
   ./script/run https://open.spotify.com/playlist/... --dir out --dry
+
+Example (single track):
+
+  ./script/run https://open.spotify.com/track/... --dir out --dry
 
 Options (summary)
 - --dir DIR: output directory for downloads (required for verifying files)
