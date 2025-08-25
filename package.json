@@ -11,6 +11,9 @@
   "bin": {
     "run-lucky": "script/run-lucky"
   },
+  "dependencies": {
+    "playwright": "^1.55.0"
+  },
   "devDependencies": {
     "@types/jest": "^30.0.0",
     "@types.node": "18",
