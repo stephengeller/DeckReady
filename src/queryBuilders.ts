@@ -1,4 +1,4 @@
-import { splitArtists, stripFeat, looksLikeRemix, normaliseForSearch } from './normalize';
+import { splitArtists, stripFeat, looksLikeRemix, normaliseForSearch } from './normalize.js';
 
 export function buildQueries({ title, artists, primArtist }: { title: string; artists: string; primArtist: string }) {
   const artistList = splitArtists(artists || '');
