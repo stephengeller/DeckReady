@@ -4,7 +4,6 @@ import path from 'node:path';
 import readline from 'node:readline';
 import { parseCliArgs } from './parseCliArgs';
 
-import pLimit from 'p-limit';
 import { makeBaseParts } from './normalize';
 import { buildQueries } from './queryBuilders';
 import { runQobuzLuckyStrict } from './qobuzRunner';
@@ -26,11 +25,8 @@ function validLine(line: string) {
 }
 
 export async function main() {
-  const { file, dir, concurrency, dry, quiet } = parseCliArgs(process.argv);
+  const { file, dir, dry, quiet } = parseCliArgs(process.argv);
   if (!dir) throw new Error('--dir is required so we can verify files were actually written');
-
-  const limit = pLimit(concurrency);
-  const tasks: Array<Promise<void>> = [];
 
   for await (const raw of lineStream(file)) {
     const line = raw.trim();
@@ -39,47 +35,43 @@ export async function main() {
     const base = makeBaseParts(line);
     const candidates = buildQueries(base as any);
 
-    tasks.push(limit(async () => {
-      console.log(`>>> ${line}`);
+    console.log(`>>> ${line}`);
 
-      // try each candidate; per-candidate: q=6, then q=5
-      let matched = false;
+    // try each candidate; per-candidate: q=6, then q=5
+    let matched = false;
 
-      for (const q of candidates) {
-        // Lossless
-        const res6 = (await runQobuzLuckyStrict(q, { directory: dir, quality: 6, dryRun: dry, quiet })) || {};
-        if (dry) {
-          console.log(`  [dry-run] ${res6.cmd || ''}`);
-          console.log(`  ✓ would try lossless first for: ${q}`);
-          matched = true;
-          break; // in dry-run we stop at first planned candidate
-        }
-        if (res6.ok) {
-          console.log(`  ✓ matched (lossless) via: ${q}`);
-          for (const p of res6.added) console.log(`    → ${p}`);
-          matched = true;
-          break;
-        }
-
-        // 320 fallback
-        const res5 = await runQobuzLuckyStrict(q, { directory: dir, quality: 5, dryRun: false, quiet });
-        if (res5.ok) {
-          console.log(`  ✓ matched (320) via: ${q}`);
-          for (const p of res5.added) console.log(`    → ${p}`);
-          matched = true;
-          break;
-        } else {
-          // brief tail for debugging
-          const tail = (res5.stderr || res5.stdout || '').split('\n').slice(-4).join('\n');
-          console.log(`  · candidate failed: ${q}\n${tail ? '    └─ tail:\n' + indent(tail, 6) : ''}`);
-        }
+    for (const q of candidates) {
+      // Lossless
+      const res6 = (await runQobuzLuckyStrict(q, { directory: dir, quality: 6, dryRun: dry, quiet })) || {};
+      if (dry) {
+        console.log(`  [dry-run] ${res6.cmd || ''}`);
+        console.log(`  ✓ would try lossless first for: ${q}`);
+        matched = true;
+        break; // in dry-run we stop at first planned candidate
+      }
+      if (res6.ok) {
+        console.log(`  ✓ matched (lossless) via: ${q}`);
+        for (const p of res6.added) console.log(`    → ${p}`);
+        matched = true;
+        break;
       }
 
-      if (!matched && !dry) console.log('  ✗ no candidate matched.');
-    }));
-  }
+      // 320 fallback
+      const res5 = await runQobuzLuckyStrict(q, { directory: dir, quality: 5, dryRun: false, quiet });
+      if (res5.ok) {
+        console.log(`  ✓ matched (320) via: ${q}`);
+        for (const p of res5.added) console.log(`    → ${p}`);
+        matched = true;
+        break;
+      } else {
+        // brief tail for debugging
+        const tail = (res5.stderr || res5.stdout || '').split('\n').slice(-4).join('\n');
+        console.log(`  · candidate failed: ${q}\n${tail ? '    └─ tail:\n' + indent(tail, 6) : ''}`);
+      }
+    }
 
-  await Promise.all(tasks);
+    if (!matched && !dry) console.log('  ✗ no candidate matched.');
+  }
 }
 
 function indent(s: string | undefined | null, n = 2) {

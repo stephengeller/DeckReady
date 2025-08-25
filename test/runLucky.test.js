@@ -1,8 +1,9 @@
 import { parseCliArgs } from '../src/parseCliArgs.ts';
 
-// We need to export parseCliArgs from file; this test will be a smoke test once export exists
-
 test('parseCliArgs basic', () => {
-  const argv = ['node', 'script', 'http://spotify.com/abc', '--dir', 'out', '--concurrency', '4', '--dry'];
-  // call the function via dynamic import
+  const argv = ['node', 'script', 'http://spotify.com/abc', '--dir', 'out', '--dry'];
+  const p = parseCliArgs(argv);
+  expect(p.file).toBe('http://spotify.com/abc');
+  expect(p.dir).toBe('out');
+  expect(p.dry).toBe(true);
 });
