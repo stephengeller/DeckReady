@@ -1,4 +1,7 @@
 # Migration plan: JavaScript -> TypeScript
+# Migration plan: JavaScript -> TypeScript (updated: switch to ts-node-only workflow)
+
+
 
 This document captures a concrete, incremental plan to migrate the SpotifyToRekordbox repository from plain JavaScript to TypeScript. The aim is to add types and improve maintainability while keeping the project runnable and testable during migration.
 

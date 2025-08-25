@@ -1,0 +1,138 @@
+#!/usr/bin/env node
+/**
+ * Usage:
+ *   node src/spotify_list.ts "https://open.spotify.com/playlist/..."
+ *   node src/spotify_list.ts "https://open.spotify.com/album/..."
+ *
+ * Prints:
+ *   Song Title - Artist 1, Artist 2
+ */
+
+import { chromium } from 'playwright';
+
+const SPOTIFY_HOSTS = new Set(['open.spotify.com', 'www.open.spotify.com']);
+
+function usageAndExit() {
+  console.error('Usage: node src/spotify_list.ts "<spotify album/playlist url>"');
+  process.exit(1);
+}
+
+(async () => {
+  const url = process.argv[2];
+  if (!url) usageAndExit();
+
+  let parsed;
+  try { parsed = new URL(url); } catch { usageAndExit(); }
+  if (!SPOTIFY_HOSTS.has(parsed.host)) {
+    console.error('Provide an open.spotify.com link.');
+    process.exit(1);
+  }
+
+  const browser = await chromium.launch({ headless: true });
+  const context = await browser.newContext({
+    viewport: { width: 1366, height: 1400 },
+    userAgent:
+      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+    locale: 'en-US',
+  });
+
+  // Abort heavy media (previews etc.) to speed things up
+  await context.route('**/*', route => {
+    const req = route.request();
+    const type = req.resourceType();
+    const u = req.url();
+    if (type === 'media' || u.includes('.mp3') || u.includes('.m4a')) {
+      return route.abort();
+    }
+    route.continue();
+  });
+
+  const page = await context.newPage();
+
+  try {
+    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60_000 });
+
+    // Cookie/consent buttons
+    const consentSelectors = [
+      'button:has-text("Accept")',
+      'button:has-text("Accept All")',
+      'button:has-text("I agree")',
+      'button:has-text("Agree")',
+      '[data-testid="accept-cookie-policy"]',
+      '[data-testid="cookie-banner-accept-all"]',
+    ];
+    for (const sel of consentSelectors) {
+      const btn = await page.$(sel);
+      if (btn) { await btn.click().catch(() => {}); }
+    }
+
+    // Wait for any track anchor
+    await page.waitForSelector('a[href^="/track"]', { timeout: 60_000 });
+
+    // Auto-scroll to load all items
+    const maxScrollMs = 60_000;
+    const start = Date.now();
+    let stableRounds = 0;
+
+    while (Date.now() - start < maxScrollMs && stableRounds < 3) {
+      const added = await page.evaluate(() => {
+        const scrollers = [
+          document.querySelector('main[role="main"]'),
+          document.querySelector('[data-testid="scrolling-wrapper"]'),
+          document.scrollingElement || document.documentElement
+        ].filter(Boolean);
+
+        const countBefore = document.querySelectorAll('a[href^="/track"]').length;
+        for (const el of scrollers) el.scrollTop = el.scrollHeight;
+
+        return new Promise(resolve => {
+          setTimeout(() => {
+            const countAfter = document.querySelectorAll('a[href^="/track"]').length;
+            resolve(countAfter - countBefore);
+          }, 700);
+        });
+      });
+      stableRounds = (added > 0) ? 0 : (stableRounds + 1);
+    }
+
+    // Extract lines
+    const lines = await page.evaluate(() => {
+      const txt = el => (el?.textContent || '').trim();
+      const uniq = arr => Array.from(new Set(arr));
+
+      const trackLinks = Array.from(document.querySelectorAll('a[href^="/track"]'));
+      const rows = uniq(
+        trackLinks
+          .map(a => a.closest('[data-testid="tracklist-row"], [role="row"], div[draggable="true"]'))
+          .filter(Boolean)
+      );
+
+      const parsed = rows.map(row => {
+        const titleEl =
+          row.querySelector('[data-testid="internal-track-link"]') ||
+          row.querySelector('a[href^="/track"]');
+        const title = txt(titleEl);
+
+        const artistEls = Array.from(row.querySelectorAll('a[href^="/artist"]'));
+        const artists = uniq(artistEls.map(a => txt(a))).filter(Boolean).join(', ');
+
+        if (!title || !artists) return null;
+        return `${title} - ${artists}`;
+      }).filter(Boolean);
+
+      return uniq(parsed);
+    });
+
+    if (!lines.length) {
+      console.error('No tracks found. If this is a private playlist, open it in the browser to confirm access.');
+      process.exit(2);
+    }
+
+    process.stdout.write(lines.join('\n') + '\n');
+  } finally {
+    await browser.close();
+  }
+})().catch(err => {
+  console.error(err?.message || String(err));
+  process.exit(1);
+});
