@@ -78,6 +78,10 @@ function spawnStreaming(cmd, args, { quiet = false } = {}) {
       stderr += s;
       if (!quiet) process.stderr.write(s);
     });
+    child.on('error', err => {
+      stderr += String(err);
+      resolve({ code: 1, stdout, stderr });
+    });
     child.on('close', code => resolve({ code, stdout, stderr }));
   });
 }
@@ -140,6 +144,22 @@ export async function runQobuzLuckyStrict(query, {
     await pruneEmptyDirs(directory);
   }
 
+  // Write full qobuz-dl output to a per-run log file so we always have the complete output available
+  let logPath = null;
+  try {
+    if (directory) {
+      const logDir = path.join(directory, '.qobuz-logs');
+      await fs.mkdir(logDir, { recursive: true });
+      const safeQuery = query.replace(/[^a-z0-9_\-\.]/gi, '_').slice(0, 120);
+      const fname = `${Date.now()}_${quality}_${safeQuery}.log`;
+      logPath = path.join(logDir, fname);
+      const content = `CMD: ${cmd}\n\nSTDOUT:\n${res.stdout}\n\nSTDERR:\n${res.stderr}\n`;
+      await fs.writeFile(logPath, content, 'utf8');
+    }
+  } catch (e) {
+    // best-effort only; don't fail the whole operation
+  }
+
   const ok = res.code === 0 && addedAudio.length > 0;
-  return { ok, added: addedAudio, cmd, ...res };
+  return { ok, added: addedAudio, cmd, logPath, ...res };
 }

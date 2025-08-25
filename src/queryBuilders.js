@@ -9,9 +9,14 @@ export function buildQueries({ title, artists, primArtist }) {
 
   const queries = [];
 
-  // tight variants
+  // tight variants (quoted and unquoted artist-first)
   queries.push(`${primArtist} "${cleanTitle}"`);
-  queries.push(Q(cleanTitle, primArtist));
+  queries.push(normaliseForSearch(`${primArtist} ${cleanTitle}`));
+
+  // title-first (quoted exact and loose)
+  queries.push(normaliseForSearch(`${cleanTitle} ${primArtist}`));
+  queries.push(normaliseForSearch(`"${cleanTitle}" ${primArtist}`));
+  queries.push(normaliseForSearch(`"${cleanTitle}"`));
 
   // include small artist lists (2–3 total) as unquoted
   if (artistList.length > 1 && artistList.length <= 3) {
@@ -20,11 +25,11 @@ export function buildQueries({ title, artists, primArtist }) {
 
   // remix-aware exact phrase
   if (remixy) {
-    queries.push(`"${title}" ${primArtist}`);
-    queries.push(`"${cleanTitle}" ${primArtist} remix`);
+    queries.push(normaliseForSearch(`"${title}" ${primArtist}`));
+    queries.push(normaliseForSearch(`"${cleanTitle}" ${primArtist} remix`));
   }
 
-  // loose fallback
+  // loose fallback: title only
   queries.push(normaliseForSearch(cleanTitle));
 
   // de-dupe, preserve order
