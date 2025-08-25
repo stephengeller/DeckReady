@@ -7,173 +7,153 @@
  *
  * Prints:
  *   Song Title - Artist 1, Artist 2
+ *
+ * Requires environment variables:
+ *   SPOTIFY_CLIENT_ID
+ *   SPOTIFY_CLIENT_SECRET
  */
 
-import { chromium } from 'playwright';
-
-const SPOTIFY_HOSTS = new Set(['open.spotify.com', 'www.open.spotify.com']);
+const SPOTIFY_HOSTS = new Set(["open.spotify.com", "www.open.spotify.com"]);
 
 function usageAndExit() {
-  console.error('Usage: node src/spotify_list.ts "<spotify album/playlist/track url>"');
+  console.error(
+    'Usage: node src/spotify_list.ts "<spotify album/playlist/track url>"',
+  );
   process.exit(1);
+}
+
+function requireEnv(name: string): string {
+  const val = process.env[name];
+  if (!val) {
+    console.error(`Missing env var ${name}`);
+    process.exit(1);
+  }
+  return val;
+}
+
+async function getAccessToken(): Promise<string> {
+  const clientId = requireEnv("SPOTIFY_CLIENT_ID");
+  const clientSecret = requireEnv("SPOTIFY_CLIENT_SECRET");
+  const resp = await fetch("https://accounts.spotify.com/api/token", {
+    method: "POST",
+    headers: {
+      Authorization:
+        "Basic " + Buffer.from(`${clientId}:${clientSecret}`).toString("base64"),
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: "grant_type=client_credentials",
+  });
+  if (!resp.ok) {
+    const text = await resp.text();
+    throw new Error(`Token request failed: ${resp.status} ${text}`);
+  }
+  const data = (await resp.json()) as { access_token: string };
+  if (!data.access_token) throw new Error("No access token received");
+  return data.access_token;
+}
+
+function uniq<T>(arr: (T | null | undefined)[]): T[] {
+  return Array.from(new Set(arr.filter(Boolean) as T[]));
+}
+
+function formatTrack(track: any): string | null {
+  if (!track) return null;
+  const title: string | undefined = track.name;
+  const artists: string = (track.artists || [])
+    .map((a: any) => a && a.name)
+    .filter(Boolean)
+    .join(", ");
+  if (!title || !artists) return null;
+  return `${title} - ${artists}`;
+}
+
+async function fetchJson(url: string, token: string) {
+  const resp = await fetch(url, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!resp.ok) {
+    const text = await resp.text();
+    throw new Error(`Spotify API error: ${resp.status} ${text}`);
+  }
+  return resp.json();
 }
 
 (async () => {
   const url = process.argv[2];
   if (!url) usageAndExit();
 
-  let parsed;
-  try { parsed = new URL(url); } catch { usageAndExit(); }
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    usageAndExit();
+    return;
+  }
   if (!SPOTIFY_HOSTS.has(parsed.host)) {
-    console.error('Provide an open.spotify.com link.');
+    console.error("Provide an open.spotify.com link.");
     process.exit(1);
   }
-  const isTrack = parsed.pathname.startsWith('/track/');
 
-  const browser = await chromium.launch({ headless: true });
-  const context = await browser.newContext({
-    viewport: { width: 1366, height: 1400 },
-    userAgent:
-      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-    locale: 'en-US',
-  });
+  const [, type, id] = parsed.pathname.split("/");
+  if (!id) usageAndExit();
 
-  // Abort heavy media (previews etc.) to speed things up
-  await context.route('**/*', route => {
-    const req = route.request();
-    const type = req.resourceType();
-    const u = req.url();
-    if (type === 'media' || u.includes('.mp3') || u.includes('.m4a')) {
-      return route.abort();
-    }
-    route.continue();
-  });
+  const token = await getAccessToken();
 
-  const page = await context.newPage();
-
-  try {
-    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60_000 });
-
-    // Cookie/consent buttons
-    const consentSelectors = [
-      'button:has-text("Accept")',
-      'button:has-text("Accept All")',
-      'button:has-text("I agree")',
-      'button:has-text("Agree")',
-      '[data-testid="accept-cookie-policy"]',
-      '[data-testid="cookie-banner-accept-all"]',
-    ];
-    for (const sel of consentSelectors) {
-      const btn = await page.$(sel);
-      if (btn) { await btn.click().catch(() => {}); }
-    }
-
-    if (isTrack) {
-      await page.waitForSelector('h1', { timeout: 60_000 });
-      const line = await page.evaluate(() => {
-        const txt = (el: Element | null) => (el?.textContent || '').trim();
-        const uniq = (arr: string[]) => Array.from(new Set(arr));
-        const title = txt(document.querySelector('h1'));
-        const artistEls = Array.from(document.querySelectorAll('a[href^="/artist"]'));
-        const artists = uniq(artistEls.map(a => txt(a))).filter(Boolean).join(', ');
-        if (!title || !artists) return null;
-        return `${title} - ${artists}`;
-      });
-      if (!line) {
-        console.error('No track info found.');
-        process.exit(2);
-      }
-      process.stdout.write(line + '\n');
-      return;
-    }
-
-    // Wait for any track anchor
-    await page.waitForSelector('a[href^="/track"]', { timeout: 60_000 });
-
-    // Auto-scroll to load all items
-    const maxScrollMs = 60_000;
-    const start = Date.now();
-    let stableRounds = 0;
-
-    while (Date.now() - start < maxScrollMs && stableRounds < 3) {
-      const added = await page.evaluate<number>(() => {
-        const scrollers = [
-          document.querySelector('main[role="main"]'),
-          document.querySelector('[data-testid="scrolling-wrapper"]'),
-          document.scrollingElement || document.documentElement
-        ].filter(Boolean) as Element[];
-
-        const countBefore = document.querySelectorAll('a[href^="/track"]').length;
-        for (const el of scrollers) {
-          try {
-            (el as HTMLElement).scrollTop = (el as HTMLElement).scrollHeight;
-          } catch {}
-        }
-
-        return new Promise<number>(resolve => {
-          setTimeout(() => {
-            const countAfter = document.querySelectorAll('a[href^="/track"]').length;
-            resolve(countAfter - countBefore);
-          }, 700);
-        });
-      });
-      stableRounds = (added > 0) ? 0 : (stableRounds + 1);
-    }
-
-    // Extract lines (exclude "Recommended" section)
-    const lines = await page.evaluate(() => {
-      const txt = el => (el?.textContent || '').trim();
-      const uniq = arr => Array.from(new Set(arr));
-
-      // Prefer to scope to the playlist's tracklist container instead of the whole page.
-      const allAnchors = Array.from(document.querySelectorAll('a[href^="/track"]'));
-      if (allAnchors.length === 0) return [];
-
-      const firstAnchor = allAnchors[0];
-      // Find a reasonable container that likely contains the playlist tracks.
-      const containerSelectors = ['[data-testid="playlist-tracklist"]', '[data-testid="tracklist"]', '[data-testid="scrolling-wrapper"]', 'main[role="main"]', 'section', 'div[role="main"]'];
-      let container: Element | Document | null = null;
-      for (const sel of containerSelectors) {
-        const c = (firstAnchor as Element).closest(sel);
-        if (c) { container = c; break; }
-      }
-      if (!container) container = (firstAnchor as Element).closest('div') || document;
-
-      const anchors = Array.from((container as Element | Document).querySelectorAll('a[href^="/track"]'));
-
-      const rows = uniq(
-        anchors
-          .map(a => (a as Element).closest('[data-testid="tracklist-row"], [role="row"], div[draggable="true"]'))
-          .filter(Boolean)
-      );
-
-      const parsed = rows.map(row => {
-        const r = row as Element;
-        const titleEl =
-          r.querySelector('[data-testid="internal-track-link"]') ||
-          r.querySelector('a[href^="/track"]');
-        const title = txt(titleEl);
-
-        const artistEls = Array.from(r.querySelectorAll('a[href^="/artist"]'));
-        const artists = uniq(artistEls.map(a => txt(a))).filter(Boolean).join(', ');
-
-        if (!title || !artists) return null;
-        return `${title} - ${artists}`;
-      }).filter(Boolean);
-
-      return uniq(parsed);
-    });
-
-    if (!lines.length) {
-      console.error('No tracks found. If this is a private playlist, open it in the browser to confirm access.');
+  if (type === "track") {
+    const data = await fetchJson(
+      `https://api.spotify.com/v1/tracks/${id}`,
+      token,
+    );
+    const line = formatTrack(data);
+    if (!line) {
+      console.error("No track info found.");
       process.exit(2);
     }
-
-    process.stdout.write(lines.join('\n') + '\n');
-  } finally {
-    await browser.close();
+    process.stdout.write(line + "\n");
+    return;
   }
+
+  const lines: string[] = [];
+
+  if (type === "playlist") {
+    let offset = 0;
+    while (true) {
+      const data = await fetchJson(
+        `https://api.spotify.com/v1/playlists/${id}/tracks?limit=100&offset=${offset}`,
+        token,
+      );
+      for (const item of data.items || []) {
+        lines.push(formatTrack(item.track));
+      }
+      if (!data.next) break;
+      offset += data.items?.length || 0;
+    }
+  } else if (type === "album") {
+    let offset = 0;
+    while (true) {
+      const data = await fetchJson(
+        `https://api.spotify.com/v1/albums/${id}/tracks?limit=50&offset=${offset}`,
+        token,
+      );
+      for (const track of data.items || []) {
+        lines.push(formatTrack(track));
+      }
+      if (!data.next) break;
+      offset += data.items?.length || 0;
+    }
+  } else {
+    console.error("URL must point to a track, album, or playlist.");
+    process.exit(1);
+  }
+
+  const uniqLines = uniq(lines);
+  if (!uniqLines.length) {
+    console.error("No tracks found.");
+    process.exit(2);
+  }
+  process.stdout.write(uniqLines.join("\n") + "\n");
 })().catch(err => {
   console.error(err?.message || String(err));
   process.exit(1);
 });
+
