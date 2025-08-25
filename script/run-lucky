@@ -1,18 +1,5 @@
-#!/usr/bin/env node
-
-// Small shim to run the TypeScript entrypoint using ts-node
-// Keeps the repository "ts-node only" at runtime without requiring emitted JS files
-
-require('ts-node').register({
-  /* Use the project's tsconfig */
-});
-
-// Use dynamic import so that we can use ESM style modules if needed
-(async () => {
-  try {
-    await import('../src/runLuckyForTracklist.ts');
-  } catch (err) {
-    console.error(err);
-    process.exit(1);
-  }
-})();
+#!/usr/bin/env bash
+# Exec the TypeScript entrypoint using ts-node ESM loader
+SCRIPT_DIR="$(cd -- "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+NODE="${NODE:-node}"
+exec "$NODE" --loader ts-node/esm "$SCRIPT_DIR/../src/runLuckyForTracklist.ts" "$@"

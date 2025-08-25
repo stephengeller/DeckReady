@@ -1,13 +1,5 @@
-#!/usr/bin/env node
-
-// Shim to run spotify_list.ts via ts-node
-require('ts-node').register({});
-
-(async () => {
-  try {
-    await import('../src/spotify_list.ts');
-  } catch (err) {
-    console.error(err);
-    process.exit(1);
-  }
-})();
+#!/usr/bin/env bash
+# Exec the TypeScript entrypoint using ts-node ESM loader
+SCRIPT_DIR="$(cd -- "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+NODE="${NODE:-node}"
+exec "$NODE" --loader ts-node/esm "$SCRIPT_DIR/../src/spotify_list.ts" "$@"
