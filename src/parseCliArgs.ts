@@ -1,13 +1,12 @@
-export function parseCliArgs(argv: string[]): { file: string | null; dir: string | null; concurrency: number; dry: boolean; quiet: boolean } {
- const out = { file: null as string | null, dir: null as string | null, concurrency: 3, dry: false, quiet: false };
+export function parseCliArgs(argv: string[]): { file: string | null; dir: string | null; dry: boolean; quiet: boolean } {
+ const out = { file: null as string | null, dir: null as string | null, dry: false, quiet: false };
    for (let i = 2; i < argv.length; i++) {
      const a = argv[i];
      if (!a) continue;
      if (a === '--dry') out.dry = true;
      else if (a === '--quiet') out.quiet = true;
-     else if (a === '--dir') out.dir = argv[++i] || null;
-     else if (a === '--concurrency') out.concurrency = Number(argv[++i] || 3);
-     else if (!a.startsWith('--') && !out.file) out.file = a;
+    else if (a === '--dir') out.dir = argv[++i] || null;
+    else if (!a.startsWith('--') && !out.file) out.file = a;
    }
    return out;
  }

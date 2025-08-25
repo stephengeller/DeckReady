@@ -26,7 +26,7 @@ describe('runLuckyForTracklist dry-run workflow', () => {
   });
 
   test('parseCliArgs works', () => {
-    const argv = ['node', 'r', 'http://spotify.com', '--dir', 'out', '--concurrency', '2', '--dry'];
+    const argv = ['node', 'r', 'http://spotify.com', '--dir', 'out', '--dry'];
     const p = parseCliArgs(argv);
     expect(p.dir).toBe('out');
     expect(p.dry).toBe(true);
