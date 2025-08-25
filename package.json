@@ -1,7 +1,6 @@
 {
   "name": "spotify-to-rekordbox",
   "version": "0.1.0",
-  "type": "module",
   "scripts": {
     "test": "jest --runInBand --reporters=default",
     "typecheck": "tsc --noEmit",
@@ -16,7 +15,6 @@
   },
   "devDependencies": {
     "@babel/core": "^7.28.3",
-    "@babel/plugin-transform-modules-commonjs": "^7.27.1",
     "@babel/preset-env": "^7.28.3",
     "@babel/preset-typescript": "^7.27.1",
     "@types/jest": "^30.0.0",

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Exec the TypeScript entrypoint using ts-node ESM loader
+# Exec the TypeScript entrypoint using ts-node register (CommonJS)
 SCRIPT_DIR="$(cd -- "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 NODE="${NODE:-node}"
-exec env TS_NODE_TRANSPILE_ONLY=1 "$NODE" --loader ts-node/esm "$SCRIPT_DIR/../src/spotify_list.ts" "$@"
+exec env TS_NODE_TRANSPILE_ONLY=1 "$NODE" -r ts-node/register "$SCRIPT_DIR/../src/spotify_list.ts" "$@"
