@@ -75,17 +75,21 @@ function usageAndExit() {
     let stableRounds = 0;
 
     while (Date.now() - start < maxScrollMs && stableRounds < 3) {
-      const added = await page.evaluate(() => {
+      const added = await page.evaluate<number>(() => {
         const scrollers = [
           document.querySelector('main[role="main"]'),
           document.querySelector('[data-testid="scrolling-wrapper"]'),
           document.scrollingElement || document.documentElement
-        ].filter(Boolean);
+        ].filter(Boolean) as Element[];
 
         const countBefore = document.querySelectorAll('a[href^="/track"]').length;
-        for (const el of scrollers) el.scrollTop = el.scrollHeight;
+        for (const el of scrollers) {
+          try {
+            (el as HTMLElement).scrollTop = (el as HTMLElement).scrollHeight;
+          } catch {}
+        }
 
-        return new Promise(resolve => {
+        return new Promise<number>(resolve => {
           setTimeout(() => {
             const countAfter = document.querySelectorAll('a[href^="/track"]').length;
             resolve(countAfter - countBefore);
@@ -107,28 +111,29 @@ function usageAndExit() {
       const firstAnchor = allAnchors[0];
       // Find a reasonable container that likely contains the playlist tracks.
       const containerSelectors = ['[data-testid="playlist-tracklist"]', '[data-testid="tracklist"]', '[data-testid="scrolling-wrapper"]', 'main[role="main"]', 'section', 'div[role="main"]'];
-      let container = null;
+      let container: Element | Document | null = null;
       for (const sel of containerSelectors) {
-        const c = firstAnchor.closest(sel);
+        const c = (firstAnchor as Element).closest(sel);
         if (c) { container = c; break; }
       }
-      if (!container) container = firstAnchor.closest('div') || document;
+      if (!container) container = (firstAnchor as Element).closest('div') || document;
 
-      const anchors = Array.from(container.querySelectorAll('a[href^="/track"]'));
+      const anchors = Array.from((container as Element | Document).querySelectorAll('a[href^="/track"]'));
 
       const rows = uniq(
         anchors
-          .map(a => a.closest('[data-testid="tracklist-row"], [role="row"], div[draggable="true"]'))
+          .map(a => (a as Element).closest('[data-testid="tracklist-row"], [role="row"], div[draggable="true"]'))
           .filter(Boolean)
       );
 
       const parsed = rows.map(row => {
+        const r = row as Element;
         const titleEl =
-          row.querySelector('[data-testid="internal-track-link"]') ||
-          row.querySelector('a[href^="/track"]');
+          r.querySelector('[data-testid="internal-track-link"]') ||
+          r.querySelector('a[href^="/track"]');
         const title = txt(titleEl);
 
-        const artistEls = Array.from(row.querySelectorAll('a[href^="/artist"]'));
+        const artistEls = Array.from(r.querySelectorAll('a[href^="/artist"]'));
         const artists = uniq(artistEls.map(a => txt(a))).filter(Boolean).join(', ');
 
         if (!title || !artists) return null;

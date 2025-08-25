@@ -2,17 +2,17 @@ import { spawn } from 'node:child_process';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-export async function walkFiles(dir: string) {
+export async function walkFiles(dir: string): Promise<string[]> {
   const { files } = await walk(dir);
   return files;
 }
 
-export async function snapshot(dir: string) {
+export async function snapshot(dir: string): Promise<{ files: Set<string>; dirs: Set<string> }> {
   try {
     const { files, dirs } = await walk(dir);
     return { files: new Set(files), dirs: new Set(dirs) };
   } catch {
-    return { files: new Set(), dirs: new Set() };
+    return { files: new Set<string>(), dirs: new Set<string>() };
   }
 }
 

@@ -2,12 +2,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import readline from 'node:readline';
-import { parseCliArgs } from './parseCliArgs.ts';
+import { parseCliArgs } from './parseCliArgs';
 
 import pLimit from 'p-limit';
-import { makeBaseParts } from './normalize.ts';
-import { buildQueries } from './queryBuilders.ts';
-import { runQobuzLuckyStrict } from './qobuzRunner.ts';
+import { makeBaseParts } from './normalize';
+import { buildQueries } from './queryBuilders';
+import { runQobuzLuckyStrict } from './qobuzRunner';
 
 
 async function* lineStream(file: string | null) {
