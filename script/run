@@ -5,8 +5,9 @@ set -euo pipefail
 # Resolve repo paths (no npm link needed)
 # -----------------------
 SCRIPT_DIR="$(cd -- "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
-RUN_LUCKY_JS="${RUN_LUCKY_JS:-"$SCRIPT_DIR/../src/runLuckyForTracklist.js"}"
-SPOTIFY_LIST_JS="${SPOTIFY_LIST_JS:-"$SCRIPT_DIR/../src/spotify_list.js"}"
+# Use our ts-node shims by default so the CLI runs TypeScript entrypoints directly
+RUN_LUCKY_JS="${RUN_LUCKY_JS:-"$SCRIPT_DIR/run-lucky"}"
+SPOTIFY_LIST_JS="${SPOTIFY_LIST_JS:-"$SCRIPT_DIR/spotify-list"}"
 
 # -----------------------
 # Config defaults
