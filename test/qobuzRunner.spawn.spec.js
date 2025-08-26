@@ -102,4 +102,27 @@ describe('runQobuzLuckyStrict spawn integration (mocked spawn)', () => {
     expect(res.added.length).toBe(0);
   });
 
+  test('treats already downloaded as ok even if spawn exits non-zero', async () => {
+    jest.doMock('node:child_process', () => ({
+      spawn: (cmd, args, opts) => {
+        const stdoutListeners = [], stderrListeners = [], closeListeners = [];
+        const child = {
+          stdout: { on: (ev, cb) => { if (ev === 'data') stdoutListeners.push(cb); } },
+          stderr: { on: (ev, cb) => { if (ev === 'data') stderrListeners.push(cb); } },
+          on: (ev, cb) => { if (ev === 'close') closeListeners.push(cb); }
+        };
+        setTimeout(() => {
+          for (const cb of stdoutListeners) cb(Buffer.from('Big Fi Dem was already downloaded\nCompleted'));
+          for (const cb of closeListeners) cb(1);
+        }, 5);
+        return child;
+      },
+    }));
+    const { runQobuzLuckyStrict } = require('../src/qobuzRunner.ts');
+    const res = await runQobuzLuckyStrict('test', { directory: tmp, dryRun: false });
+    expect(res.ok).toBe(true);
+    expect(res.alreadyDownloaded).toBe(true);
+    expect(res.added.length).toBe(0);
+  });
+
 });

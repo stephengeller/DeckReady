@@ -75,5 +75,6 @@ describe('runLuckyForTracklist dry-run workflow', () => {
       logSpy.mockRestore();
     }
     expect(logs.join('\n')).toMatch(/already downloaded/);
+    expect(runQobuzLuckyStrict).toHaveBeenCalledTimes(1);
   });
 });
