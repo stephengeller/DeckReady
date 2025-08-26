@@ -13,6 +13,20 @@
  *   SPOTIFY_CLIENT_SECRET
  */
 
+import fs from "node:fs";
+import path from "node:path";
+
+(function loadEnv() {
+  const envPath = path.join(__dirname, "..", ".env");
+  try {
+    const content = fs.readFileSync(envPath, "utf8");
+    for (const line of content.split(/\r?\n/)) {
+      const m = line.match(/^([^#=]+)=(.*)$/);
+      if (m && !process.env[m[1]]) process.env[m[1]] = m[2];
+    }
+  } catch {}
+})();
+
 const SPOTIFY_HOSTS = new Set(["open.spotify.com", "www.open.spotify.com"]);
 
 function usageAndExit() {

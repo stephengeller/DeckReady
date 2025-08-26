@@ -8,6 +8,7 @@ jest.mock('../src/qobuzRunner.ts', () => ({
   runQobuzLuckyStrict: jest.fn(async (q, opts) => {
     // simulate: if query contains 'win' succeed, else fail
     if (q.includes('win')) return { ok: true, added: ['/out/track.flac'], cmd: 'cmd' };
+    if (q.toLowerCase().includes('exist')) return { ok: true, alreadyDownloaded: true, added: [], cmd: 'cmd' };
     return { ok: false, stdout: '', stderr: 'no', code: 1, cmd: 'cmd' };
   }),
 }));
@@ -22,7 +23,7 @@ describe('runLuckyForTracklist dry-run workflow', () => {
   });
   afterEach(async () => {
     await fs.rm(tmp, { recursive: true, force: true });
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   test('parseCliArgs works', () => {
@@ -58,5 +59,21 @@ describe('runLuckyForTracklist dry-run workflow', () => {
     expect(out).toMatch(/\[dry-run\]/);
     // our mock should have been called
     expect(runQobuzLuckyStrict).toHaveBeenCalled();
+  });
+
+  test('handles already downloaded tracks', async () => {
+    const tl = path.join(tmp, 'exist.txt');
+    await fs.writeFile(tl, 'Existing Song - Artist\n');
+    const oldArgv = process.argv;
+    const logs = [];
+    const logSpy = jest.spyOn(console, 'log').mockImplementation((...args) => logs.push(args.join(' ')));
+    process.argv = ['node', 'src/runLuckyForTracklist.ts', tl, '--dir', tmp];
+    try {
+      await runScript();
+    } finally {
+      process.argv = oldArgv;
+      logSpy.mockRestore();
+    }
+    expect(logs.join('\n')).toMatch(/already downloaded/);
   });
 });

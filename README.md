@@ -5,7 +5,7 @@ This repository contains helper scripts to take a Spotify playlist, album, or si
 Prerequisites
 - node (v16+)
 - qobuz-dl in your PATH
-- Spotify API credentials in env `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET`
+- Spotify API credentials in `.env` (`SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET`)
 
 Quick usage
 
