@@ -50,8 +50,12 @@ export async function main() {
         break; // in dry-run we stop at first planned candidate
       }
       if (res6.ok) {
-        console.log(`  ✓ matched (lossless) via: ${q}`);
-        for (const p of res6.added) console.log(`    → ${p}`);
+        if (res6.alreadyDownloaded) {
+          console.log(`  ✓ already downloaded via: ${q}`);
+        } else {
+          console.log(`  ✓ matched (lossless) via: ${q}`);
+          for (const p of res6.added) console.log(`    → ${p}`);
+        }
         matched = true;
         break;
       }
@@ -59,8 +63,12 @@ export async function main() {
       // 320 fallback
       const res5 = await runQobuzLuckyStrict(q, { directory: dir, quality: 5, dryRun: false, quiet });
       if (res5.ok) {
-        console.log(`  ✓ matched (320) via: ${q}`);
-        for (const p of res5.added) console.log(`    → ${p}`);
+        if (res5.alreadyDownloaded) {
+          console.log(`  ✓ already downloaded via: ${q}`);
+        } else {
+          console.log(`  ✓ matched (320) via: ${q}`);
+          for (const p of res5.added) console.log(`    → ${p}`);
+        }
         matched = true;
         break;
       } else {
