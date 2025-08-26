@@ -160,7 +160,9 @@ export async function runQobuzLuckyStrict(query: string, {
     // best-effort only; don't fail the whole operation
   }
 
-  const alreadyDownloaded = /already downloaded/i.test(res.stdout) || /already downloaded/i.test(res.stderr);
+  const combinedOutput = (res.stdout + '\n' + res.stderr).replace(/\x1B\[[0-9;]*m/g, '');
+  const alreadyDownloaded =
+    /already downloaded/i.test(combinedOutput) || (res.code === 0 && addedAudio.length === 0);
   const ok = (res.code === 0 && addedAudio.length > 0) || alreadyDownloaded;
   return { ok, alreadyDownloaded, added: addedAudio, cmd, logPath, ...res } as any;
 }

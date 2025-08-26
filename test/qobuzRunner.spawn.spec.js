@@ -125,4 +125,28 @@ describe('runQobuzLuckyStrict spawn integration (mocked spawn)', () => {
     expect(res.added.length).toBe(0);
   });
 
+  test('detects already downloaded when output has ANSI colors', async () => {
+    jest.doMock('node:child_process', () => ({
+      spawn: (cmd, args, opts) => {
+        const stdoutListeners = [], closeListeners = [];
+        const child = {
+          stdout: { on: (ev, cb) => { if (ev === 'data') stdoutListeners.push(cb); } },
+          stderr: { on: () => {} },
+          on: (ev, cb) => { if (ev === 'close') closeListeners.push(cb); }
+        };
+        setTimeout(() => {
+          const line = '\u001b[32mBig Fi Dem\u001b[0m was \u001b[33malready\u001b[0m downloaded';
+          for (const cb of stdoutListeners) cb(Buffer.from(line));
+          for (const cb of closeListeners) cb(0);
+        }, 5);
+        return child;
+      },
+    }));
+    const { runQobuzLuckyStrict } = require('../src/qobuzRunner.ts');
+    const res = await runQobuzLuckyStrict('test', { directory: tmp, dryRun: false });
+    expect(res.ok).toBe(true);
+    expect(res.alreadyDownloaded).toBe(true);
+    expect(res.added.length).toBe(0);
+  });
+
 });
