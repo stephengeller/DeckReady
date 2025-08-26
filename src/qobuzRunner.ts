@@ -161,6 +161,6 @@ export async function runQobuzLuckyStrict(query: string, {
   }
 
   const alreadyDownloaded = /already downloaded/i.test(res.stdout) || /already downloaded/i.test(res.stderr);
-  const ok = res.code === 0 && (addedAudio.length > 0 || alreadyDownloaded);
+  const ok = (res.code === 0 && addedAudio.length > 0) || alreadyDownloaded;
   return { ok, alreadyDownloaded, added: addedAudio, cmd, logPath, ...res } as any;
 }
