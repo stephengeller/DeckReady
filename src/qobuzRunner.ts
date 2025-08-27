@@ -170,6 +170,19 @@ export async function runQobuzLuckyStrict(
 
   const addedAudio = diffNewAudio(before.files, after.files);
 
+  // Write the original search term next to each downloaded audio file for debugging
+  if (addedAudio.length > 0) {
+    await Promise.all(
+      addedAudio.map(async (p) => {
+        try {
+          await fs.writeFile(`${p}.search.txt`, query, 'utf8');
+        } catch (err) {
+          console.error('Failed to write search term file:', err);
+        }
+      }),
+    );
+  }
+
   // If no audio landed, remove any new .tmp files and prune empty dirs we just created
   if (addedAudio.length === 0) {
     const newFiles = diffNew(before.files, after.files);
@@ -296,9 +309,20 @@ async function processDownloadedAudio(inputPath: string) {
       );
     }
 
+    const moveSearchFile = async (src: string, dest: string) => {
+      const srcTxt = src + '.search.txt';
+      const destTxt = dest + '.search.txt';
+      try {
+        await fs.rename(srcTxt, destTxt);
+      } catch (e) {
+        void e; // best effort
+      }
+    };
+
     if (isAIFF) {
       // already AIFF, just move
       await fs.rename(inputPath, destPath);
+      await moveSearchFile(inputPath, destPath);
       console.log(`Organised (moved AIFF): ${inputPath} -> ${destPath}`);
       return;
     }
@@ -365,6 +389,7 @@ async function processDownloadedAudio(inputPath: string) {
 
     // Move converted into final location
     await fs.rename(converted, destPath);
+    await moveSearchFile(inputPath, destPath);
 
     // Verify tags made it into the AIFF. If key tags are missing, inject metadata explicitly using ffmpeg (copy).
     try {
