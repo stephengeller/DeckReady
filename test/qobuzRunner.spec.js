@@ -28,7 +28,12 @@ describe('qobuzRunner filesystem helpers', () => {
     await fs.writeFile(path.join(d2, 'song2.mp3'), 'm');
 
     const files = await walkFiles(tmp);
-    expect(files.sort()).toEqual(expect.arrayContaining([expect.stringContaining('song.flac'), expect.stringContaining('song2.mp3')]));
+    expect(files.sort()).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining('song.flac'),
+        expect.stringContaining('song2.mp3'),
+      ]),
+    );
   });
 
   test('runQobuzLuckyStrict dryRun', async () => {

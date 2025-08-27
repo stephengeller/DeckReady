@@ -23,7 +23,11 @@ function usageAndExit() {
   if (!url) usageAndExit();
 
   let parsed;
-  try { parsed = new URL(url); } catch { usageAndExit(); }
+  try {
+    parsed = new URL(url);
+  } catch {
+    usageAndExit();
+  }
   if (!SPOTIFY_HOSTS.has(parsed.host)) {
     console.error('Provide an open.spotify.com link.');
     process.exit(1);
@@ -39,7 +43,7 @@ function usageAndExit() {
   });
 
   // Abort heavy media (previews etc.) to speed things up
-  await context.route('**/*', route => {
+  await context.route('**/*', (route) => {
     const req = route.request();
     const type = req.resourceType();
     const u = req.url();
@@ -65,7 +69,9 @@ function usageAndExit() {
     ];
     for (const sel of consentSelectors) {
       const btn = await page.$(sel);
-      if (btn) { await btn.click().catch(() => {}); }
+      if (btn) {
+        await btn.click().catch(() => {});
+      }
     }
 
     if (isTrack) {
@@ -75,7 +81,9 @@ function usageAndExit() {
         const uniq = (arr: string[]) => Array.from(new Set(arr));
         const title = txt(document.querySelector('h1'));
         const artistEls = Array.from(document.querySelectorAll('a[href^="/artist"]'));
-        const artists = uniq(artistEls.map(a => txt(a))).filter(Boolean).join(', ');
+        const artists = uniq(artistEls.map((a) => txt(a)))
+          .filter(Boolean)
+          .join(', ');
         if (!title || !artists) return null;
         return `${title} - ${artists}`;
       });
@@ -100,7 +108,7 @@ function usageAndExit() {
         const scrollers = [
           document.querySelector('main[role="main"]'),
           document.querySelector('[data-testid="scrolling-wrapper"]'),
-          document.scrollingElement || document.documentElement
+          document.scrollingElement || document.documentElement,
         ].filter(Boolean) as Element[];
 
         const countBefore = document.querySelectorAll('a[href^="/track"]').length;
@@ -110,20 +118,20 @@ function usageAndExit() {
           } catch {}
         }
 
-        return new Promise<number>(resolve => {
+        return new Promise<number>((resolve) => {
           setTimeout(() => {
             const countAfter = document.querySelectorAll('a[href^="/track"]').length;
             resolve(countAfter - countBefore);
           }, 700);
         });
       });
-      stableRounds = (added > 0) ? 0 : (stableRounds + 1);
+      stableRounds = added > 0 ? 0 : stableRounds + 1;
     }
 
     // Extract lines (exclude "Recommended" section)
     const lines = await page.evaluate(() => {
-      const txt = el => (el?.textContent || '').trim();
-      const uniq = arr => Array.from(new Set(arr));
+      const txt = (el) => (el?.textContent || '').trim();
+      const uniq = (arr) => Array.from(new Set(arr));
 
       // Prefer to scope to the playlist's tracklist container instead of the whole page.
       const allAnchors = Array.from(document.querySelectorAll('a[href^="/track"]'));
@@ -131,41 +139,63 @@ function usageAndExit() {
 
       const firstAnchor = allAnchors[0];
       // Find a reasonable container that likely contains the playlist tracks.
-      const containerSelectors = ['[data-testid="playlist-tracklist"]', '[data-testid="tracklist"]', '[data-testid="scrolling-wrapper"]', 'main[role="main"]', 'section', 'div[role="main"]'];
+      const containerSelectors = [
+        '[data-testid="playlist-tracklist"]',
+        '[data-testid="tracklist"]',
+        '[data-testid="scrolling-wrapper"]',
+        'main[role="main"]',
+        'section',
+        'div[role="main"]',
+      ];
       let container: Element | Document | null = null;
       for (const sel of containerSelectors) {
         const c = (firstAnchor as Element).closest(sel);
-        if (c) { container = c; break; }
+        if (c) {
+          container = c;
+          break;
+        }
       }
       if (!container) container = (firstAnchor as Element).closest('div') || document;
 
-      const anchors = Array.from((container as Element | Document).querySelectorAll('a[href^="/track"]'));
+      const anchors = Array.from(
+        (container as Element | Document).querySelectorAll('a[href^="/track"]'),
+      );
 
       const rows = uniq(
         anchors
-          .map(a => (a as Element).closest('[data-testid="tracklist-row"], [role="row"], div[draggable="true"]'))
-          .filter(Boolean)
+          .map((a) =>
+            (a as Element).closest(
+              '[data-testid="tracklist-row"], [role="row"], div[draggable="true"]',
+            ),
+          )
+          .filter(Boolean),
       );
 
-      const parsed = rows.map(row => {
-        const r = row as Element;
-        const titleEl =
-          r.querySelector('[data-testid="internal-track-link"]') ||
-          r.querySelector('a[href^="/track"]');
-        const title = txt(titleEl);
+      const parsed = rows
+        .map((row) => {
+          const r = row as Element;
+          const titleEl =
+            r.querySelector('[data-testid="internal-track-link"]') ||
+            r.querySelector('a[href^="/track"]');
+          const title = txt(titleEl);
 
-        const artistEls = Array.from(r.querySelectorAll('a[href^="/artist"]'));
-        const artists = uniq(artistEls.map(a => txt(a))).filter(Boolean).join(', ');
+          const artistEls = Array.from(r.querySelectorAll('a[href^="/artist"]'));
+          const artists = uniq(artistEls.map((a) => txt(a)))
+            .filter(Boolean)
+            .join(', ');
 
-        if (!title || !artists) return null;
-        return `${title} - ${artists}`;
-      }).filter(Boolean);
+          if (!title || !artists) return null;
+          return `${title} - ${artists}`;
+        })
+        .filter(Boolean);
 
       return uniq(parsed);
     });
 
     if (!lines.length) {
-      console.error('No tracks found. If this is a private playlist, open it in the browser to confirm access.');
+      console.error(
+        'No tracks found. If this is a private playlist, open it in the browser to confirm access.',
+      );
       process.exit(2);
     }
 
@@ -173,7 +203,7 @@ function usageAndExit() {
   } finally {
     await browser.close();
   }
-})().catch(err => {
+})().catch((err) => {
   console.error(err?.message || String(err));
   process.exit(1);
 });
