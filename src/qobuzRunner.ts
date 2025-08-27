@@ -252,36 +252,6 @@ export async function runQobuzLuckyStrict(
     // best-effort only; don't fail the whole operation
   }
 
-  if (addedAudio.length > 0 && (artist || title)) {
-    const expectedArtist = normaliseTag(artist);
-    const expectedTitle = normaliseTag(title);
-    let tagsMatch = true;
-    for (const f of addedAudio) {
-      // eslint-disable-next-line no-await-in-loop
-      const tags = await readTags(f);
-      const fileArtist = normaliseTag(tags['artist'] || tags['album_artist']);
-      const fileTitle = normaliseTag(tags['title']);
-      if ((artist && fileArtist !== expectedArtist) || (title && fileTitle !== expectedTitle)) {
-        tagsMatch = false;
-        break;
-      }
-    }
-    if (!tagsMatch) {
-      await Promise.all(
-        addedAudio.map(async (p) => {
-          try {
-            await fs.rm(p, { force: true });
-            await fs.rm(`${p}.search.txt`, { force: true });
-          } catch (err) {
-            void err;
-          }
-        }),
-      );
-      await pruneEmptyDirs(directory || '.');
-      return { ok: false, added: [], cmd, logPath, ...res } as unknown as RunQobuzResult;
-    }
-  }
-
   const ok = res.code === 0 && addedAudio.length > 0;
 
   // After each successful download, convert to AIFF and organise by genre/artist/title
