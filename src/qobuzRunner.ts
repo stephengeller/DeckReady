@@ -136,6 +136,17 @@ export type RunQobuzResult = {
   logPath?: string | null;
 };
 
+export interface RunQobuzOptions {
+  directory?: string;
+  quality?: number;
+  number?: number;
+  type?: string;
+  dryRun?: boolean;
+  quiet?: boolean;
+  artist?: string;
+  title?: string;
+}
+
 export async function runQobuzLuckyStrict(
   query: string,
   {
@@ -147,16 +158,7 @@ export async function runQobuzLuckyStrict(
     quiet = false, // noisy by default; set true to silence
     artist,
     title,
-  }: {
-    directory?: string;
-    quality?: number;
-    number?: number;
-    type?: string;
-    dryRun?: boolean;
-    quiet?: boolean;
-    artist?: string;
-    title?: string;
-  } = {},
+  }: RunQobuzOptions = {},
 ): Promise<RunQobuzResult> {
   const args = [
     'lucky',
