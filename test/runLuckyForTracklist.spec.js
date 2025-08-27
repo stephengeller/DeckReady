@@ -40,7 +40,9 @@ describe('runLuckyForTracklist dry-run workflow', () => {
     // run the script in-process (so our Jest mock is used)
     const oldArgv = process.argv;
     const logs = [];
-    const logSpy = jest.spyOn(console, 'log').mockImplementation((...args) => logs.push(args.join(' ')));
+    const logSpy = jest
+      .spyOn(console, 'log')
+      .mockImplementation((...args) => logs.push(args.join(' ')));
     const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
     process.argv = ['node', 'src/runLuckyForTracklist.ts', tl, '--dir', tmp, '--dry'];

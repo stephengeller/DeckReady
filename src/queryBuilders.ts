@@ -1,6 +1,14 @@
 import { splitArtists, stripFeat, looksLikeRemix, normaliseForSearch } from './normalize';
 
-export function buildQueries({ title, artists, primArtist }: { title: string; artists: string; primArtist: string }) {
+export function buildQueries({
+  title,
+  artists,
+  primArtist,
+}: {
+  title: string;
+  artists: string;
+  primArtist: string;
+}) {
   const artistList = splitArtists(artists || '');
   const cleanTitle = stripFeat(title || '');
   const remixy = looksLikeRemix(title || '');

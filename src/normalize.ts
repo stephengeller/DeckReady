@@ -4,7 +4,7 @@ export function primaryArtist(artists: string | null | undefined): string | null
   if (!artists) return artists;
   const parts = artists
     .split(/\s*,\s*|\s*&\s*|\s+x\s+|\s*×\s*|\s+\band\s+/gi) // only split on ' x ' (with spaces), not the letter 'x'
-    .map(s => s.trim())
+    .map((s) => s.trim())
     .filter(Boolean);
   return parts[0] || artists.trim();
 }
@@ -14,7 +14,10 @@ export function stripDecorations(title: string | null | undefined): string | nul
   let t = title;
 
   // Drop trailing decorations like "- Remastered 2011", "- Radio Edit", but KEEP Remix/VIP/Edit tokens
-  t = t.replace(/\s*-\s*(?:remaster(?:ed)?(?:\s*\d{2,4})?|mono|stereo|live|demo|radio edit|single edit|album version)\b.*$/i, '');
+  t = t.replace(
+    /\s*-\s*(?:remaster(?:ed)?(?:\s*\d{2,4})?|mono|stereo|live|demo|radio edit|single edit|album version)\b.*$/i,
+    '',
+  );
 
   // Remove (feat./ft.) or (live/remaster...) if they are bracketed at the END
   t = t
@@ -30,7 +33,7 @@ export function splitArtists(artistStr: string | null | undefined): string[] {
   if (!artistStr) return [];
   return artistStr
     .split(/\s*,\s*|\s*&\s*|\s+x\s+|\s*×\s*|\s+\band\s+/gi)
-    .map(s => s.trim())
+    .map((s) => s.trim())
     .filter(Boolean);
 }
 
@@ -51,14 +54,19 @@ export function looksLikeRemix(title: string | null | undefined): boolean {
 // Remove most punctuation/diacritics that hurt search, keep quotes for exact title variant
 export function normaliseForSearch(s: string): string {
   return s
-    .normalize('NFD').replace(/\p{Diacritic}/gu, '')
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
     .replace(/[“”‘’]/g, '"')
     .replace(/[^\w\s"'.&+-]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
 }
 
-export function makeBaseParts(line: string): { title: string; artists: string; primArtist: string } {
+export function makeBaseParts(line: string): {
+  title: string;
+  artists: string;
+  primArtist: string;
+} {
   const [rawTitle, rawArtists] = line.split(' - ');
   const title = (stripDecorations(stripFeat(rawTitle || '')) || '').toString();
   const artists = (rawArtists || '').trim();
