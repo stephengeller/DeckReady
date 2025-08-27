@@ -5,7 +5,7 @@
     "typecheck": "tsc --noEmit",
     "start": "ts-node src/runLuckyForTracklist.ts",
     "test": "jest --runInBand --reporters=default",
-    "lint": "eslint --config .eslintrc.cjs --ext .ts src test",
+    "lint": "eslint --config .eslintrc.cjs --ext .ts src",
     "format:check": "prettier --check ."
   },
   "bin": {

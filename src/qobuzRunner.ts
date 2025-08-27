@@ -48,7 +48,9 @@ async function rmIfOldTmp(p: string, maxAgeMs = 15 * 60 * 1000) {
     if (!TMP_EXT.test(p)) return;
     const st = await fs.stat(p);
     if (Date.now() - st.mtimeMs > maxAgeMs) await fs.rm(p, { force: true });
-  } catch {}
+  } catch (err) {
+    void err;
+  }
 }
 
 async function pruneEmptyDirs(root: string) {
@@ -63,7 +65,9 @@ async function pruneEmptyDirs(root: string) {
         if (left.length === 0) await fs.rmdir(p);
       }),
     );
-  } catch {}
+  } catch (err) {
+    void err;
+  }
 }
 
 function spawnStreaming(cmd: string, args: string[], { quiet = false } = {}) {
@@ -89,6 +93,17 @@ function spawnStreaming(cmd: string, args: string[], { quiet = false } = {}) {
   });
 }
 
+export type RunQobuzResult = {
+  ok: boolean;
+  added: string[];
+  cmd: string;
+  stdout: string;
+  stderr: string;
+  code: number;
+  dry?: boolean;
+  logPath?: string | null;
+};
+
 export async function runQobuzLuckyStrict(
   query: string,
   {
@@ -96,7 +111,6 @@ export async function runQobuzLuckyStrict(
     quality = 6,
     number = 1,
     type = 'track',
-    embedArt = false, // we avoid covers so “cover-only” can't mask failures
     dryRun = false,
     quiet = false, // noisy by default; set true to silence
   }: {
@@ -104,11 +118,10 @@ export async function runQobuzLuckyStrict(
     quality?: number;
     number?: number;
     type?: string;
-    embedArt?: boolean;
     dryRun?: boolean;
     quiet?: boolean;
   } = {},
-) {
+): Promise<RunQobuzResult> {
   const args = [
     'lucky',
     '-t',
@@ -146,7 +159,7 @@ export async function runQobuzLuckyStrict(
       stderr: '',
       code: 0,
       dry: true,
-    } as any;
+    } as RunQobuzResult;
   }
 
   // Take a filesystem snapshot before running
@@ -166,7 +179,9 @@ export async function runQobuzLuckyStrict(
       try {
         const left = await fs.readdir(d);
         if (left.length === 0) await fs.rmdir(d);
-      } catch {}
+      } catch (err) {
+        void err;
+      }
     }
     await pruneEmptyDirs(directory || '.');
   }
@@ -177,16 +192,17 @@ export async function runQobuzLuckyStrict(
     if (directory) {
       const logDir = path.join(directory, '.qobuz-logs');
       await fs.mkdir(logDir, { recursive: true });
-      const safeQuery = query.replace(/[^a-z0-9_\-\.]/gi, '_').slice(0, 120);
+      const safeQuery = query.replace(/[^a-z0-9_\-.]/gi, '_').slice(0, 120);
       const fname = `${Date.now()}_${quality}_${safeQuery}.log`;
       logPath = path.join(logDir, fname);
       const content = `CMD: ${cmd}\n\nSTDOUT:\n${res.stdout}\n\nSTDERR:\n${res.stderr}\n`;
       await fs.writeFile(logPath, content, 'utf8');
     }
   } catch (e) {
+    console.error('Failed to write qobuz-dl log:', e);
     // best-effort only; don't fail the whole operation
   }
 
   const ok = res.code === 0 && addedAudio.length > 0;
-  return { ok, added: addedAudio, cmd, logPath, ...res } as any;
+  return { ok, added: addedAudio, cmd, logPath, ...res } as unknown as RunQobuzResult;
 }

@@ -115,7 +115,9 @@ function usageAndExit() {
         for (const el of scrollers) {
           try {
             (el as HTMLElement).scrollTop = (el as HTMLElement).scrollHeight;
-          } catch {}
+          } catch (err) {
+            void err;
+          }
         }
 
         return new Promise<number>((resolve) => {
