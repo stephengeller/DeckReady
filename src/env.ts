@@ -2,9 +2,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 // Attempt to load environment variables from a .env file using dotenv if available.
+import { config as dotenvConfig } from 'dotenv';
+
 try {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  require('dotenv').config();
+  dotenvConfig();
 } catch {
   const envPath = path.resolve(process.cwd(), '.env');
   if (fs.existsSync(envPath)) {
