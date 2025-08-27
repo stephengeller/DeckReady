@@ -204,5 +204,192 @@ export async function runQobuzLuckyStrict(
   }
 
   const ok = res.code === 0 && addedAudio.length > 0;
+
+  // After each successful download, convert to AIFF and organise by genre/artist/title
+  if (addedAudio.length > 0) {
+    for (const f of addedAudio) {
+      // Run synchronously (await) so nothing happens in background. Log errors but continue with next file.
+      try {
+        // await the processing so it runs before we return
+        // If you prefer to fail the whole command when organising fails, remove the try/catch.
+        // Here we keep best-effort behaviour but synchronously.
+        // eslint-disable-next-line no-await-in-loop
+        await processDownloadedAudio(f);
+      } catch (e) {
+        console.error('processDownloadedAudio failed for', f, e);
+      }
+    }
+  }
+
   return { ok, added: addedAudio, cmd, logPath, ...res } as unknown as RunQobuzResult;
+}
+
+// --- Helpers: convert downloaded audio to AIFF, read metadata, and move into organised folders
+async function processDownloadedAudio(inputPath: string) {
+  const ORG_BASE = '/Users/stephengeller/Music/DJ Stuff/Organised_AIFF';
+  try {
+    if (!inputPath) return;
+    // Ensure file exists
+    try {
+      await fs.stat(inputPath);
+    } catch (e) {
+      throw new Error(`file not found: ${inputPath}`);
+    }
+
+    const isAIFF = /\.aiff$/i.test(inputPath);
+
+    // Probe the original file for tags first (avoid relying on conversion to keep tags).
+    // Ask ffprobe for both format and stream tags because different files store tags in different places.
+    const probeArgs = ['-v', 'quiet', '-show_entries', 'format_tags:stream_tags', '-of', 'default=noprint_wrappers=1:nokey=0', inputPath];
+    const probeOrig = await spawnStreaming('ffprobe', probeArgs, { quiet: true });
+    const tags: Record<string, string> = {};
+    for (const line of probeOrig.stdout.split(/\r?\n/)) {
+      if (!line) continue;
+      // ffprobe emits lines like "TAG:key=value"
+      const pref = line.startsWith('TAG:') ? line.slice(4) : line;
+      const eq = pref.indexOf('=');
+      if (eq > -1) {
+        const k = pref.slice(0, eq).trim();
+        const v = pref.slice(eq + 1).trim();
+        tags[k.toLowerCase()] = v;
+      }
+    }
+
+    const genreRaw = tags['genre'] || 'Unknown Genre';
+    const artistRaw = tags['artist'] || tags['album_artist'] || 'Unknown Artist';
+    const titleRaw = tags['title'] || path.basename(inputPath).replace(/\.[^.]+$/, '');
+
+    const genre = sanitizeName(genreRaw);
+    const artist = sanitizeName(artistRaw);
+    const title = sanitizeName(titleRaw);
+
+    const destDir = path.join(ORG_BASE, genre, artist);
+    await fs.mkdir(destDir, { recursive: true });
+
+    let destPath = path.join(destDir, `${title}.aiff`);
+    // avoid overwriting existing files by adding numeric suffix
+    let i = 1;
+    while (true) {
+      try {
+        await fs.access(destPath);
+        // exists -> add suffix
+        destPath = path.join(destDir, `${title} (${i}).aiff`);
+        i += 1;
+      } catch (e) {
+        break; // does not exist
+      }
+    }
+
+    if (isAIFF) {
+      // already AIFF, just move
+      await fs.rename(inputPath, destPath);
+      console.log(`Organised (moved AIFF): ${inputPath} -> ${destPath}`);
+      return;
+    }
+
+    // Not AIFF -> convert to AIFF and write metadata explicitly in the final AIFF output
+    const converted = inputPath + '.converted.aiff';
+    const codec = 'pcm_s16le';
+
+    // Build metadata args: prefer standard keys and normalize variants
+    const keyMap: Record<string, string> = {
+      title: 'title',
+      artist: 'artist',
+      album: 'album',
+      genre: 'genre',
+      date: 'date',
+      year: 'date',
+      track: 'track',
+      tracktotal: 'tracktotal',
+      album_artist: 'album_artist',
+      albumartist: 'album_artist',
+      label: 'label',
+      composer: 'composer',
+      composer_sort: 'composer_sort',
+    };
+
+    const metaArgs: string[] = [];
+    for (const [k, v] of Object.entries(tags)) {
+      if (!v || v.length === 0) continue;
+      const key = k.toLowerCase();
+      const outKey = keyMap[key];
+      if (!outKey) continue;
+      metaArgs.push('-metadata', `${outKey}=${v}`);
+    }
+
+    // Main conversion command: map original metadata and also pass explicit -metadata entries for compatibility
+    const convArgs = ['-y', '-i', inputPath, '-map_metadata', '0', '-vn', '-c:a', codec, ...metaArgs, '-write_id3v2', '1', '-id3v2_version', '3', '-f', 'aiff', converted];
+
+    const ff = await spawnStreaming('ffmpeg', convArgs, { quiet: true });
+    if (ff.code !== 0) {
+      try {
+        await fs.rm(converted, { force: true });
+      } catch (e) {
+        void e;
+      }
+      throw new Error(`ffmpeg failed: ${ff.stderr || ff.stdout}`);
+    }
+
+    // Move converted into final location
+    await fs.rename(converted, destPath);
+
+    // Verify tags made it into the AIFF. If key tags are missing, inject metadata explicitly using ffmpeg (copy).
+    try {
+      const check = await spawnStreaming('ffprobe', ['-v', 'quiet', '-show_entries', 'format_tags', '-of', 'default=noprint_wrappers=1:nokey=0', destPath], { quiet: true });
+      const found: Record<string, string> = {};
+      for (const line of check.stdout.split(/\r?\n/)) {
+        if (!line) continue;
+        const pref = line.startsWith('TAG:') ? line.slice(4) : line;
+        const eq = pref.indexOf('=');
+        if (eq > -1) {
+          const k = pref.slice(0, eq).trim().toLowerCase();
+          const v = pref.slice(eq + 1).trim();
+          found[k] = v;
+        }
+      }
+
+      const needGenre = !found['genre'] && !!tags['genre'];
+      const needArtist = !found['artist'] && !!tags['artist'];
+      const needTitle = !found['title'] && !!tags['title'];
+
+      if (needGenre || needArtist || needTitle) {
+        const metaArgs: string[] = [];
+        if (tags['title']) metaArgs.push('-metadata', `title=${tags['title']}`);
+        if (tags['artist']) metaArgs.push('-metadata', `artist=${tags['artist']}`);
+        if (tags['album']) metaArgs.push('-metadata', `album=${tags['album']}`);
+        if (tags['genre']) metaArgs.push('-metadata', `genre=${tags['genre']}`);
+        if (tags['date']) metaArgs.push('-metadata', `date=${tags['date']}`);
+        if (tags['label']) metaArgs.push('-metadata', `label=${tags['label']}`);
+
+        const outTmp = destPath + '.meta.aiff';
+        const injectArgs = ['-y', '-i', destPath, ...metaArgs, '-c', 'copy', outTmp];
+        const inj = await spawnStreaming('ffmpeg', injectArgs, { quiet: true });
+        if (inj.code === 0) {
+          await fs.rename(outTmp, destPath);
+          console.log(`Metadata injected into AIFF: ${destPath}`);
+        } else {
+          try {
+            await fs.rm(outTmp, { force: true });
+          } catch (e) {
+            void e;
+          }
+          console.warn('Failed to inject metadata into AIFF:', inj.stderr || inj.stdout);
+        }
+      }
+    } catch (e) {
+      void e;
+    }
+
+    console.log(`Organised (converted -> AIFF): ${inputPath} -> ${destPath}`);
+  } catch (err) {
+    console.error('Error organising downloaded audio:', inputPath, err);
+  }
+}
+
+function sanitizeName(s: string) {
+  if (!s) return 'Unknown';
+  // Replace path separators and other problematic characters, keep unicode letters
+  const cleaned = s.replace(/[\\/:\u0000-\u001f<>\?|\*\"]+/g, '_').trim();
+  // Collapse multiple spaces
+  return cleaned.replace(/\s+/g, ' ');
 }
