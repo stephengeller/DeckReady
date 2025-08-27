@@ -6,6 +6,17 @@ Prerequisites
 - node (v16+)
 - qobuz-dl in your PATH
 
+Configuration
+
+Create a `.env` file in the project root to provide Spotify credentials:
+
+```
+SPOTIFY_CLIENT_ID=your_client_id
+SPOTIFY_CLIENT_SECRET=your_client_secret
+```
+
+These values are loaded automatically at runtime.
+
 Quick usage
 
 1. Make an output directory, e.g. `mkdir -p out`
