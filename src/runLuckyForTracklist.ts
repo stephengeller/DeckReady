@@ -43,14 +43,14 @@ export async function main() {
       // Lossless
       const res6 = await runQobuzLuckyStrict(q, { directory: dir, quality: 6, dryRun: dry, quiet });
       if (dry) {
-        console.log(`  [dry-run] ${res6.cmd || ''}`);
+        console.log(`  [dry-run] ${res6?.cmd || ''}`);
         console.log(`  ✓ would try lossless first for: ${q}`);
         matched = true;
         break; // in dry-run we stop at first planned candidate
       }
-      if (res6.ok) {
+      if (res6?.ok) {
         console.log(`  ✓ matched (lossless) via: ${q}`);
-        for (const p of res6.added) console.log(`    → ${p}`);
+        for (const p of res6?.added || []) console.log(`    → ${p}`);
         matched = true;
         break;
       }
@@ -62,14 +62,14 @@ export async function main() {
         dryRun: false,
         quiet,
       });
-      if (res5.ok) {
+      if (res5?.ok) {
         console.log(`  ✓ matched (320) via: ${q}`);
-        for (const p of res5.added) console.log(`    → ${p}`);
+        for (const p of res5?.added || []) console.log(`    → ${p}`);
         matched = true;
         break;
       } else {
         // brief tail for debugging
-        const tail = (res5.stderr || res5.stdout || '').split('\n').slice(-4).join('\n');
+        const tail = (res5?.stderr || res5?.stdout || '').split('\n').slice(-4).join('\n');
         console.log(
           `  · candidate failed: ${q}\n${tail ? '    └─ tail:\n' + indent(tail, 6) : ''}`,
         );
