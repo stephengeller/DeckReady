@@ -8,9 +8,11 @@ describe('runQobuzLuckyStrict spawn integration (mocked spawn)', () => {
   let tmp;
   beforeEach(async () => {
     tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'qobuz-'));
+    process.env.ORGANISED_AIFF_DIR = path.join(tmp, 'org');
   });
   afterEach(async () => {
     await fs.rm(tmp, { recursive: true, force: true });
+    delete process.env.ORGANISED_AIFF_DIR;
     jest.resetModules();
     jest.clearAllMocks();
   });
@@ -44,7 +46,7 @@ describe('runQobuzLuckyStrict spawn integration (mocked spawn)', () => {
           const dIndex = args.indexOf('-d');
           const dir = dIndex >= 0 ? args[dIndex + 1] : undefined;
           if (dir) {
-            await fs.writeFile(path.join(dir, 'new-song.flac'), 'audio');
+            await fs.writeFile(path.join(dir, 'new-song.aiff'), 'audio');
           }
           for (const cb of stdoutListeners) cb(Buffer.from('ok'));
           for (const cb of closeListeners) cb(0);
@@ -59,7 +61,12 @@ describe('runQobuzLuckyStrict spawn integration (mocked spawn)', () => {
     const res = await runQobuzLuckyStrict('test', { directory: tmp, dryRun: false });
     expect(res.ok).toBe(true);
     expect(res.added.length).toBeGreaterThan(0);
-    expect(res.added[0]).toEqual(expect.stringContaining('new-song.flac'));
+    expect(res.added[0]).toEqual(expect.stringContaining('new-song.aiff'));
+
+    const destBase = path.join(process.env.ORGANISED_AIFF_DIR, 'Unknown Genre', 'Unknown Artist');
+    const queryPath = path.join(destBase, 'new-song.aiff.search.txt');
+    const content = await fs.readFile(queryPath, 'utf8');
+    expect(content).toBe('test');
   });
 
   test('returns not ok when spawn exits non-zero or no files added', async () => {
