@@ -432,8 +432,10 @@ async function processDownloadedAudio(inputPath: string) {
 
 function sanitizeName(s: string) {
   if (!s) return 'Unknown';
-  // Replace path separators and other problematic characters, keep unicode letters
-  const cleaned = s.replace(/[\\/:\x00-\x1F<>?|*"]+/g, '_').trim();
+  // Remove Unicode control characters (category Cc) safely using Unicode property escape
+  // then replace path separator and problematic characters with underscore.
+  const noControl = s.replace(/\p{Cc}/gu, '');
+  const cleaned = noControl.replace(/[\\/:"<>?|*]+/g, '_').trim();
   // Collapse multiple spaces
   return cleaned.replace(/\s+/g, ' ');
 }
