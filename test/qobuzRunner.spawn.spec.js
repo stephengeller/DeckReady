@@ -23,9 +23,19 @@ describe('runQobuzLuckyStrict spawn integration (mocked spawn)', () => {
         const stderrListeners = [];
         const closeListeners = [];
         const child = {
-          stdout: { on: (ev, cb) => { if (ev === 'data') stdoutListeners.push(cb); } },
-          stderr: { on: (ev, cb) => { if (ev === 'data') stderrListeners.push(cb); } },
-          on: (ev, cb) => { if (ev === 'close') closeListeners.push(cb); }
+          stdout: {
+            on: (ev, cb) => {
+              if (ev === 'data') stdoutListeners.push(cb);
+            },
+          },
+          stderr: {
+            on: (ev, cb) => {
+              if (ev === 'data') stderrListeners.push(cb);
+            },
+          },
+          on: (ev, cb) => {
+            if (ev === 'close') closeListeners.push(cb);
+          },
         };
 
         // simulate async qobuz-dl behavior: create an audio file then emit data and close
@@ -41,7 +51,7 @@ describe('runQobuzLuckyStrict spawn integration (mocked spawn)', () => {
         }, 5);
 
         return child;
-      }
+      },
     }));
 
     const { runQobuzLuckyStrict } = require('../src/qobuzRunner.ts');
@@ -59,9 +69,19 @@ describe('runQobuzLuckyStrict spawn integration (mocked spawn)', () => {
         const stderrListeners = [];
         const closeListeners = [];
         const child = {
-          stdout: { on: (ev, cb) => { if (ev === 'data') stdoutListeners.push(cb); } },
-          stderr: { on: (ev, cb) => { if (ev === 'data') stderrListeners.push(cb); } },
-          on: (ev, cb) => { if (ev === 'close') closeListeners.push(cb); }
+          stdout: {
+            on: (ev, cb) => {
+              if (ev === 'data') stdoutListeners.push(cb);
+            },
+          },
+          stderr: {
+            on: (ev, cb) => {
+              if (ev === 'data') stderrListeners.push(cb);
+            },
+          },
+          on: (ev, cb) => {
+            if (ev === 'close') closeListeners.push(cb);
+          },
         };
 
         setTimeout(() => {
@@ -70,7 +90,7 @@ describe('runQobuzLuckyStrict spawn integration (mocked spawn)', () => {
         }, 5);
 
         return child;
-      }
+      },
     }));
 
     const { runQobuzLuckyStrict } = require('../src/qobuzRunner.ts');

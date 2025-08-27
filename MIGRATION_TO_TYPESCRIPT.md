@@ -1,7 +1,6 @@
 # Migration plan: JavaScript -> TypeScript
+
 # Migration plan: JavaScript -> TypeScript (updated: switch to ts-node-only workflow)
-
-
 
 This document captures a concrete, incremental plan to migrate the SpotifyToRekordbox repository from plain JavaScript to TypeScript. The aim is to add types and improve maintainability while keeping the project runnable and testable during migration.
 
@@ -13,42 +12,48 @@ High-level strategy
 
 Phases
 
-1) Preparation (non-destructive)
-  - Add TypeScript dev tooling.
-    - Install dev deps: typescript, @types/node, @types/jest, ts-node (optional), eslint typescript plugin (optional).
-      Example (yarn):
-        yarn add -D typescript @types/node @types/jest ts-node
-  - Add tsconfig.json (checked in) configured for incremental migration (allowJs: true, noEmit: true).
-  - Update Babel to include @babel/preset-typescript so jest/babel continue to run .ts files during tests.
-  - Update jest.config to transform .ts files with babel-jest.
-  - Add npm script: "typecheck": "tsc --noEmit" so CI can run type checking.
+1. Preparation (non-destructive)
 
-2) Convert low-risk utility modules
-  - Pick small, pure modules first (parseArgs.js, parseCliArgs.js, normalize.js, queryBuilders.js).
-  - For each file:
-    - Rename file to .ts (e.g. parseArgs.ts).
-    - Add explicit parameter and return types.
-    - Keep existing import specifiers (including ".js" extensions) — TypeScript with module: NodeNext / moduleResolution: NodeNext understands .js specifiers in source and will emit compatible outputs.
-    - Run `yarn test` and `yarn typecheck` to catch issues.
+- Add TypeScript dev tooling.
+  - Install dev deps: typescript, @types/node, @types/jest, ts-node (optional), eslint typescript plugin (optional).
+    Example (yarn):
+    yarn add -D typescript @types/node @types/jest ts-node
+- Add tsconfig.json (checked in) configured for incremental migration (allowJs: true, noEmit: true).
+- Update Babel to include @babel/preset-typescript so jest/babel continue to run .ts files during tests.
+- Update jest.config to transform .ts files with babel-jest.
+- Add npm script: "typecheck": "tsc --noEmit" so CI can run type checking.
 
-3) Convert business logic & I/O code
-  - Convert files that touch Playwright or spawn child processes (qobuzRunner.js, runLuckyForTracklist.js, spotify_list.js).
-  - Add types for returned promises/objects, and define small local types/interfaces where appropriate.
+2. Convert low-risk utility modules
 
-4) Convert tests
-  - Option A: keep tests as .js (Babel will handle importing .ts modules).
-  - Option B (recommended long-term): convert tests to TypeScript and add @types/jest.
+- Pick small, pure modules first (parseArgs.js, parseCliArgs.js, normalize.js, queryBuilders.js).
+- For each file:
+  - Rename file to .ts (e.g. parseArgs.ts).
+  - Add explicit parameter and return types.
+  - Keep existing import specifiers (including ".js" extensions) — TypeScript with module: NodeNext / moduleResolution: NodeNext understands .js specifiers in source and will emit compatible outputs.
+  - Run `yarn test` and `yarn typecheck` to catch issues.
 
-5) Tighten TypeScript settings
-  - After all/most files are .ts, flip tsconfig:
-    - allowJs: false
-    - noEmit: false (or use a separate tsconfig.build.json for emit)
-    - enable strict checks (noImplicitAny, strictNullChecks, etc.) and fix resulting errors.
-  - Add a build step (tsc --build or tsc -p tsconfig.build.json) to produce dist/ for runtime scripts and bin entries.
+3. Convert business logic & I/O code
 
-6) Finalize runtime scripts
-  - Update package.json/bin to point to compiled JS in dist/ (or keep using ts-node if preferred).
-  - Remove Babel if you choose to rely solely on tsc + esbuild/rollup for bundling.
+- Convert files that touch Playwright or spawn child processes (qobuzRunner.js, runLuckyForTracklist.js, spotify_list.js).
+- Add types for returned promises/objects, and define small local types/interfaces where appropriate.
+
+4. Convert tests
+
+- Option A: keep tests as .js (Babel will handle importing .ts modules).
+- Option B (recommended long-term): convert tests to TypeScript and add @types/jest.
+
+5. Tighten TypeScript settings
+
+- After all/most files are .ts, flip tsconfig:
+  - allowJs: false
+  - noEmit: false (or use a separate tsconfig.build.json for emit)
+  - enable strict checks (noImplicitAny, strictNullChecks, etc.) and fix resulting errors.
+- Add a build step (tsc --build or tsc -p tsconfig.build.json) to produce dist/ for runtime scripts and bin entries.
+
+6. Finalize runtime scripts
+
+- Update package.json/bin to point to compiled JS in dist/ (or keep using ts-node if preferred).
+- Remove Babel if you choose to rely solely on tsc + esbuild/rollup for bundling.
 
 Recommended tsconfig.json (initial, checked-in)
 
@@ -108,8 +113,13 @@ Risks and mitigations
 Example conversions (small snippets)
 
 - parseArgs.js → parseArgs.ts
+
 ```ts
-export function parseArgs(argv: string[]): { file: string | null; dir: string | null; dry: boolean } {
+export function parseArgs(argv: string[]): {
+  file: string | null;
+  dir: string | null;
+  dry: boolean;
+} {
   const out = { file: null, dir: null, dry: false };
   for (let i = 2; i < argv.length; i++) {
     const a = argv[i];
