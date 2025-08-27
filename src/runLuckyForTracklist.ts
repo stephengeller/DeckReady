@@ -41,8 +41,7 @@ export async function main() {
 
     for (const q of candidates) {
       // Lossless
-      const res6 =
-        (await runQobuzLuckyStrict(q, { directory: dir, quality: 6, dryRun: dry, quiet })) || {};
+      const res6 = await runQobuzLuckyStrict(q, { directory: dir, quality: 6, dryRun: dry, quiet });
       if (dry) {
         console.log(`  [dry-run] ${res6.cmd || ''}`);
         console.log(`  ✓ would try lossless first for: ${q}`);
