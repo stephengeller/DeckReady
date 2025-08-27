@@ -3,6 +3,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 import readline from 'node:readline';
 import { parseCliArgs } from './parseCliArgs';
+// Load environment variables from .env
+import { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET } from './env';
+void SPOTIFY_CLIENT_ID;
+void SPOTIFY_CLIENT_SECRET;
 
 import { makeBaseParts } from './normalize';
 import { buildQueries } from './queryBuilders';
