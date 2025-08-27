@@ -232,7 +232,7 @@ async function processDownloadedAudio(inputPath: string) {
     // Ensure file exists
     try {
       await fs.stat(inputPath);
-    } catch (e) {
+    } catch {
       throw new Error(`file not found: ${inputPath}`);
     }
 
@@ -240,7 +240,15 @@ async function processDownloadedAudio(inputPath: string) {
 
     // Probe the original file for tags first (avoid relying on conversion to keep tags).
     // Ask ffprobe for both format and stream tags because different files store tags in different places.
-    const probeArgs = ['-v', 'quiet', '-show_entries', 'format_tags:stream_tags', '-of', 'default=noprint_wrappers=1:nokey=0', inputPath];
+    const probeArgs = [
+      '-v',
+      'quiet',
+      '-show_entries',
+      'format_tags:stream_tags',
+      '-of',
+      'default=noprint_wrappers=1:nokey=0',
+      inputPath,
+    ];
     const probeOrig = await spawnStreaming('ffprobe', probeArgs, { quiet: true });
     const tags: Record<string, string> = {};
     for (const line of probeOrig.stdout.split(/\r?\n/)) {
@@ -269,15 +277,22 @@ async function processDownloadedAudio(inputPath: string) {
     let destPath = path.join(destDir, `${title}.aiff`);
     // avoid overwriting existing files by adding numeric suffix
     let i = 1;
-    while (true) {
+    const MAX_ATTEMPTS = 1000;
+    let found = false;
+    while (i <= MAX_ATTEMPTS && !found) {
       try {
         await fs.access(destPath);
         // exists -> add suffix
         destPath = path.join(destDir, `${title} (${i}).aiff`);
         i += 1;
-      } catch (e) {
-        break; // does not exist
+      } catch {
+        found = true; // does not exist
       }
+    }
+    if (!found) {
+      throw new Error(
+        `Could not find available filename for ${title} after ${MAX_ATTEMPTS} attempts`,
+      );
     }
 
     if (isAIFF) {
@@ -318,7 +333,24 @@ async function processDownloadedAudio(inputPath: string) {
     }
 
     // Main conversion command: map original metadata and also pass explicit -metadata entries for compatibility
-    const convArgs = ['-y', '-i', inputPath, '-map_metadata', '0', '-vn', '-c:a', codec, ...metaArgs, '-write_id3v2', '1', '-id3v2_version', '3', '-f', 'aiff', converted];
+    const convArgs = [
+      '-y',
+      '-i',
+      inputPath,
+      '-map_metadata',
+      '0',
+      '-vn',
+      '-c:a',
+      codec,
+      ...metaArgs,
+      '-write_id3v2',
+      '1',
+      '-id3v2_version',
+      '3',
+      '-f',
+      'aiff',
+      converted,
+    ];
 
     const ff = await spawnStreaming('ffmpeg', convArgs, { quiet: true });
     if (ff.code !== 0) {
@@ -335,7 +367,19 @@ async function processDownloadedAudio(inputPath: string) {
 
     // Verify tags made it into the AIFF. If key tags are missing, inject metadata explicitly using ffmpeg (copy).
     try {
-      const check = await spawnStreaming('ffprobe', ['-v', 'quiet', '-show_entries', 'format_tags', '-of', 'default=noprint_wrappers=1:nokey=0', destPath], { quiet: true });
+      const check = await spawnStreaming(
+        'ffprobe',
+        [
+          '-v',
+          'quiet',
+          '-show_entries',
+          'format_tags',
+          '-of',
+          'default=noprint_wrappers=1:nokey=0',
+          destPath,
+        ],
+        { quiet: true },
+      );
       const found: Record<string, string> = {};
       for (const line of check.stdout.split(/\r?\n/)) {
         if (!line) continue;
@@ -389,7 +433,7 @@ async function processDownloadedAudio(inputPath: string) {
 function sanitizeName(s: string) {
   if (!s) return 'Unknown';
   // Replace path separators and other problematic characters, keep unicode letters
-  const cleaned = s.replace(/[\\/:\u0000-\u001f<>\?|\*\"]+/g, '_').trim();
+  const cleaned = s.replace(/[\\/:\x00-\x1F<>?|*"]+/g, '_').trim();
   // Collapse multiple spaces
   return cleaned.replace(/\s+/g, ' ');
 }
