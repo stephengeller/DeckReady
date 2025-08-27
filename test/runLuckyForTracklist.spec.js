@@ -4,10 +4,13 @@ const path = require('node:path');
 const { exec } = require('node:child_process');
 const { parseCliArgs } = require('../src/parseCliArgs.ts');
 
+const MOCK_TRACK =
+  process.env.MOCK_TRACK_PATH || path.join(os.tmpdir(), 'out', 'track.flac');
+
 jest.mock('../src/qobuzRunner.ts', () => ({
   runQobuzLuckyStrict: jest.fn(async (q, opts) => {
     // simulate: if query contains 'win' succeed, else fail
-    if (q.includes('win')) return { ok: true, added: ['/out/track.flac'], cmd: 'cmd' };
+    if (q.includes('win')) return { ok: true, added: [MOCK_TRACK], cmd: 'cmd' };
     return { ok: false, stdout: '', stderr: 'no', code: 1, cmd: 'cmd' };
   }),
 }));
