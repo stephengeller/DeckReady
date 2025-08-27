@@ -1,6 +1,7 @@
 import { spawn } from 'node:child_process';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { ORGANISED_AIFF_DIR } from './env';
 
 export async function walkFiles(dir: string): Promise<string[]> {
   const { files } = await walk(dir);
@@ -226,7 +227,7 @@ export async function runQobuzLuckyStrict(
 
 // --- Helpers: convert downloaded audio to AIFF, read metadata, and move into organised folders
 async function processDownloadedAudio(inputPath: string) {
-  const ORG_BASE = '/Users/stephengeller/Music/rekordbox/Organised_AIFF';
+  const ORG_BASE = ORGANISED_AIFF_DIR;
   try {
     if (!inputPath) return;
     // Ensure file exists
