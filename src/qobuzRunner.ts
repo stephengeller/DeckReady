@@ -2,6 +2,7 @@ import { spawn } from 'node:child_process';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { ORGANISED_AIFF_DIR } from './env';
+import { normaliseForSearch, stripFeat, stripDecorations } from './normalize';
 
 export async function walkFiles(dir: string): Promise<string[]> {
   const { files } = await walk(dir);
@@ -71,6 +72,36 @@ async function pruneEmptyDirs(root: string) {
   }
 }
 
+async function readTags(inputPath: string): Promise<Record<string, string>> {
+  const probeArgs = [
+    '-v',
+    'quiet',
+    '-show_entries',
+    'format_tags:stream_tags',
+    '-of',
+    'default=noprint_wrappers=1:nokey=0',
+    inputPath,
+  ];
+  const probe = await spawnStreaming('ffprobe', probeArgs, { quiet: true });
+  const tags: Record<string, string> = {};
+  for (const line of probe.stdout.split(/\r?\n/)) {
+    if (!line) continue;
+    const pref = line.startsWith('TAG:') ? line.slice(4) : line;
+    const eq = pref.indexOf('=');
+    if (eq > -1) {
+      const k = pref.slice(0, eq).trim();
+      const v = pref.slice(eq + 1).trim();
+      tags[k.toLowerCase()] = v;
+    }
+  }
+  return tags;
+}
+
+function normaliseTag(s: string | undefined): string {
+  if (!s) return '';
+  return normaliseForSearch(stripFeat(stripDecorations(s))).toLowerCase();
+}
+
 function spawnStreaming(cmd: string, args: string[], { quiet = false } = {}) {
   return new Promise<{ code: number; stdout: string; stderr: string }>((resolve) => {
     const child = spawn(cmd, args, { stdio: ['ignore', 'pipe', 'pipe'] });
@@ -114,6 +145,8 @@ export async function runQobuzLuckyStrict(
     type = 'track',
     dryRun = false,
     quiet = false, // noisy by default; set true to silence
+    artist,
+    title,
   }: {
     directory?: string;
     quality?: number;
@@ -121,6 +154,8 @@ export async function runQobuzLuckyStrict(
     type?: string;
     dryRun?: boolean;
     quiet?: boolean;
+    artist?: string;
+    title?: string;
   } = {},
 ): Promise<RunQobuzResult> {
   const args = [
@@ -217,6 +252,36 @@ export async function runQobuzLuckyStrict(
     // best-effort only; don't fail the whole operation
   }
 
+  if (addedAudio.length > 0 && (artist || title)) {
+    const expectedArtist = normaliseTag(artist);
+    const expectedTitle = normaliseTag(title);
+    let tagsMatch = true;
+    for (const f of addedAudio) {
+      // eslint-disable-next-line no-await-in-loop
+      const tags = await readTags(f);
+      const fileArtist = normaliseTag(tags['artist'] || tags['album_artist']);
+      const fileTitle = normaliseTag(tags['title']);
+      if ((artist && fileArtist !== expectedArtist) || (title && fileTitle !== expectedTitle)) {
+        tagsMatch = false;
+        break;
+      }
+    }
+    if (!tagsMatch) {
+      await Promise.all(
+        addedAudio.map(async (p) => {
+          try {
+            await fs.rm(p, { force: true });
+            await fs.rm(`${p}.search.txt`, { force: true });
+          } catch (err) {
+            void err;
+          }
+        }),
+      );
+      await pruneEmptyDirs(directory || '.');
+      return { ok: false, added: [], cmd, logPath, ...res } as unknown as RunQobuzResult;
+    }
+  }
+
   const ok = res.code === 0 && addedAudio.length > 0;
 
   // After each successful download, convert to AIFF and organise by genre/artist/title
@@ -254,28 +319,7 @@ async function processDownloadedAudio(inputPath: string) {
 
     // Probe the original file for tags first (avoid relying on conversion to keep tags).
     // Ask ffprobe for both format and stream tags because different files store tags in different places.
-    const probeArgs = [
-      '-v',
-      'quiet',
-      '-show_entries',
-      'format_tags:stream_tags',
-      '-of',
-      'default=noprint_wrappers=1:nokey=0',
-      inputPath,
-    ];
-    const probeOrig = await spawnStreaming('ffprobe', probeArgs, { quiet: true });
-    const tags: Record<string, string> = {};
-    for (const line of probeOrig.stdout.split(/\r?\n/)) {
-      if (!line) continue;
-      // ffprobe emits lines like "TAG:key=value"
-      const pref = line.startsWith('TAG:') ? line.slice(4) : line;
-      const eq = pref.indexOf('=');
-      if (eq > -1) {
-        const k = pref.slice(0, eq).trim();
-        const v = pref.slice(eq + 1).trim();
-        tags[k.toLowerCase()] = v;
-      }
-    }
+    const tags = await readTags(inputPath);
 
     const genreRaw = tags['genre'] || 'Unknown Genre';
     const artistRaw = tags['artist'] || tags['album_artist'] || 'Unknown Artist';
