@@ -4,8 +4,7 @@ const path = require('node:path');
 const { exec } = require('node:child_process');
 const { parseCliArgs } = require('../src/parseCliArgs.ts');
 
-const MOCK_TRACK =
-  process.env.MOCK_TRACK_PATH || path.join(os.tmpdir(), 'out', 'track.flac');
+const MOCK_TRACK = process.env.MOCK_TRACK_PATH || path.join(os.tmpdir(), 'out', 'track.flac');
 
 jest.mock('../src/qobuzRunner.ts', () => ({
   runQobuzLuckyStrict: jest.fn(async (q, opts) => {
