@@ -32,7 +32,7 @@ export async function main() {
     if (!line || !validLine(line)) continue;
 
     const base = makeBaseParts(line);
-    const candidates = buildQueries(base as any);
+    const candidates = buildQueries(base);
 
     console.log(`>>> ${line}`);
 
