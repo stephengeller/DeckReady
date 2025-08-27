@@ -226,7 +226,7 @@ export async function runQobuzLuckyStrict(
 
 // --- Helpers: convert downloaded audio to AIFF, read metadata, and move into organised folders
 async function processDownloadedAudio(inputPath: string) {
-  const ORG_BASE = '/Users/stephengeller/Music/DJ Stuff/Organised_AIFF';
+  const ORG_BASE = '/Users/stephengeller/Music/rekordbox/Organised_AIFF';
   try {
     if (!inputPath) return;
     // Ensure file exists
