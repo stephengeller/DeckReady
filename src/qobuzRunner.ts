@@ -70,6 +70,63 @@ async function pruneEmptyDirs(root: string) {
   }
 }
 
+function sanitizeSegment(s: string) {
+  return (s || 'Unknown').replace(/[\/*?"<>|:]/g, '_').trim() || 'Unknown';
+}
+
+async function convertAndOrganize(src: string): Promise<string> {
+  const targetRoot =
+    process.env.ORGANIZED_AIFF_DIR ||
+    (process.env.HOME
+      ? path.join(process.env.HOME, 'Music', 'DJ Stuff', 'Organised_AIFF')
+      : path.join('Organised_AIFF'));
+  const aiffTmp = src.replace(/\.[^.]+$/, '.aiff');
+  const ffArgs = [
+    '-y',
+    '-i',
+    src,
+    '-map_metadata',
+    '0',
+    '-write_id3v2',
+    '1',
+    '-id3v2_version',
+    '3',
+    '-c:a',
+    'pcm_s16be',
+    '-vn',
+    aiffTmp,
+  ];
+  try {
+    const ff = await spawnStreaming('ffmpeg', ffArgs, { quiet: true });
+    if (ff.code !== 0) throw new Error(ff.stderr || 'ffmpeg failed');
+    const probe = await spawnStreaming(
+      'ffprobe',
+      ['-v', 'quiet', '-show_entries', 'format_tags', '-of', 'json', aiffTmp],
+      { quiet: true },
+    );
+    if (probe.code !== 0) throw new Error(probe.stderr || 'ffprobe failed');
+    const meta = JSON.parse(probe.stdout || '{}');
+    const tags = meta.format?.tags || {};
+    const genre = sanitizeSegment(tags.genre);
+    const artist = sanitizeSegment(tags.artist);
+    const title = sanitizeSegment(tags.title || path.basename(aiffTmp, path.extname(aiffTmp)));
+    const destDir = path.join(targetRoot, genre, artist);
+    await fs.mkdir(destDir, { recursive: true });
+    const dest = path.join(destDir, `${title}.aiff`);
+    await fs.rename(aiffTmp, dest);
+    return dest;
+  } catch (err) {
+    console.error('AIFF conversion failed:', err);
+    // best effort: if conversion failed, return original file
+    try {
+      await fs.rm(aiffTmp, { force: true });
+    } catch {
+      // ignore
+    }
+    return src;
+  }
+}
+
 function spawnStreaming(cmd: string, args: string[], { quiet = false } = {}) {
   return new Promise<{ code: number; stdout: string; stderr: string }>((resolve) => {
     const child = spawn(cmd, args, { stdio: ['ignore', 'pipe', 'pipe'] });
@@ -167,7 +224,16 @@ export async function runQobuzLuckyStrict(
   const res = await spawnStreaming('qobuz-dl', args, { quiet });
   const after = await snapshot(directory || '.');
 
-  const addedAudio = diffNewAudio(before.files, after.files);
+  const addedRaw = diffNewAudio(before.files, after.files);
+  const addedAudio: string[] = [];
+  for (const p of addedRaw) {
+    try {
+      const dest = await convertAndOrganize(p);
+      addedAudio.push(dest);
+    } catch (err) {
+      console.error('post-download processing failed:', err);
+    }
+  }
 
   // If no audio landed, remove any new .tmp files and prune empty dirs we just created
   if (addedAudio.length === 0) {

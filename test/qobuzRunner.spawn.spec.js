@@ -38,16 +38,21 @@ describe('runQobuzLuckyStrict spawn integration (mocked spawn)', () => {
           },
         };
 
-        // simulate async qobuz-dl behavior: create an audio file then emit data and close
         setTimeout(async () => {
-          // find directory in args: '-d', '<dir>'
-          const dIndex = args.indexOf('-d');
-          const dir = dIndex >= 0 ? args[dIndex + 1] : undefined;
-          if (dir) {
-            await fs.writeFile(path.join(dir, 'new-song.flac'), 'audio');
+          if (cmd === 'qobuz-dl') {
+            const dIndex = args.indexOf('-d');
+            const dir = dIndex >= 0 ? args[dIndex + 1] : undefined;
+            if (dir) await fs.writeFile(path.join(dir, 'new-song.flac'), 'audio');
+            for (const cb of stdoutListeners) cb(Buffer.from('ok'));
+            for (const cb of closeListeners) cb(0);
+          } else if (cmd === 'ffmpeg') {
+            // simulate ffmpeg creating the aiff file
+            const out = args[args.length - 1];
+            await fs.writeFile(out, 'aiff');
+            for (const cb of closeListeners) cb(0);
+          } else if (cmd === 'ffprobe') {
+            for (const cb of closeListeners) cb(0);
           }
-          for (const cb of stdoutListeners) cb(Buffer.from('ok'));
-          for (const cb of closeListeners) cb(0);
         }, 5);
 
         return child;
@@ -59,7 +64,7 @@ describe('runQobuzLuckyStrict spawn integration (mocked spawn)', () => {
     const res = await runQobuzLuckyStrict('test', { directory: tmp, dryRun: false });
     expect(res.ok).toBe(true);
     expect(res.added.length).toBeGreaterThan(0);
-    expect(res.added[0]).toEqual(expect.stringContaining('new-song.flac'));
+    expect(res.added[0]).toMatch(/new-song\.(flac|aiff)$/);
   });
 
   test('returns not ok when spawn exits non-zero or no files added', async () => {

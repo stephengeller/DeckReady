@@ -16,7 +16,6 @@ OUT_DIR="${OUT_DIR:-$HOME/Music/qobuz-dl}"
 QUALITY="${QUALITY:-6}"
 DRY_RUN="${DRY_RUN:-0}"
 TRACKLIST_FILE=""
-DO_CONVERT=0
 
 usage() {
   cat <<EOF
@@ -28,7 +27,6 @@ Options:
   --quality Q          5=320, 6=LOSSLESS, 7=24b<=96k, 27=>96k (default: $QUALITY)
   --dry                Dry-run: print qobuz commands; no downloads
   --tracklist FILE     Use an existing "Song - Artist" list; skip Spotify scraping
-  --convert            (placeholder) enable FFmpeg→AIFF conversion
   -h, --help           Show this help
 
 Env overrides:
@@ -49,7 +47,6 @@ while [[ $# -gt 0 ]]; do
     --quality) QUALITY="$2"; shift 2 ;;
     --dry) DRY_RUN=1; shift ;;
     --tracklist) TRACKLIST_FILE="$2"; shift 2 ;;
-    --convert) DO_CONVERT=1; shift ;;
     http*spotify.com*) SPOTIFY_URL="$1"; shift ;;
     *) echo "Unknown arg: $1"; usage; exit 1 ;;
   esac
@@ -101,19 +98,6 @@ if [[ "$DRY_RUN" -eq 1 ]]; then
   "$RUN_LUCKY_JS" "$TRACKS_TXT" --dir "$OUT_DIR" --quality "$QUALITY" --dry
 else
   "$RUN_LUCKY_JS" "$TRACKS_TXT" --dir "$OUT_DIR" --quality "$QUALITY"
-fi
-
-# -----------------------
-# Step 4 (optional placeholder): FFmpeg → AIFF
-# -----------------------
-if [[ "$DO_CONVERT" -eq 1 ]]; then
-  need ffmpeg
-  echo "Converting to AIFF (placeholder) ..."
-  while IFS= read -r -d '' f; do
-    base="${f%.*}"
-    aiff="${base}.aiff"
-    ffmpeg -y -i "$f" -map_metadata 0 -c:a pcm_s16be "$aiff"
-  done < <(find "$OUT_DIR" -type f \( -iname '*.flac' -o -iname '*.wav' -o -iname '*.mp3' -o -iname '*.m4a' \) -print0)
 fi
 
 echo "Done."
