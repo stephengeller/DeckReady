@@ -80,7 +80,16 @@ export async function main() {
       }
     }
 
-    if (!matched && !dry) console.log('  ✗ no candidate matched.');
+    if (!matched) {
+      if (!dry) {
+        console.log('  ✗ no candidate matched.');
+        const nf = path.join(dir, 'not-found.log');
+        fs.appendFileSync(nf, `${line}\n`);
+        console.log(`  ↪ appended to ${nf}`);
+      } else {
+        console.log('  ✗ no candidate matched (dry-run).');
+      }
+    }
   }
 }
 
