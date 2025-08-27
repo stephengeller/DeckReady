@@ -10,6 +10,10 @@
  */
 
 import { chromium } from 'playwright';
+// Load environment variables (SPOTIFY_CLIENT_ID/SECRET) from .env if present
+import { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET } from './env';
+void SPOTIFY_CLIENT_ID;
+void SPOTIFY_CLIENT_SECRET;
 
 const SPOTIFY_HOSTS = new Set(['open.spotify.com', 'www.open.spotify.com']);
 
