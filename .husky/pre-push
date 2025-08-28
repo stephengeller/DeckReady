@@ -1,0 +1,22 @@
+#!/bin/sh
+echo "Running pre-push checks..."
+
+# Guard: no focused tests should be committed
+if command -v rg >/dev/null 2>&1; then
+  if rg -n '\\.only\(' test src; then
+    echo "Remove .only() from tests before pushing."
+    exit 1
+  fi
+else
+  if grep -Rn --include='*.ts' --include='*.js' '\.only(' test src; then
+    echo "Remove .only() from tests before pushing."
+    exit 1
+  fi
+fi
+
+# Full verification: lint, format check, typecheck, tests
+yarn -s lint || exit 1
+yarn -s format:check || exit 1
+yarn -s typecheck || exit 1
+yarn -s test --runInBand || exit 1
+

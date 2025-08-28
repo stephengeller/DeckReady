@@ -1,4 +1,14 @@
 #!/bin/sh
-# Auto-fix staged files, then typecheck the repo
+# Auto-fix staged files, then typecheck and run related tests
+
+# 1) Lint/format staged files only (auto-fix) and re-stage
 npx --no-install lint-staged || exit 1
+
+# 2) Typecheck whole project (fast, no emit)
 yarn -s typecheck || exit 1
+
+# 3) Run related tests for staged files to fail fast
+STAGED="$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(ts|tsx|js|jsx)$' || true)"
+if [ -n "$STAGED" ]; then
+  yarn -s test --bail --findRelatedTests $STAGED || exit 1
+fi
