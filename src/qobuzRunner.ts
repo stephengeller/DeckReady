@@ -661,7 +661,7 @@ function pickGenre(raw: string): string {
   return parts[0] || 'Unknown';
 }
 
-function sanitizeName(s: string) {
+export function sanitizeName(s: string) {
   if (!s) return 'Unknown';
   // Remove Unicode control characters (category Cc) safely using Unicode property escape
   // then replace path separator and problematic characters with underscore.
@@ -669,4 +669,31 @@ function sanitizeName(s: string) {
   const cleaned = noControl.replace(/[\\/:"<>?|*]+/g, '_').trim();
   // Collapse multiple spaces
   return cleaned.replace(/\s+/g, ' ');
+}
+
+// Find an already-organised AIFF for the given artist/title anywhere under ORGANISED_AIFF_DIR
+export async function findOrganisedAiff(artist: string, title: string): Promise<string | null> {
+  try {
+    const baseDir = process.env.ORGANISED_AIFF_DIR || ORGANISED_AIFF_DIR;
+    const artistDirName = sanitizeName(artist || '');
+    const titleBase = sanitizeName(title || '');
+    // Search each genre subdir for artist folder
+    const genres = await fs.readdir(baseDir).catch(() => [] as string[]);
+    const titleRegex = new RegExp(`^${titleBase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?: \\((?:\\d+)\\))?\\.aiff$`, 'i');
+    for (const g of genres) {
+      const artistDir = path.join(baseDir, g, artistDirName);
+      try {
+        const entries = await fs.readdir(artistDir, { withFileTypes: true });
+        for (const e of entries) {
+          if (!e.isFile()) continue;
+          if (titleRegex.test(e.name)) return path.join(artistDir, e.name);
+        }
+      } catch {
+        // ignore missing artistDir in this genre
+      }
+    }
+  } catch {
+    // ignore
+  }
+  return null;
 }

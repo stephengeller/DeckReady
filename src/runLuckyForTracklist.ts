@@ -11,7 +11,7 @@ void SPOTIFY_CLIENT_SECRET;
 
 import { makeBaseParts } from './normalize';
 import { buildQueries } from './queryBuilders';
-import { runQobuzLuckyStrict } from './qobuzRunner';
+import { runQobuzLuckyStrict, findOrganisedAiff } from './qobuzRunner';
 
 async function* lineStream(file: string | null) {
   if (file) {
@@ -46,6 +46,21 @@ export async function main() {
 
     const base = makeBaseParts(line);
     const candidates = buildQueries(base);
+
+    // Short-circuit: if a matching AIFF already exists under ORGANISED_AIFF_DIR, skip qobuz-dl
+    let existing: string | null = null;
+    try {
+      if (typeof (findOrganisedAiff as any) === 'function') {
+        existing = await findOrganisedAiff(base.primArtist, base.title);
+      }
+    } catch {
+      // in tests, module mocks may omit findOrganisedAiff; ignore
+    }
+    if (existing) {
+      if (!summaryOnly) console.log(`  ${yellow('↺')} already organised: ${existing}`);
+      alreadyCount += 1;
+      continue;
+    }
 
     if (!summaryOnly) console.log(cyan(`>>> ${line}`));
 
