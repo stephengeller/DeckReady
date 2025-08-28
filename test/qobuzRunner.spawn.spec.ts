@@ -298,4 +298,110 @@ describe('runQobuzLuckyStrict spawn integration (mocked spawn)', () => {
       .catch(() => false);
     expect(exists).toBe(false);
   });
+
+  test('accepts when file artist list contains expected primary artist', async () => {
+    const spawnMock = jest.fn((cmd: string, args: string[]) => {
+      const stdoutListeners: Array<(b: Buffer) => void> = [];
+      const closeListeners: Array<(code: number) => void> = [];
+      const child = {
+        stdout: {
+          on: (ev: string, cb: (b: Buffer) => void) => {
+            if (ev === 'data') stdoutListeners.push(cb);
+          },
+        },
+        stderr: { on: () => {} },
+        on: (ev: string, cb: (code: number) => void) => {
+          if (ev === 'close') closeListeners.push(cb);
+        },
+      } as any;
+
+      setTimeout(async () => {
+        if (cmd === 'qobuz-dl') {
+          const dIndex = args.indexOf('-d');
+          const dir = dIndex >= 0 ? args[dIndex + 1] : undefined;
+          if (dir) await fs.writeFile(path.join(dir, 'track.aiff'), 'audio');
+          stdoutListeners.forEach((cb) => cb(Buffer.from('ok')));
+          closeListeners.forEach((cb) => cb(0));
+        } else if (cmd === 'ffprobe') {
+          const out = 'TAG:artist=Nikita, the Wicked\nTAG:title=with vengeance\nTAG:genre=Genre\n';
+          stdoutListeners.forEach((cb) => cb(Buffer.from(out)));
+          closeListeners.forEach((cb) => cb(0));
+        } else {
+          // ffmpeg not needed since already AIFF
+          closeListeners.forEach((cb) => cb(0));
+        }
+      }, 5);
+
+      return child;
+    });
+
+    jest.doMock('node:child_process', () => ({ spawn: spawnMock }));
+
+    const { runQobuzLuckyStrict } = require('../src/qobuzRunner.ts');
+
+    const res = await runQobuzLuckyStrict('q', {
+      directory: tmp,
+      dryRun: false,
+      artist: 'Nikita',
+      title: 'with vengeance',
+    });
+
+    expect(res.ok).toBe(true);
+    // ensure no not-matched log
+    const logPath = path.join(tmp, 'not-matched.log');
+    const exists = await fs.stat(logPath).then(() => true).catch(() => false);
+    expect(exists).toBe(false);
+  });
+
+  test('accepts remix when expected artist appears in title parentheses', async () => {
+    const spawnMock = jest.fn((cmd: string, args: string[]) => {
+      const stdoutListeners: Array<(b: Buffer) => void> = [];
+      const closeListeners: Array<(code: number) => void> = [];
+      const child = {
+        stdout: {
+          on: (ev: string, cb: (b: Buffer) => void) => {
+            if (ev === 'data') stdoutListeners.push(cb);
+          },
+        },
+        stderr: { on: () => {} },
+        on: (ev: string, cb: (code: number) => void) => {
+          if (ev === 'close') closeListeners.push(cb);
+        },
+      } as any;
+
+      setTimeout(async () => {
+        if (cmd === 'qobuz-dl') {
+          const dIndex = args.indexOf('-d');
+          const dir = dIndex >= 0 ? args[dIndex + 1] : undefined;
+          if (dir) await fs.writeFile(path.join(dir, 'remix.aiff'), 'audio');
+          stdoutListeners.forEach((cb) => cb(Buffer.from('ok')));
+          closeListeners.forEach((cb) => cb(0));
+        } else if (cmd === 'ffprobe') {
+          const out = 'TAG:artist=Feed Me\nTAG:title=One Click Headshot (Arya & Alexis B Remix)\nTAG:genre=Genre\n';
+          stdoutListeners.forEach((cb) => cb(Buffer.from(out)));
+          closeListeners.forEach((cb) => cb(0));
+        } else {
+          closeListeners.forEach((cb) => cb(0));
+        }
+      }, 5);
+
+      return child;
+    });
+
+    jest.doMock('node:child_process', () => ({ spawn: spawnMock }));
+
+    const { runQobuzLuckyStrict } = require('../src/qobuzRunner.ts');
+
+    const res = await runQobuzLuckyStrict('q', {
+      directory: tmp,
+      dryRun: false,
+      artist: 'Arya',
+      title: 'One Click Headshot',
+    });
+
+    expect(res.ok).toBe(true);
+    const logPath = path.join(tmp, 'not-matched.log');
+    const exists = await fs.stat(logPath).then(() => true).catch(() => false);
+    expect(exists).toBe(false);
+  });
 });

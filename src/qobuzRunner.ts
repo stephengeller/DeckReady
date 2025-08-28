@@ -109,6 +109,15 @@ function normaliseTag(s: string | undefined): string {
   return normaliseForSearch(stripFeat(stripDecorations(s))).toLowerCase();
 }
 
+function normaliseTitleBase(s: string | undefined): string {
+  if (!s) return '';
+  // Remove trailing parenthetical/bracketed segments that contain remix/edit/version-like tokens
+  const stripped = (s || '')
+    .replace(/\s*[\[(][^\])]*(?:remix|vip|edit|version)[^\])]*[\])]\s*$/i, '')
+    .trim();
+  return normaliseTag(stripped);
+}
+
 function spawnStreaming(cmd: string, args: string[], { quiet = false } = {}) {
   return new Promise<{ code: number; stdout: string; stderr: string }>((resolve) => {
     const child = spawn(cmd, args, { stdio: ['ignore', 'pipe', 'pipe'] });
@@ -268,6 +277,7 @@ export async function runQobuzLuckyStrict(
   if (addedAudio.length > 0 && (artist || title)) {
     const expectedArtist = normaliseTag(artist);
     const expectedTitle = normaliseTag(title);
+    const expectedTitleBase = normaliseTitleBase(title);
     let tagsMatch = true;
     let firstMismatch: {
       file: string;
@@ -277,14 +287,48 @@ export async function runQobuzLuckyStrict(
     for (const f of addedAudio) {
       // eslint-disable-next-line no-await-in-loop
       const tags = await readTags(f);
-      const fileArtist = normaliseTag(tags['artist'] || tags['album_artist']);
-      const fileTitle = normaliseTag(tags['title']);
-      if ((artist && fileArtist !== expectedArtist) || (title && fileTitle !== expectedTitle)) {
+      const fileArtistRaw = tags['artist'] || tags['album_artist'] || '';
+      const fileTitleRaw = tags['title'] || '';
+      const fileArtist = normaliseTag(fileArtistRaw);
+      const fileTitle = normaliseTag(fileTitleRaw);
+
+      // Relaxed artist match rules:
+      // - exact normalized match
+      // - OR expected artist appears in the split artist list from the tag
+      // - OR (if title indicates remix/edit), expected artist appears in the parentheses content
+      let artistOk = true;
+      if (artist) {
+        artistOk = false;
+        if (fileArtist === expectedArtist) artistOk = true;
+        if (!artistOk) {
+          const parts = (fileArtistRaw || '')
+            .split(/\s*,\s*|\s*&\s*|\s+x\s+|\s*×\s*|\s+\band\s+/gi)
+            .map((s) => normaliseTag(s))
+            .filter(Boolean);
+          if (parts.includes(expectedArtist)) artistOk = true;
+        }
+        if (!artistOk && /\(([^)]*)\)/.test(fileTitleRaw)) {
+          const paren = (fileTitleRaw.match(/\(([^)]*)\)/) || [])[1] || '';
+          const normParen = normaliseTag(paren);
+          if (/(remix|vip|edit|version)/i.test(paren) && normParen.includes(expectedArtist)) artistOk = true;
+        }
+      }
+
+      // Relaxed title match rules: base title (without remix/edit parentheses) may match
+      let titleOk = true;
+      if (title) {
+        titleOk = false;
+        const fileTitleBase = normaliseTitleBase(fileTitleRaw);
+        if (fileTitle === expectedTitle) titleOk = true;
+        else if (fileTitleBase && expectedTitleBase && fileTitleBase === expectedTitleBase) titleOk = true;
+      }
+
+      if (!artistOk || !titleOk) {
         tagsMatch = false;
         firstMismatch = {
           file: f,
-          artist: tags['artist'] || tags['album_artist'] || '',
-          title: tags['title'] || '',
+          artist: fileArtistRaw,
+          title: fileTitleRaw,
         };
         break;
       }
