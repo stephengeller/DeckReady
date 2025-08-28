@@ -1,6 +1,8 @@
 {
   "name": "spotify-to-rekordbox",
   "version": "0.1.0",
+  "private": true,
+  "license": "UNLICENSED",
   "scripts": {
     "typecheck": "tsc --noEmit",
     "start": "ts-node src/cli/runLucky.ts",

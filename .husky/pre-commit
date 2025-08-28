@@ -1,7 +1,4 @@
 #!/bin/sh
-. "$(dirname "$0")/_/husky.sh"
-
 # Auto-fix staged files, then typecheck the repo
 npx --no-install lint-staged || exit 1
 yarn -s typecheck || exit 1
-
