@@ -1,48 +1,128 @@
-# Spotify → Rekordbox (helper scripts)
+# Spotify → Rekordbox
 
-This repository contains helper scripts to take a Spotify playlist, album, or single track and try to download matching tracks from Qobuz using the `qobuz-dl` tool.
+Helper tools to turn a Spotify playlist/album/track into an organised, Rekordbox-ready AIFF library by:
 
-Prerequisites
+- Scraping tracklines from a Spotify URL (Song Title - Artist 1, Artist 2).
+- Searching/downloading best matches from Qobuz using `qobuz-dl` (lossless preferred; 320 fallback).
+- Converting to AIFF and organising to a genre/artist folder tree with metadata preserved.
 
-- node (v16+)
-- qobuz-dl in your PATH
+Works entirely from the CLI and does not require a Spotify login for public content.
+
+What this repository provides
+
+- High-level runner `script/run` for one-command end-to-end flow.
+- TypeScript CLI `run-lucky` to run Qobuz “lucky” searches from a tracklist with validation and logging.
+- TypeScript CLI `script/spotify-list` to scrape Spotify pages via Playwright.
+- Organiser that converts audio to AIFF and places it under `ORGANISED_AIFF_DIR/Genre/Artist/Title.aiff`.
+
+Requirements
+
+- node: 18+ (Playwright requires Node 18 or newer)
+- qobuz-dl: available in your PATH and configured with your Qobuz credentials
+- ffmpeg and ffprobe: required for tag inspection and AIFF conversion
+- playwright browsers: run `npx playwright install chromium` once after install
+
+Install
+
+- Clone the repo, then install deps:
+  - `yarn install` (preferred) or `npm install`
+- Install Playwright browsers (first time):
+  - `npx playwright install chromium`
 
 Configuration
 
-Create a `.env` file in the project root to provide Spotify credentials:
+Create a `.env` (or edit the provided example) at repo root if desired:
 
-```
-SPOTIFY_CLIENT_ID=your_client_id
-SPOTIFY_CLIENT_SECRET=your_client_secret
-```
+- `SPOTIFY_CLIENT_ID` / `SPOTIFY_CLIENT_SECRET`: optional; currently not required for public scraping but loaded if present.
+- `ORGANISED_AIFF_DIR`: base folder for organised AIFF files. Default: `~/Music/rekordbox/Organised_AIFF`.
 
-These values are loaded automatically at runtime.
+See `.env.example:1` for a starting point.
 
-Quick usage
+Quick Start
 
-1. Make an output directory, e.g. `mkdir -p out`
-2. Run the high-level helper script:
+1. Make an output directory (where qobuz-dl writes): `mkdir -p out`
+2. Run the end‑to‑end helper:
 
-./script/run <spotify_url> --dir out [--dry] [--quality Q]
+`script/run <spotify_url> --dir out [--dry] [--quality Q]`
 
-The `spotify_url` may be a playlist, album, or single track link.
+- Supports playlist, album, or single track URLs from `open.spotify.com`.
+- Use `--dry` to preview qobuz-dl commands without downloading.
 
-Example (playlist, dry-run):
+Examples
 
-./script/run https://open.spotify.com/playlist/... --dir out --dry
+- Playlist (dry-run):
+  - `script/run https://open.spotify.com/playlist/... --dir out --dry`
+- Single track:
+  - `script/run https://open.spotify.com/track/... --dir out`
+- Use an existing file of lines (skip Spotify):
+  - `script/run --tracklist path/to/tracklist.txt --dir out`
 
-Example (single track):
+CLI Details
 
-./script/run https://open.spotify.com/track/... --dir out --dry
+- `script/run`: top-level wrapper that:
+  - Scrapes Spotify into lines via `script/spotify-list` unless `--tracklist` is provided.
+  - Calls `run-lucky` (ts-node entry) to run qobuz-dl with validation and logging.
+  - Optional placeholder `--convert` exists for additional conversion, but the organiser already converts to AIFF.
+
+- `run-lucky` (bin) / `script/run-lucky` (ts-node shim):
+  - Usage: `run-lucky <tracklist.txt> --dir <out> [--dry] [--quiet|--verbose] [--summary-only] [--json]`
+  - Writes logs for each query under `<out>/.qobuz-logs/` and summary counters to stdout.
+  - Detects “already downloaded” and skips duplicate fallback attempts.
+  - Validates downloaded files via tags; on mismatch it deletes the wrong files and logs details.
+
+- `script/spotify-list`:
+  - Usage: `script/spotify-list "https://open.spotify.com/{playlist|album|track}/..."`
+  - Prints one line per track: `Song Title - Artist 1, Artist 2`.
+  - Works for public pages; private content will not be accessible in headless mode.
 
 Options (summary)
 
-- --dir DIR: output directory for downloads (required for verifying files)
-- --quality Q: 5=320, 6=LOSSLESS, 7=24b=>96k, 27=>96k (default 6)
-- --dry: dry-run mode — commands will be printed but nothing downloaded
-- --tracklist FILE: skip Spotify scraping and use an existing "Song - Artist" file
+- `--dir DIR`: output directory for qobuz-dl downloads (required)
+- `--quality Q`: qobuz quality (5=320, 6=LOSSLESS, 7=24b≤96k, 27=>96k; default 6)
+- `--dry`: print commands without downloading
+- `--tracklist FILE`: use a pre-made "Song - Artist" file; skip Spotify scraping
+- `--quiet`/`--verbose`: control qobuz-dl output streaming
+- `--summary-only`: only print per-track summaries and final totals
+- `--json`: emit final summary as JSON
 
-Notes
+Output & Logs
 
-- The `run` script calls `node src/runLuckyForTracklist.js` (or the path set in env RUN_LUCKY_JS).
-- For tests, this project uses Jest (see package.json). Run `npm install` then `npm test`.
+- Organised AIFF files are placed under `ORGANISED_AIFF_DIR/Genre/Artist/Title.aiff`.
+- For each qobuz-dl run, a detailed log is written under `<dir>/.qobuz-logs/`.
+- When no match is found, the original line is appended to `<dir>/not-found.log`.
+- When a wrong match occurs, the downloaded files are removed and a `mismatch` is reported in summary.
+
+Troubleshooting
+
+- qobuz-dl not found: ensure it’s installed and in PATH.
+- Playwright fails to launch: run `npx playwright install chromium`.
+- Private playlists/tracks: headless scraping can’t access private content. Make the playlist public or extract a tracklist manually.
+- FFmpeg/ffprobe missing: install both and ensure they’re available in PATH.
+- Files not appearing in organised folder: check `ORGANISED_AIFF_DIR` and logs in `<dir>/.qobuz-logs`.
+
+Development
+
+- Type-check: `yarn typecheck`
+- Tests (Jest): `yarn test`
+- Lint: `yarn lint` (autofix: `yarn lint:fix`)
+- Format: `yarn format` / `yarn format:check`
+
+Repo Guide
+
+- `src/cli/runLucky.ts`: CLI entry for qobuz-dl flow
+- `src/lib/runLuckyForTracklist.ts`: core orchestration (queries, matching, validation, summary)
+- `src/cli/spotifyList.ts`: Spotify scraper (Playwright)
+- `src/lib/normalize.ts`, `src/lib/queryBuilders.ts`: query generation helpers
+- `src/qobuzRunner.ts`: qobuz-dl integration, tagging, AIFF conversion, organisation
+- `script/run`, `script/run-lucky`, `script/spotify-list`: small shims to run CLIs via ts-node
+
+More docs
+
+- See `docs/USAGE.md:1` for extended examples.
+- See `docs/ARCHITECTURE.md:1` for a deeper dive into flow and decisions.
+- See `docs/TROUBLESHOOTING.md:1` for common errors and fixes.
+- See `docs/DEVELOPMENT.md:1` for local setup tips and scripts.
+
+Legal
+
+Use responsibly and in accordance with Qobuz/Spotify terms. This tool automates search and download via your `qobuz-dl` configuration; ensure you have rights to obtain and use downloaded content.
