@@ -156,6 +156,7 @@ export type RunQobuzResult = {
     artistRaw: string;
     titleRaw: string;
   } | null;
+  already?: boolean;
 };
 
 export async function runQobuzLuckyStrict(
@@ -255,6 +256,12 @@ export async function runQobuzLuckyStrict(
       }
     }
     await pruneEmptyDirs(directory || '.');
+  }
+
+  // If the tool reported files were already downloaded, treat as success to avoid falling back to 320.
+  const alreadyDownloaded = res.code === 0 && addedAudio.length === 0;
+  if (alreadyDownloaded) {
+    return { ok: true, added: [], cmd, logPath: null, already: true, mismatch: null, ...res } as unknown as RunQobuzResult;
   }
 
   // Write full qobuz-dl output to a per-run log file so we always have the complete output available

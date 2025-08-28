@@ -65,6 +65,10 @@ export async function main() {
         for (const p of res6?.added || []) console.log(`    → ${p}`);
         matched = true;
         break;
+      } else if (res6?.already) {
+        console.log(`  ✓ already downloaded (lossless) via: ${q}`);
+        matched = true;
+        break;
       }
       if (res6?.mismatch) {
         const key6 = `${res6.mismatch.artistNorm}|${res6.mismatch.titleNorm}`;
