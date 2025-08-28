@@ -141,6 +141,12 @@ export type RunQobuzResult = {
   code: number;
   dry?: boolean;
   logPath?: string | null;
+  mismatch?: {
+    artistNorm: string;
+    titleNorm: string;
+    artistRaw: string;
+    titleRaw: string;
+  } | null;
 };
 
 export async function runQobuzLuckyStrict(
@@ -307,8 +313,37 @@ export async function runQobuzLuckyStrict(
           }
         }),
       );
+      // Best-effort: remove parent album folder(s) entirely
+      try {
+        const parents = Array.from(
+          new Set(
+            addedAudio
+              .map((p) => path.dirname(p))
+              .filter((d) => !directory || path.resolve(d) !== path.resolve(directory)),
+          ),
+        );
+        await Promise.all(
+          parents.map(async (d) => {
+            try {
+              await fs.rm(d, { recursive: true, force: true });
+            } catch (e) {
+              void e;
+            }
+          }),
+        );
+      } catch (e) {
+        void e;
+      }
       await pruneEmptyDirs(directory || '.');
-      return { ok: false, added: [], cmd, logPath, ...res } as unknown as RunQobuzResult;
+      const mismatch = firstMismatch
+        ? {
+            artistNorm: normaliseTag(firstMismatch.artist),
+            titleNorm: normaliseTag(firstMismatch.title),
+            artistRaw: firstMismatch.artist,
+            titleRaw: firstMismatch.title,
+          }
+        : null;
+      return { ok: false, added: [], cmd, logPath, mismatch, ...res } as unknown as RunQobuzResult;
     }
   }
 
@@ -330,7 +365,7 @@ export async function runQobuzLuckyStrict(
     }
   }
 
-  return { ok, added: addedAudio, cmd, logPath, ...res } as unknown as RunQobuzResult;
+  return { ok, added: addedAudio, cmd, logPath, mismatch: null, ...res } as unknown as RunQobuzResult;
 }
 
 // --- Helpers: convert downloaded audio to AIFF, read metadata, and move into organised folders

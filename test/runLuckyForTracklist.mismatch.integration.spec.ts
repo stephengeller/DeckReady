@@ -31,7 +31,13 @@ describe('runLuckyForTracklist integration: mismatch is deleted and logged', () 
           if (cmd === 'qobuz-dl') {
             const dIndex = args.indexOf('-d');
             const dir = dIndex >= 0 ? args[dIndex + 1] : tmp;
-            await fs.writeFile(path.join(dir, 'It’s a Beautiful World (When I’m on My Own).flac'), 'data');
+            const album = 'Rikas - Soundtrack For A Movie That Has Not Been Written Yet (2025) [16B-44.1kHz]';
+            const albumDir = path.join(dir, album);
+            await fs.mkdir(albumDir, { recursive: true });
+            await fs.writeFile(
+              path.join(albumDir, 'It’s a Beautiful World (When I’m on My Own).flac'),
+              'data',
+            );
             stdoutListeners.forEach((cb) => cb(Buffer.from('ok')));
             closeListeners.forEach((cb) => cb(0));
           } else if (cmd === 'ffprobe') {
@@ -70,9 +76,11 @@ describe('runLuckyForTracklist integration: mismatch is deleted and logged', () 
       process.argv = oldArgv;
     }
 
-    // wrong file should be deleted
-    const files = await fs.readdir(tmp);
-    expect(files.join('\n')).not.toMatch(/Beautiful World/);
+    // wrong album folder should be deleted
+    const album = 'Rikas - Soundtrack For A Movie That Has Not Been Written Yet (2025) [16B-44.1kHz]';
+    const albumDir = path.join(tmp, album);
+    const exists = await fs.stat(albumDir).then(() => true).catch(() => false);
+    expect(exists).toBe(false);
 
     // should log mismatch
     const mmLog = path.join(tmp, 'not-matched.log');
@@ -86,4 +94,3 @@ describe('runLuckyForTracklist integration: mismatch is deleted and logged', () 
     expect(nf).toMatch(/When I\'m On - Virus Syndicate/);
   });
 });
-

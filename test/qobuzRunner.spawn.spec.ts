@@ -132,11 +132,16 @@ describe('runQobuzLuckyStrict spawn integration (mocked spawn)', () => {
         if (cmd === 'qobuz-dl') {
           const dIndex = args.indexOf('-d');
           const dir = dIndex >= 0 ? args[dIndex + 1] : undefined;
-          if (dir) await fs.writeFile(path.join(dir, 'wrong-song.aiff'), 'audio');
+          if (dir) {
+            const album = 'Rikas - Soundtrack For A Movie That Has Not Been Written Yet (2025) [16B-44.1kHz]';
+            const albumDir = path.join(dir, album);
+            await fs.mkdir(albumDir, { recursive: true });
+            await fs.writeFile(path.join(albumDir, "It’s a Beautiful World (When I’m on My Own).aiff"), 'audio');
+          }
           for (const cb of stdoutListeners) cb(Buffer.from('ok'));
           for (const cb of closeListeners) cb(0);
         } else if (cmd === 'ffprobe') {
-          const out = 'TAG:artist=Other Artist\nTAG:title=Other Song\n';
+          const out = 'TAG:artist=Rikas\nTAG:title=It’s a Beautiful World (When I’m on My Own)\n';
           for (const cb of stdoutListeners) cb(Buffer.from(out));
           for (const cb of closeListeners) cb(0);
         } else {
@@ -154,14 +159,17 @@ describe('runQobuzLuckyStrict spawn integration (mocked spawn)', () => {
     const res = await runQobuzLuckyStrict('query', {
       directory: tmp,
       dryRun: false,
-      artist: 'Right Artist',
-      title: 'Right Song',
+      artist: 'Virus Syndicate',
+      title: "When I'm On",
     });
 
     expect(res.ok).toBe(false);
     expect(res.added.length).toBe(0);
-    const files = await fs.readdir(tmp);
-    expect(files).not.toContain('wrong-song.aiff');
+    // album folder should be gone
+    const album = 'Rikas - Soundtrack For A Movie That Has Not Been Written Yet (2025) [16B-44.1kHz]';
+    const albumDir = path.join(tmp, album);
+    const exists = await fs.stat(albumDir).then(() => true).catch(() => false);
+    expect(exists).toBe(false);
     expect(spawnMock).not.toHaveBeenCalledWith('ffmpeg', expect.anything(), expect.anything());
   });
 
@@ -190,11 +198,16 @@ describe('runQobuzLuckyStrict spawn integration (mocked spawn)', () => {
         if (cmd === 'qobuz-dl') {
           const dIndex = args.indexOf('-d');
           const dir = dIndex >= 0 ? args[dIndex + 1] : undefined;
-          if (dir) await fs.writeFile(path.join(dir, 'wrong-song.aiff'), 'audio');
+          if (dir) {
+            const album = 'Rikas - Soundtrack For A Movie That Has Not Been Written Yet (2025) [16B-44.1kHz]';
+            const albumDir = path.join(dir, album);
+            await fs.mkdir(albumDir, { recursive: true });
+            await fs.writeFile(path.join(albumDir, "It’s a Beautiful World (When I’m on My Own).aiff"), 'audio');
+          }
           for (const cb of stdoutListeners) cb(Buffer.from('ok'));
           for (const cb of closeListeners) cb(0);
         } else if (cmd === 'ffprobe') {
-          const out = 'TAG:artist=Other Artist\nTAG:title=Other Song\n';
+          const out = 'TAG:artist=Rikas\nTAG:title=It’s a Beautiful World (When I’m on My Own)\n';
           for (const cb of stdoutListeners) cb(Buffer.from(out));
           for (const cb of closeListeners) cb(0);
         } else {
@@ -209,21 +222,21 @@ describe('runQobuzLuckyStrict spawn integration (mocked spawn)', () => {
 
     const { runQobuzLuckyStrict } = require('../src/qobuzRunner.ts');
 
-    const query = 'Right Artist - Right Song';
+    const query = "Virus Syndicate - When I'm On";
     const res = await runQobuzLuckyStrict(query, {
       directory: tmp,
       dryRun: false,
-      artist: 'Right Artist',
-      title: 'Right Song',
+      artist: 'Virus Syndicate',
+      title: "When I'm On",
     });
 
     expect(res.ok).toBe(false);
     const logPath = path.join(tmp, 'not-matched.log');
     const log = await fs.readFile(logPath, 'utf8');
-    expect(log).toMatch(/Right Artist/);
-    expect(log).toMatch(/Right Song/);
-    expect(log).toMatch(/Other Artist/);
-    expect(log).toMatch(/Other Song/);
+    expect(log).toMatch(/Virus Syndicate/);
+    expect(log).toMatch(/When I\'m On/);
+    expect(log).toMatch(/Rikas/);
+    expect(log).toMatch(/It’s a Beautiful World/);
   });
 
   test('does not create not-matched.log when tags match', async () => {
