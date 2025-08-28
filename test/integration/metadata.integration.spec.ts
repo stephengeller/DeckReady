@@ -120,3 +120,4 @@ describe('audio metadata integration', () => {
     expect(files).not.toContain('track.flac');
   });
 });
+export {};

@@ -69,3 +69,4 @@ describe('short-circuit when AIFF already organised', () => {
     expect(logs.join('\n')).toMatch(/already organised/);
   });
 });
+export {};

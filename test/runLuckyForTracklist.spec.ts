@@ -64,3 +64,4 @@ describe('runLuckyForTracklist dry-run workflow', () => {
     expect(runQobuzLuckyStrict).toHaveBeenCalled();
   });
 });
+export {};
