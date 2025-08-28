@@ -5,7 +5,7 @@ const path = require('node:path');
 jest.setTimeout(15000);
 
 describe('runLuckyForTracklist main workflow (various match outcomes)', () => {
-  let tmp;
+  let tmp: string;
   beforeEach(async () => {
     tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'rl-'));
   });
@@ -38,7 +38,7 @@ describe('runLuckyForTracklist main workflow (various match outcomes)', () => {
 
     // Mock qobuzRunner before importing the script
     jest.doMock('../src/qobuzRunner.ts', () => ({
-      runQobuzLuckyStrict: jest.fn(async (q, opts) => {
+      runQobuzLuckyStrict: jest.fn(async (q: string, opts: any) => {
         if (opts.quality === 6)
           return { ok: true, added: [path.join(opts.directory || '', 'a.flac')], cmd: 'cmd' };
         return { ok: false, stdout: '', stderr: '', code: 1, cmd: 'cmd' };
@@ -48,10 +48,10 @@ describe('runLuckyForTracklist main workflow (various match outcomes)', () => {
     const { runQobuzLuckyStrict } = require('../src/qobuzRunner.ts');
     const runScript = require('../src/runLuckyForTracklist.ts').default;
 
-    const logs = [];
+    const logs: string[] = [];
     const logSpy = jest
       .spyOn(console, 'log')
-      .mockImplementation((...args) => logs.push(args.join(' ')));
+      .mockImplementation((...args: any[]) => logs.push(args.join(' ')));
 
     const oldArgv = process.argv;
     process.argv = ['node', 'src/runLuckyForTracklist.ts', tl, '--dir', tmp];
@@ -68,7 +68,7 @@ describe('runLuckyForTracklist main workflow (various match outcomes)', () => {
     expect(out).toMatch(/a\.flac/);
     expect(runQobuzLuckyStrict).toHaveBeenCalled();
     // ensure at least one call used quality 6
-    expect(runQobuzLuckyStrict.mock.calls.some((c) => c[1] && c[1].quality === 6)).toBe(true);
+    expect(runQobuzLuckyStrict.mock.calls.some((c: any[]) => c[1] && c[1].quality === 6)).toBe(true);
   });
 
   test('falls back to 320 (quality=5) when lossless fails', async () => {
@@ -76,7 +76,7 @@ describe('runLuckyForTracklist main workflow (various match outcomes)', () => {
     await fs.writeFile(tl, 'Fallback Track - Artist\n');
 
     jest.doMock('../src/qobuzRunner.ts', () => ({
-      runQobuzLuckyStrict: jest.fn(async (q, opts) => {
+      runQobuzLuckyStrict: jest.fn(async (q: string, opts: any) => {
         // fail for quality 6
         if (opts.quality === 6) return { ok: false, stdout: '', stderr: 'no', code: 1, cmd: 'cmd' };
         if (opts.quality === 5)
@@ -88,10 +88,10 @@ describe('runLuckyForTracklist main workflow (various match outcomes)', () => {
     const { runQobuzLuckyStrict } = require('../src/qobuzRunner.ts');
     const runScript = require('../src/runLuckyForTracklist.ts').default;
 
-    const logs = [];
+    const logs: string[] = [];
     const logSpy = jest
       .spyOn(console, 'log')
-      .mockImplementation((...args) => logs.push(args.join(' ')));
+      .mockImplementation((...args: any[]) => logs.push(args.join(' ')));
 
     const oldArgv = process.argv;
     process.argv = ['node', 'src/runLuckyForTracklist.ts', tl, '--dir', tmp];
@@ -107,7 +107,7 @@ describe('runLuckyForTracklist main workflow (various match outcomes)', () => {
     expect(out).toMatch(/matched \(320\)/i);
     expect(out).toMatch(/b\.mp3/);
     // ensure we called with quality 6 then 5
-    const qualities = runQobuzLuckyStrict.mock.calls.map((c) => c[1] && c[1].quality);
+    const qualities = runQobuzLuckyStrict.mock.calls.map((c: any[]) => c[1] && c[1].quality);
     expect(qualities).toContain(6);
     expect(qualities).toContain(5);
   });
@@ -117,7 +117,7 @@ describe('runLuckyForTracklist main workflow (various match outcomes)', () => {
     await fs.writeFile(tl, 'NoMatch Track - Artist\n');
 
     jest.doMock('../src/qobuzRunner.ts', () => ({
-      runQobuzLuckyStrict: jest.fn(async (q, opts) => ({
+      runQobuzLuckyStrict: jest.fn(async () => ({
         ok: false,
         stdout: '',
         stderr: 'no',
@@ -129,10 +129,10 @@ describe('runLuckyForTracklist main workflow (various match outcomes)', () => {
     const { runQobuzLuckyStrict } = require('../src/qobuzRunner.ts');
     const runScript = require('../src/runLuckyForTracklist.ts').default;
 
-    const logs = [];
+    const logs: string[] = [];
     const logSpy = jest
       .spyOn(console, 'log')
-      .mockImplementation((...args) => logs.push(args.join(' ')));
+      .mockImplementation((...args: any[]) => logs.push(args.join(' ')));
 
     const oldArgv = process.argv;
     process.argv = ['node', 'src/runLuckyForTracklist.ts', tl, '--dir', tmp];
@@ -149,3 +149,4 @@ describe('runLuckyForTracklist main workflow (various match outcomes)', () => {
     expect(runQobuzLuckyStrict).toHaveBeenCalled();
   });
 });
+

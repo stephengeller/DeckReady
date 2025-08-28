@@ -72,7 +72,12 @@ async function pruneEmptyDirs(root: string) {
   }
 }
 
-async function readTags(inputPath: string): Promise<Record<string, string>> {
+type Runner = (
+  cmd: string,
+  args: string[],
+) => Promise<{ code: number; stdout: string; stderr: string }>;
+
+async function readTags(inputPath: string, runner?: Runner): Promise<Record<string, string>> {
   const probeArgs = [
     '-v',
     'quiet',
@@ -82,7 +87,9 @@ async function readTags(inputPath: string): Promise<Record<string, string>> {
     'default=noprint_wrappers=1:nokey=0',
     inputPath,
   ];
-  const probe = await spawnStreaming('ffprobe', probeArgs, { quiet: true });
+  const probe = runner
+    ? await runner('ffprobe', probeArgs)
+    : await spawnStreaming('ffprobe', probeArgs, { quiet: true });
   const tags: Record<string, string> = {};
   for (const line of probe.stdout.split(/\r?\n/)) {
     if (!line) continue;
@@ -304,8 +311,8 @@ export async function runQobuzLuckyStrict(
 }
 
 // --- Helpers: convert downloaded audio to AIFF, read metadata, and move into organised folders
-async function processDownloadedAudio(inputPath: string) {
-  const ORG_BASE = ORGANISED_AIFF_DIR;
+export async function processDownloadedAudio(inputPath: string, runner?: Runner) {
+  const ORG_BASE = process.env.ORGANISED_AIFF_DIR || ORGANISED_AIFF_DIR;
   try {
     if (!inputPath) return;
     // Ensure file exists
@@ -319,13 +326,13 @@ async function processDownloadedAudio(inputPath: string) {
 
     // Probe the original file for tags first (avoid relying on conversion to keep tags).
     // Ask ffprobe for both format and stream tags because different files store tags in different places.
-    const tags = await readTags(inputPath);
+    const tags = await readTags(inputPath, runner);
 
     const genreRaw = tags['genre'] || 'Unknown Genre';
     const artistRaw = tags['artist'] || tags['album_artist'] || 'Unknown Artist';
     const titleRaw = tags['title'] || path.basename(inputPath).replace(/\.[^.]+$/, '');
 
-    const genre = sanitizeName(genreRaw);
+    const genre = sanitizeName(pickGenre(genreRaw));
     const artist = sanitizeName(artistRaw);
     const title = sanitizeName(titleRaw);
 
@@ -421,7 +428,9 @@ async function processDownloadedAudio(inputPath: string) {
       converted,
     ];
 
-    const ff = await spawnStreaming('ffmpeg', convArgs, { quiet: true });
+    const ff = runner
+      ? await runner('ffmpeg', convArgs)
+      : await spawnStreaming('ffmpeg', convArgs, { quiet: true });
     if (ff.code !== 0) {
       try {
         await fs.rm(converted, { force: true });
@@ -437,19 +446,18 @@ async function processDownloadedAudio(inputPath: string) {
 
     // Verify tags made it into the AIFF. If key tags are missing, inject metadata explicitly using ffmpeg (copy).
     try {
-      const check = await spawnStreaming(
-        'ffprobe',
-        [
-          '-v',
-          'quiet',
-          '-show_entries',
-          'format_tags',
-          '-of',
-          'default=noprint_wrappers=1:nokey=0',
-          destPath,
-        ],
-        { quiet: true },
-      );
+      const checkArgs = [
+        '-v',
+        'quiet',
+        '-show_entries',
+        'format_tags',
+        '-of',
+        'default=noprint_wrappers=1:nokey=0',
+        destPath,
+      ];
+      const check = runner
+        ? await runner('ffprobe', checkArgs)
+        : await spawnStreaming('ffprobe', checkArgs, { quiet: true });
       const found: Record<string, string> = {};
       for (const line of check.stdout.split(/\r?\n/)) {
         if (!line) continue;
@@ -477,7 +485,9 @@ async function processDownloadedAudio(inputPath: string) {
 
         const outTmp = destPath + '.meta.aiff';
         const injectArgs = ['-y', '-i', destPath, ...metaArgs, '-c', 'copy', outTmp];
-        const inj = await spawnStreaming('ffmpeg', injectArgs, { quiet: true });
+        const inj = runner
+          ? await runner('ffmpeg', injectArgs)
+          : await spawnStreaming('ffmpeg', injectArgs, { quiet: true });
         if (inj.code === 0) {
           await fs.rename(outTmp, destPath);
           console.log(`Metadata injected into AIFF: ${destPath}`);
@@ -498,6 +508,30 @@ async function processDownloadedAudio(inputPath: string) {
   } catch (err) {
     console.error('Error organising downloaded audio:', inputPath, err);
   }
+}
+
+// Prefer specific sub-genres when multiple are present in a comma-separated list.
+// For example: "Électronique, Drum & Bass" -> "Drum & Bass".
+function pickGenre(raw: string): string {
+  if (!raw) return 'Unknown';
+  const parts = raw
+    .split(/[,;|/]+/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  const norm = (s: string) => normaliseForSearch(s).toLowerCase();
+
+  // If any part is Drum & Bass (in any case), prefer that exact spelling
+  const dnb = parts.find((p) => norm(p).includes('drum & bass'));
+  if (dnb) return 'Drum & Bass';
+
+  // Otherwise, if first is something generic like Electronique and next exists, take next
+  if (parts.length > 1) {
+    const first = norm(parts[0]);
+    if (first === 'electronique' || first === 'electronic') return parts[1];
+  }
+
+  return parts[0] || 'Unknown';
 }
 
 function sanitizeName(s: string) {

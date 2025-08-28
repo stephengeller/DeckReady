@@ -3,9 +3,9 @@ const os = require('node:os');
 const path = require('node:path');
 
 describe('qobuzRunner filesystem helpers', () => {
-  let tmp;
-  let walkFiles;
-  let runQobuzLuckyStrict;
+  let tmp: string;
+  let walkFiles: (dir: string) => Promise<string[]>;
+  let runQobuzLuckyStrict: any;
 
   beforeEach(async () => {
     jest.resetModules();
@@ -42,3 +42,4 @@ describe('qobuzRunner filesystem helpers', () => {
     expect(res.cmd).toMatch(/qobuz-dl/);
   });
 });
+
