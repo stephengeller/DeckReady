@@ -118,7 +118,11 @@ function normaliseTitleBase(s: string | undefined): string {
   return normaliseTag(stripped);
 }
 
-function spawnStreaming(cmd: string, args: string[], { quiet = false } = {}) {
+function spawnStreaming(
+  cmd: string,
+  args: string[],
+  { quiet = false, onStdout }: { quiet?: boolean; onStdout?: (chunk: string) => void } = {},
+) {
   return new Promise<{ code: number; stdout: string; stderr: string }>((resolve) => {
     const child = spawn(cmd, args, { stdio: ['ignore', 'pipe', 'pipe'] });
     let stdout = '',
@@ -126,7 +130,8 @@ function spawnStreaming(cmd: string, args: string[], { quiet = false } = {}) {
     child.stdout.on('data', (d) => {
       const s = d.toString();
       stdout += s;
-      if (!quiet) process.stdout.write(s);
+      if (onStdout) onStdout(s);
+      else if (!quiet) process.stdout.write(s);
     });
     child.stderr.on('data', (d) => {
       const s = d.toString();
@@ -170,6 +175,8 @@ export async function runQobuzLuckyStrict(
     quiet = false, // noisy by default; set true to silence
     artist,
     title,
+    progress = false,
+    onProgress,
   }: {
     directory?: string;
     quality?: number;
@@ -179,6 +186,8 @@ export async function runQobuzLuckyStrict(
     quiet?: boolean;
     artist?: string;
     title?: string;
+    progress?: boolean;
+    onProgress?: (info: { raw: string; percent?: number; bytes?: number; total?: number }) => void;
   } = {},
 ): Promise<RunQobuzResult> {
   const args = [
@@ -223,7 +232,23 @@ export async function runQobuzLuckyStrict(
 
   // Take a filesystem snapshot before running
   const before = await snapshot(directory || '.');
-  const res = await spawnStreaming('qobuz-dl', args, { quiet });
+  // Optional progress parser
+  let bytes = 0;
+  let total = 0;
+  const onStdout = progress
+    ? (chunk: string) => {
+        const m = chunk.match(/(\d+(?:\.\d+)?)([kM])\/(\d+(?:\.\d+)?)([kM])/);
+        if (m) {
+          const v = (n: string, u: string) => Number(n) * (u === 'M' ? 1_000_000 : 1_000);
+          bytes = v(m[1], m[2]);
+          total = v(m[3], m[4]);
+          const percent = total > 0 ? Math.max(0, Math.min(100, Math.round((bytes / total) * 100))) : undefined;
+          if (onProgress) onProgress({ raw: chunk, percent, bytes, total });
+        }
+      }
+    : undefined;
+
+  const res = await spawnStreaming('qobuz-dl', args, { quiet, onStdout });
   const after = await snapshot(directory || '.');
 
   const addedAudio = diffNewAudio(before.files, after.files);
@@ -410,7 +435,7 @@ export async function runQobuzLuckyStrict(
         // If you prefer to fail the whole command when organising fails, remove the try/catch.
         // Here we keep best-effort behaviour but synchronously.
         // eslint-disable-next-line no-await-in-loop
-        await processDownloadedAudio(f);
+        await processDownloadedAudio(f, undefined, { quiet });
       } catch (e) {
         console.error('processDownloadedAudio failed for', f, e);
       }
@@ -421,7 +446,11 @@ export async function runQobuzLuckyStrict(
 }
 
 // --- Helpers: convert downloaded audio to AIFF, read metadata, and move into organised folders
-export async function processDownloadedAudio(inputPath: string, runner?: Runner) {
+export async function processDownloadedAudio(
+  inputPath: string,
+  runner?: Runner,
+  opts?: { quiet?: boolean; verbose?: boolean },
+) {
   const ORG_BASE = process.env.ORGANISED_AIFF_DIR || ORGANISED_AIFF_DIR;
   try {
     if (!inputPath) return;
@@ -473,7 +502,7 @@ export async function processDownloadedAudio(inputPath: string, runner?: Runner)
     if (isAIFF) {
       // already AIFF, just move
       await fs.rename(inputPath, destPath);
-      console.log(`Organised (moved AIFF): ${inputPath} -> ${destPath}`);
+      if (!opts?.quiet) console.log(`Organised (moved AIFF): ${inputPath} -> ${destPath}`);
       return;
     }
 
@@ -588,7 +617,7 @@ export async function processDownloadedAudio(inputPath: string, runner?: Runner)
           : await spawnStreaming('ffmpeg', injectArgs, { quiet: true });
         if (inj.code === 0) {
           await fs.rename(outTmp, destPath);
-          console.log(`Metadata injected into AIFF: ${destPath}`);
+          if (!opts?.quiet) console.log(`Metadata injected into AIFF: ${destPath}`);
         } else {
           try {
             await fs.rm(outTmp, { force: true });
@@ -602,7 +631,7 @@ export async function processDownloadedAudio(inputPath: string, runner?: Runner)
       void e;
     }
 
-    console.log(`Organised (converted -> AIFF): ${inputPath} -> ${destPath}`);
+    if (!opts?.quiet) console.log(`Organised (converted -> AIFF): ${inputPath} -> ${destPath}`);
   } catch (err) {
     console.error('Error organising downloaded audio:', inputPath, err);
   }
