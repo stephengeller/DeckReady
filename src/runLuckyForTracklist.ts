@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import readline from 'node:readline';
 import { parseCliArgs } from './parseCliArgs';
+import { setColorEnabled, green, yellow, red, magenta, cyan, isTTY, dim } from './tty';
 // Load environment variables from .env
 import { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET } from './env';
 void SPOTIFY_CLIENT_ID;
@@ -28,7 +29,9 @@ function validLine(line: string) {
 }
 
 export async function main() {
-  const { file, dir, dry, quiet: quietArg, verbose } = parseCliArgs(process.argv);
+  const { file, dir, dry, quiet: quietArg, verbose, progress, noColor, summaryOnly, json } =
+    parseCliArgs(process.argv);
+  if (noColor) setColorEnabled(false);
   const quiet = quietArg && !verbose; // verbose overrides quiet
   if (!dir) throw new Error('--dir is required so we can verify files were actually written');
 
@@ -44,7 +47,7 @@ export async function main() {
     const base = makeBaseParts(line);
     const candidates = buildQueries(base);
 
-    console.log(`>>> ${line}`);
+    if (!summaryOnly) console.log(cyan(`>>> ${line}`));
 
     // try each candidate; per-candidate: q=6, then q=5
     let matched = false;
@@ -52,6 +55,19 @@ export async function main() {
 
     for (const q of candidates) {
       // Lossless
+      // Simple TTY progress line
+      let progressLine = '';
+      const showProgress = progress && isTTY() && !verbose && !summaryOnly;
+      const updateProgress = (p?: number) => {
+        if (!showProgress) return;
+        const pct = typeof p === 'number' ? `${p}%` : '';
+        const txt = dim(`  ⬇︎ ${pct}`);
+        if (txt !== progressLine) {
+          progressLine = txt;
+          process.stdout.write(`\r${progressLine}`);
+        }
+      };
+
       const res6 = await runQobuzLuckyStrict(q, {
         directory: dir,
         quality: 6,
@@ -59,7 +75,10 @@ export async function main() {
         quiet,
         artist: base.primArtist,
         title: base.title,
+        progress: showProgress,
+        onProgress: (info) => updateProgress(info.percent),
       });
+      if (showProgress) process.stdout.write('\r\x1b[2K'); // clear progress line
       if (dry) {
         console.log(`  [dry-run] ${res6?.cmd || ''}`);
         console.log(`  ✓ would try lossless first for: ${q}`);
@@ -67,13 +86,14 @@ export async function main() {
         break; // in dry-run we stop at first planned candidate
       }
       if (res6?.ok) {
-        console.log(`  ✓ matched (lossless) via: ${q}`);
-        for (const p of res6?.added || []) console.log(`    → ${p}`);
+        if (!summaryOnly) console.log(`  ${green('✓')} matched (lossless) via: ${q}`);
+        if (!summaryOnly)
+          for (const p of res6?.added || []) console.log(`    ${dim('→')} ${p}`);
         matched = true;
         matchedCount += 1;
         break;
       } else if (res6?.already) {
-        console.log(`  ✓ already downloaded (lossless) via: ${q}`);
+        if (!summaryOnly) console.log(`  ${yellow('↺')} already downloaded (lossless) via: ${q}`);
         matched = true;
         alreadyCount += 1;
         break;
@@ -82,7 +102,8 @@ export async function main() {
         const key6 = `${res6.mismatch.artistNorm}|${res6.mismatch.titleNorm}`;
         seenMismatches.add(key6);
         // Stop trying further candidates for this track after the first wrong match
-        console.log('  · wrong match (lossless); stopping search for this track.');
+        if (!summaryOnly)
+          console.log(`  ${magenta('·')} wrong match (lossless); stopping search for this track.`);
         mismatchCount += 1;
         break;
       }
@@ -97,8 +118,9 @@ export async function main() {
         title: base.title,
       });
       if (res5?.ok) {
-        console.log(`  ✓ matched (320) via: ${q}`);
-        for (const p of res5?.added || []) console.log(`    → ${p}`);
+        if (!summaryOnly) console.log(`  ${green('✓')} matched (320) via: ${q}`);
+        if (!summaryOnly)
+          for (const p of res5?.added || []) console.log(`    ${dim('→')} ${p}`);
         matched = true;
         matchedCount += 1;
         break;
@@ -112,39 +134,49 @@ export async function main() {
           }
           seenMismatches.add(key5);
         }
-        if (verbose) {
+        if (verbose && !summaryOnly) {
           // brief tail for debugging (verbose only)
           const tail = (res5?.stderr || res5?.stdout || '').split('\n').slice(-4).join('\n');
-          console.log(
-            `  · candidate failed: ${q}\n${tail ? '    └─ tail:\n' + indent(tail, 6) : ''}`,
-          );
+          console.log(`  ${magenta('·')} candidate failed: ${q}`);
+          if (tail) console.log('    └─ tail:\n' + indent(tail, 6));
         }
       }
     }
 
     if (!matched) {
       if (!dry) {
-        console.log('  ✗ no candidate matched.');
+        if (!summaryOnly) console.log(`  ${red('✗')} no candidate matched.`);
         const nf = path.join(dir, 'not-found.log');
         fs.appendFileSync(nf, `${line}\n`);
-        console.log(`  ↪ appended to ${nf}`);
+        if (!summaryOnly) console.log(`  ${dim('↪')} appended to ${nf}`);
         notFoundCount += 1;
       } else {
-        console.log('  ✗ no candidate matched (dry-run).');
+        if (!summaryOnly) console.log(`  ${red('✗')} no candidate matched (dry-run).`);
       }
     }
   }
 
   // Print final summary (quiet-friendly)
-  console.log('');
-  console.log('Summary:');
-  console.log(`  ✓ matched: ${matchedCount}`);
-  console.log(`  ↺ already: ${alreadyCount}`);
-  console.log(`  ✗ mismatched: ${mismatchCount}`);
-  console.log(`  Ø not found: ${notFoundCount}`);
-  console.log('  Logs:');
-  console.log('    not-matched: <dir>/not-matched.log');
-  console.log('    not-found:   <dir>/not-found.log');
+  if (json) {
+    const summary = {
+      matched: matchedCount,
+      already: alreadyCount,
+      mismatched: mismatchCount,
+      notFound: notFoundCount,
+      logs: { notMatched: '<dir>/not-matched.log', notFound: '<dir>/not-found.log' },
+    };
+    console.log(JSON.stringify(summary));
+  } else {
+    console.log('');
+    console.log('Summary:');
+    console.log(`  ${green('✓')} matched: ${matchedCount}`);
+    console.log(`  ${yellow('↺')} already: ${alreadyCount}`);
+    console.log(`  ${red('✗')} mismatched: ${mismatchCount}`);
+    console.log(`  Ø not found: ${notFoundCount}`);
+    console.log('  Logs:');
+    console.log('    not-matched: <dir>/not-matched.log');
+    console.log('    not-found:   <dir>/not-found.log');
+  }
 }
 
 function indent(s: string | undefined | null, n = 2) {
