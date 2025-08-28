@@ -28,4 +28,3 @@ export const SPOTIFY_CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET ?? '';
 export const ORGANISED_AIFF_DIR =
   process.env.ORGANISED_AIFF_DIR ??
   path.join(process.env.HOME || '', 'Music', 'rekordbox', 'Organised_AIFF');
-

@@ -29,4 +29,3 @@ export function createSpinner(enabled: boolean, intervalMs = 80): Spinner {
 
   return { start, stop };
 }
-

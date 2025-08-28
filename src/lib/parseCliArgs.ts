@@ -38,4 +38,3 @@ export function parseCliArgs(argv: string[]): {
   }
   return out;
 }
-
