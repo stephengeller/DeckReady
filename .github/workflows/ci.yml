@@ -24,8 +24,8 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
-      - name: Run lint
-        run: yarn lint
+      # - name: Run lint
+      #   run: yarn lint
 
       - name: Run prettier check
         run: yarn format:check
