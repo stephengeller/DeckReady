@@ -149,6 +149,8 @@ export async function main() {
         artist: base.primArtist,
         title: base.title,
       });
+      // Ensure we always stop the spinner for the 320 fallback as well
+      stopSpinner();
       if (res5?.ok) {
         if (!summaryOnly) console.log(`  ${green('✓')} matched (320) via: ${q}`);
         if (!summaryOnly) for (const p of res5?.added || []) console.log(`    ${dim('→')} ${p}`);
