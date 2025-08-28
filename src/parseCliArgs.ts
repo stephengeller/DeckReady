@@ -3,13 +3,25 @@ export function parseCliArgs(argv: string[]): {
   dir: string | null;
   dry: boolean;
   quiet: boolean;
+  verbose: boolean;
 } {
-  const out = { file: null as string | null, dir: null as string | null, dry: false, quiet: false };
+  // Default to quiet output; enable verbose for full qobuz-dl streams
+  const out = {
+    file: null as string | null,
+    dir: null as string | null,
+    dry: false,
+    quiet: true,
+    verbose: false,
+  };
   for (let i = 2; i < argv.length; i++) {
     const a = argv[i];
     if (!a) continue;
     if (a === '--dry') out.dry = true;
     else if (a === '--quiet') out.quiet = true;
+    else if (a === '--verbose') {
+      out.verbose = true;
+      out.quiet = false;
+    }
     else if (a === '--dir') out.dir = argv[++i] || null;
     else if (!a.startsWith('--') && !out.file) out.file = a;
   }
