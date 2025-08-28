@@ -1,12 +1,17 @@
 {
   "name": "spotify-to-rekordbox",
   "version": "0.1.0",
+  "private": true,
+  "license": "UNLICENSED",
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "start": "ts-node src/runLuckyForTracklist.ts",
+    "start": "ts-node src/cli/runLucky.ts",
     "test": "jest --runInBand --reporters=default",
-    "lint": "eslint --config .eslintrc.cjs --ext .ts src",
-    "format:check": "prettier --check ."
+    "lint": "eslint --config .eslintrc.cjs --ext .ts src test",
+    "lint:fix": "eslint --config .eslintrc.cjs --ext .ts src test --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "husky:init": "husky"
   },
   "bin": {
     "run-lucky": "script/run-lucky"
@@ -20,6 +25,8 @@
     "@types/node": "18",
     "@typescript-eslint/eslint-plugin": "^8.40.0",
     "@typescript-eslint/parser": "^8.40.0",
+    "husky": "^9.1.6",
+    "lint-staged": "^15.2.10",
     "eslint": "^8.45.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-import-resolver-typescript": "^4.4.4",
@@ -30,5 +37,14 @@
     "ts-jest": "^29.1.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.2"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "eslint --config .eslintrc.cjs --fix",
+      "prettier --write"
+    ],
+    "*.{md,json,yml,yaml}": [
+      "prettier --write"
+    ]
   }
 }

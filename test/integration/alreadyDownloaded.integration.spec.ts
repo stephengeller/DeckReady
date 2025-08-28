@@ -22,7 +22,7 @@ describe('runLuckyForTracklist: respects already-downloaded and skips fallback',
   test('quality 6 already-downloaded short-circuits; quality 5 not attempted', async () => {
     let qobuzCalls = 0;
     jest.doMock('node:child_process', () => ({
-      spawn: (cmd, args) => {
+      spawn: (cmd, _args) => {
         const stdoutListeners = [];
         const closeListeners = [];
         const child = {
