@@ -43,4 +43,3 @@ export function buildQueries({
   // de-dupe, preserve order
   return Array.from(new Set(queries.filter(Boolean)));
 }
-

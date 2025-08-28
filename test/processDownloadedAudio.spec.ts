@@ -21,7 +21,7 @@ describe('processDownloadedAudio (unit, mocked ffmpeg/ffprobe)', () => {
     // best-effort cleanup
     try {
       await fs.rm(tmp.dir, { recursive: true, force: true });
-    } catch (e) {
+    } catch (_e) {
       // ignore
     }
   });

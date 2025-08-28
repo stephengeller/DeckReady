@@ -209,4 +209,3 @@ function indent(s: string | undefined | null, n = 2) {
 }
 
 export default main;
-

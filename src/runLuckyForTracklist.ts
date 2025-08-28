@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Backwards-compat entry that forwards to the new lib + CLI
-import main from './lib/runLuckyForTracklist';
-export default main;
+import runLuckyMain from './lib/runLuckyForTracklist';
+export default runLuckyMain;
 
 if (
   typeof process !== 'undefined' &&
@@ -9,7 +9,7 @@ if (
   process.argv[1] &&
   process.argv[1].endsWith('runLuckyForTracklist.ts')
 ) {
-  main().catch((e) => {
+  runLuckyMain().catch((e) => {
     console.error(e?.message || String(e));
     process.exit(1);
   });

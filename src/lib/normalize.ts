@@ -73,4 +73,3 @@ export function makeBaseParts(line: string): {
   const primArtist = (primaryArtist(artists) || '').toString();
   return { title, artists, primArtist };
 }
-
