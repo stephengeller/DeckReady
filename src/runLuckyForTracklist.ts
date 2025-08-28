@@ -69,6 +69,9 @@ export async function main() {
       if (res6?.mismatch) {
         const key6 = `${res6.mismatch.artistNorm}|${res6.mismatch.titleNorm}`;
         seenMismatches.add(key6);
+        // Stop trying further candidates for this track after the first wrong match
+        console.log('  · wrong match (lossless); stopping search for this track.');
+        break;
       }
 
       // 320 fallback

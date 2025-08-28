@@ -297,7 +297,8 @@ export async function runQobuzLuckyStrict(
         const foundStr = firstMismatch
           ? `${firstMismatch.artist} - ${firstMismatch.title}`.trim()
           : 'unknown';
-        const line = `[${new Date().toISOString()}] query="${query}" expected="${expectedStr}" found="${foundStr}" file="${firstMismatch?.file || ''}"\n`;
+        // Keep log concise: no timestamp and no file path (file was removed)
+        const line = `query="${query}" expected="${expectedStr}" found="${foundStr}"\n`;
         await fs.appendFile(logFile, line, 'utf8');
       } catch (e) {
         // best effort logging only
