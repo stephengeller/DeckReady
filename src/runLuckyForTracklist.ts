@@ -66,6 +66,7 @@ export async function main() {
 
     // try each candidate; per-candidate: q=6, then q=5
     let matched = false;
+    let hadMismatch = false;
     const seenMismatches = new Set<string>();
 
     for (const q of candidates) {
@@ -120,6 +121,7 @@ export async function main() {
         if (!summaryOnly)
           console.log(`  ${magenta('·')} wrong match (lossless); stopping search for this track.`);
         mismatchCount += 1;
+        hadMismatch = true;
         break;
       }
 
@@ -148,6 +150,7 @@ export async function main() {
             break;
           }
           seenMismatches.add(key5);
+          hadMismatch = true;
         }
         if (verbose && !summaryOnly) {
           // brief tail for debugging (verbose only)
@@ -161,10 +164,12 @@ export async function main() {
     if (!matched) {
       if (!dry) {
         if (!summaryOnly) console.log(`  ${red('✗')} no candidate matched.`);
-        const nf = path.join(dir, 'not-found.log');
-        fs.appendFileSync(nf, `${line}\n`);
-        if (!summaryOnly) console.log(`  ${dim('↪')} appended to ${nf}`);
-        notFoundCount += 1;
+        if (!hadMismatch) {
+          const nf = path.join(dir, 'not-found.log');
+          fs.appendFileSync(nf, `${line}\n`);
+          if (!summaryOnly) console.log(`  ${dim('↪')} appended to ${nf}`);
+          notFoundCount += 1;
+        }
       } else {
         if (!summaryOnly) console.log(`  ${red('✗')} no candidate matched (dry-run).`);
       }

@@ -8,11 +8,14 @@ describe('runLuckyForTracklist: respects already-downloaded and skips fallback',
   let tmp;
   beforeEach(async () => {
     tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'rl-already-'));
+    process.env.ORGANISED_AIFF_DIR = path.join(tmp, 'org');
+    await fs.mkdir(process.env.ORGANISED_AIFF_DIR, { recursive: true });
     jest.resetModules();
     jest.clearAllMocks();
   });
   afterEach(async () => {
     await fs.rm(tmp, { recursive: true, force: true });
+    delete process.env.ORGANISED_AIFF_DIR;
   });
 
   test('quality 6 already-downloaded short-circuits; quality 5 not attempted', async () => {
@@ -64,4 +67,3 @@ describe('runLuckyForTracklist: respects already-downloaded and skips fallback',
     expect(exists).toBe(false);
   });
 });
-
