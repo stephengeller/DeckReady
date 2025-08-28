@@ -45,7 +45,14 @@ export async function main() {
 
     for (const q of candidates) {
       // Lossless
-      const res6 = await runQobuzLuckyStrict(q, { directory: dir, quality: 6, dryRun: dry, quiet });
+      const res6 = await runQobuzLuckyStrict(q, {
+        directory: dir,
+        quality: 6,
+        dryRun: dry,
+        quiet,
+        artist: base.primArtist,
+        title: base.title,
+      });
       if (dry) {
         console.log(`  [dry-run] ${res6?.cmd || ''}`);
         console.log(`  ✓ would try lossless first for: ${q}`);
@@ -65,6 +72,8 @@ export async function main() {
         quality: 5,
         dryRun: false,
         quiet,
+        artist: base.primArtist,
+        title: base.title,
       });
       if (res5?.ok) {
         console.log(`  ✓ matched (320) via: ${q}`);

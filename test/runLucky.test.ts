@@ -1,4 +1,4 @@
-const { parseCliArgs } = require('../src/parseCliArgs.ts');
+import { parseCliArgs } from '../src/parseCliArgs';
 
 test('parseCliArgs basic', () => {
   const argv = ['node', 'script', 'http://spotify.com/abc', '--dir', 'out', '--dry'];
@@ -7,4 +7,3 @@ test('parseCliArgs basic', () => {
   expect(p.dir).toBe('out');
   expect(p.dry).toBe(true);
 });
-
