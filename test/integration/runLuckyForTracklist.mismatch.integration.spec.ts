@@ -1,3 +1,4 @@
+// integration: mismatch handling and logs
 const fs = require('node:fs/promises');
 const os = require('node:os');
 const path = require('node:path');
@@ -31,7 +32,8 @@ describe('runLuckyForTracklist integration: mismatch is deleted and logged', () 
           if (cmd === 'qobuz-dl') {
             const dIndex = args.indexOf('-d');
             const dir = dIndex >= 0 ? args[dIndex + 1] : tmp;
-            const album = 'Rikas - Soundtrack For A Movie That Has Not Been Written Yet (2025) [16B-44.1kHz]';
+            const album =
+              'Rikas - Soundtrack For A Movie That Has Not Been Written Yet (2025) [16B-44.1kHz]';
             const albumDir = path.join(dir, album);
             await fs.mkdir(albumDir, { recursive: true });
             await fs.writeFile(
@@ -62,10 +64,10 @@ describe('runLuckyForTracklist integration: mismatch is deleted and logged', () 
       },
     }));
 
-    const runScript = require('../src/runLuckyForTracklist.ts').default;
+    const runScript = require('../../src/runLuckyForTracklist.ts').default;
 
     const tl = path.join(tmp, 'tracks.txt');
-    await fs.writeFile(tl, 'When I\'m On - Virus Syndicate\n');
+    await fs.writeFile(tl, "When I'm On - Virus Syndicate\n");
 
     const oldArgv = process.argv;
     process.argv = ['node', 'src/runLuckyForTracklist.ts', tl, '--dir', tmp];
@@ -77,9 +79,13 @@ describe('runLuckyForTracklist integration: mismatch is deleted and logged', () 
     }
 
     // wrong album folder should be deleted
-    const album = 'Rikas - Soundtrack For A Movie That Has Not Been Written Yet (2025) [16B-44.1kHz]';
+    const album =
+      'Rikas - Soundtrack For A Movie That Has Not Been Written Yet (2025) [16B-44.1kHz]';
     const albumDir = path.join(tmp, album);
-    const exists = await fs.stat(albumDir).then(() => true).catch(() => false);
+    const exists = await fs
+      .stat(albumDir)
+      .then(() => true)
+      .catch(() => false);
     expect(exists).toBe(false);
 
     // should log mismatch
@@ -90,7 +96,10 @@ describe('runLuckyForTracklist integration: mismatch is deleted and logged', () 
 
     // With mismatch, we do not also write not-found.log to avoid duplicates
     const nfLog = path.join(tmp, 'not-found.log');
-    const nfExists = await fs.stat(nfLog).then(() => true).catch(() => false);
+    const nfExists = await fs
+      .stat(nfLog)
+      .then(() => true)
+      .catch(() => false);
     expect(nfExists).toBe(false);
   });
 });

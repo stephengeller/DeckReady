@@ -68,7 +68,9 @@ describe('runLuckyForTracklist main workflow (various match outcomes)', () => {
     expect(out).toMatch(/a\.flac/);
     expect(runQobuzLuckyStrict).toHaveBeenCalled();
     // ensure at least one call used quality 6
-    expect(runQobuzLuckyStrict.mock.calls.some((c: any[]) => c[1] && c[1].quality === 6)).toBe(true);
+    expect(runQobuzLuckyStrict.mock.calls.some((c: any[]) => c[1] && c[1].quality === 6)).toBe(
+      true,
+    );
   });
 
   test('falls back to 320 (quality=5) when lossless fails', async () => {
@@ -149,4 +151,3 @@ describe('runLuckyForTracklist main workflow (various match outcomes)', () => {
     expect(runQobuzLuckyStrict).toHaveBeenCalled();
   });
 });
-

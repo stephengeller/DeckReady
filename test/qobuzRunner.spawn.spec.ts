@@ -133,10 +133,14 @@ describe('runQobuzLuckyStrict spawn integration (mocked spawn)', () => {
           const dIndex = args.indexOf('-d');
           const dir = dIndex >= 0 ? args[dIndex + 1] : undefined;
           if (dir) {
-            const album = 'Rikas - Soundtrack For A Movie That Has Not Been Written Yet (2025) [16B-44.1kHz]';
+            const album =
+              'Rikas - Soundtrack For A Movie That Has Not Been Written Yet (2025) [16B-44.1kHz]';
             const albumDir = path.join(dir, album);
             await fs.mkdir(albumDir, { recursive: true });
-            await fs.writeFile(path.join(albumDir, "It’s a Beautiful World (When I’m on My Own).aiff"), 'audio');
+            await fs.writeFile(
+              path.join(albumDir, 'It’s a Beautiful World (When I’m on My Own).aiff'),
+              'audio',
+            );
           }
           for (const cb of stdoutListeners) cb(Buffer.from('ok'));
           for (const cb of closeListeners) cb(0);
@@ -166,9 +170,13 @@ describe('runQobuzLuckyStrict spawn integration (mocked spawn)', () => {
     expect(res.ok).toBe(false);
     expect(res.added.length).toBe(0);
     // album folder should be gone
-    const album = 'Rikas - Soundtrack For A Movie That Has Not Been Written Yet (2025) [16B-44.1kHz]';
+    const album =
+      'Rikas - Soundtrack For A Movie That Has Not Been Written Yet (2025) [16B-44.1kHz]';
     const albumDir = path.join(tmp, album);
-    const exists = await fs.stat(albumDir).then(() => true).catch(() => false);
+    const exists = await fs
+      .stat(albumDir)
+      .then(() => true)
+      .catch(() => false);
     expect(exists).toBe(false);
     expect(spawnMock).not.toHaveBeenCalledWith('ffmpeg', expect.anything(), expect.anything());
   });
@@ -199,10 +207,14 @@ describe('runQobuzLuckyStrict spawn integration (mocked spawn)', () => {
           const dIndex = args.indexOf('-d');
           const dir = dIndex >= 0 ? args[dIndex + 1] : undefined;
           if (dir) {
-            const album = 'Rikas - Soundtrack For A Movie That Has Not Been Written Yet (2025) [16B-44.1kHz]';
+            const album =
+              'Rikas - Soundtrack For A Movie That Has Not Been Written Yet (2025) [16B-44.1kHz]';
             const albumDir = path.join(dir, album);
             await fs.mkdir(albumDir, { recursive: true });
-            await fs.writeFile(path.join(albumDir, "It’s a Beautiful World (When I’m on My Own).aiff"), 'audio');
+            await fs.writeFile(
+              path.join(albumDir, 'It’s a Beautiful World (When I’m on My Own).aiff'),
+              'audio',
+            );
           }
           for (const cb of stdoutListeners) cb(Buffer.from('ok'));
           for (const cb of closeListeners) cb(0);
@@ -349,7 +361,10 @@ describe('runQobuzLuckyStrict spawn integration (mocked spawn)', () => {
     expect(res.ok).toBe(true);
     // ensure no not-matched log
     const logPath = path.join(tmp, 'not-matched.log');
-    const exists = await fs.stat(logPath).then(() => true).catch(() => false);
+    const exists = await fs
+      .stat(logPath)
+      .then(() => true)
+      .catch(() => false);
     expect(exists).toBe(false);
   });
 
@@ -377,7 +392,8 @@ describe('runQobuzLuckyStrict spawn integration (mocked spawn)', () => {
           stdoutListeners.forEach((cb) => cb(Buffer.from('ok')));
           closeListeners.forEach((cb) => cb(0));
         } else if (cmd === 'ffprobe') {
-          const out = 'TAG:artist=Feed Me\nTAG:title=One Click Headshot (Arya & Alexis B Remix)\nTAG:genre=Genre\n';
+          const out =
+            'TAG:artist=Feed Me\nTAG:title=One Click Headshot (Arya & Alexis B Remix)\nTAG:genre=Genre\n';
           stdoutListeners.forEach((cb) => cb(Buffer.from(out)));
           closeListeners.forEach((cb) => cb(0));
         } else {
@@ -401,7 +417,10 @@ describe('runQobuzLuckyStrict spawn integration (mocked spawn)', () => {
 
     expect(res.ok).toBe(true);
     const logPath = path.join(tmp, 'not-matched.log');
-    const exists = await fs.stat(logPath).then(() => true).catch(() => false);
+    const exists = await fs
+      .stat(logPath)
+      .then(() => true)
+      .catch(() => false);
     expect(exists).toBe(false);
   });
 });

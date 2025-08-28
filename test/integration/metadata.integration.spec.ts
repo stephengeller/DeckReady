@@ -84,7 +84,7 @@ describe('audio metadata integration', () => {
   });
 
   test('song downloaded and converted retains metadata', async () => {
-    const { runQobuzLuckyStrict } = require('../src/qobuzRunner.ts');
+    const { runQobuzLuckyStrict } = require('../../src/qobuzRunner.ts');
     const res = await runQobuzLuckyStrict('query', {
       directory: tmp,
       dryRun: false,
@@ -100,18 +100,13 @@ describe('audio metadata integration', () => {
     );
     await fs.stat(dest);
     expect(lastMetaArgs).toEqual(
-      expect.arrayContaining([
-        '-metadata',
-        'artist=Test Artist',
-        '-metadata',
-        'title=Test Title',
-      ]),
+      expect.arrayContaining(['-metadata', 'artist=Test Artist', '-metadata', 'title=Test Title']),
     );
   });
 
   test('metadata mismatch causes download to be discarded', async () => {
     probeMeta = { artist: 'Wrong', title: 'Nope', genre: 'Test Genre' };
-    const { runQobuzLuckyStrict } = require('../src/qobuzRunner.ts');
+    const { runQobuzLuckyStrict } = require('../../src/qobuzRunner.ts');
     const res = await runQobuzLuckyStrict('query', {
       directory: tmp,
       dryRun: false,
@@ -125,4 +120,3 @@ describe('audio metadata integration', () => {
     expect(files).not.toContain('track.flac');
   });
 });
-

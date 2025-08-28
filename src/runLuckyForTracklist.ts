@@ -29,8 +29,16 @@ function validLine(line: string) {
 }
 
 export async function main() {
-  const { file, dir, dry, quiet: quietArg, verbose, progress, noColor, summaryOnly, json } =
-    parseCliArgs(process.argv);
+  const {
+    file,
+    dir,
+    dry,
+    quiet: quietArg,
+    verbose,
+    noColor,
+    summaryOnly,
+    json,
+  } = parseCliArgs(process.argv);
   if (noColor) setColorEnabled(false);
   const quiet = quietArg && !verbose; // verbose overrides quiet
   if (!dir) throw new Error('--dir is required so we can verify files were actually written');
@@ -50,7 +58,7 @@ export async function main() {
     // Short-circuit: if a matching AIFF already exists under ORGANISED_AIFF_DIR, skip qobuz-dl
     let existing: string | null = null;
     try {
-      if (typeof (findOrganisedAiff as any) === 'function') {
+      if (typeof findOrganisedAiff === 'function') {
         existing = await findOrganisedAiff(base.primArtist, base.title);
       }
     } catch {
@@ -71,19 +79,26 @@ export async function main() {
 
     for (const q of candidates) {
       // Lossless
-      // Simple TTY progress line
-      let progressLine = '';
-      const showProgress = progress && isTTY() && !verbose && !summaryOnly;
-      const updateProgress = (p?: number) => {
-        if (!showProgress) return;
-        const pct = typeof p === 'number' ? `${p}%` : '';
-        const txt = dim(`  ⬇︎ ${pct}`);
-        if (txt !== progressLine) {
-          progressLine = txt;
-          process.stdout.write(`\r${progressLine}`);
-        }
+      // Default spinner (quiet mode) while downloading
+      const frames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
+      let frameIdx = 0;
+      let spinnerTimer: NodeJS.Timeout | null = null;
+      const showSpinner = isTTY() && !verbose && !summaryOnly;
+      const startSpinner = () => {
+        if (!showSpinner || spinnerTimer) return;
+        spinnerTimer = setInterval(() => {
+          const txt = dim(`  ${frames[frameIdx]} downloading`);
+          frameIdx = (frameIdx + 1) % frames.length;
+          process.stdout.write(`\r${txt}`);
+        }, 80);
+      };
+      const stopSpinner = () => {
+        if (spinnerTimer) clearInterval(spinnerTimer);
+        spinnerTimer = null;
+        if (showSpinner) process.stdout.write('\r\x1b[2K');
       };
 
+      startSpinner();
       const res6 = await runQobuzLuckyStrict(q, {
         directory: dir,
         quality: 6,
@@ -91,10 +106,10 @@ export async function main() {
         quiet,
         artist: base.primArtist,
         title: base.title,
-        progress: showProgress,
-        onProgress: (info) => updateProgress(info.percent),
+        progress: false,
+        onProgress: undefined,
       });
-      if (showProgress) process.stdout.write('\r\x1b[2K'); // clear progress line
+      stopSpinner();
       if (dry) {
         console.log(`  [dry-run] ${res6?.cmd || ''}`);
         console.log(`  ✓ would try lossless first for: ${q}`);
@@ -103,8 +118,7 @@ export async function main() {
       }
       if (res6?.ok) {
         if (!summaryOnly) console.log(`  ${green('✓')} matched (lossless) via: ${q}`);
-        if (!summaryOnly)
-          for (const p of res6?.added || []) console.log(`    ${dim('→')} ${p}`);
+        if (!summaryOnly) for (const p of res6?.added || []) console.log(`    ${dim('→')} ${p}`);
         matched = true;
         matchedCount += 1;
         break;
@@ -126,6 +140,7 @@ export async function main() {
       }
 
       // 320 fallback
+      startSpinner();
       const res5 = await runQobuzLuckyStrict(q, {
         directory: dir,
         quality: 5,
@@ -136,8 +151,7 @@ export async function main() {
       });
       if (res5?.ok) {
         if (!summaryOnly) console.log(`  ${green('✓')} matched (320) via: ${q}`);
-        if (!summaryOnly)
-          for (const p of res5?.added || []) console.log(`    ${dim('→')} ${p}`);
+        if (!summaryOnly) for (const p of res5?.added || []) console.log(`    ${dim('→')} ${p}`);
         matched = true;
         matchedCount += 1;
         break;
@@ -146,7 +160,9 @@ export async function main() {
         if (res5?.mismatch) {
           const key5 = `${res5.mismatch.artistNorm}|${res5.mismatch.titleNorm}`;
           if (seenMismatches.has(key5)) {
-            console.log('  · duplicate wrong match encountered; stopping further attempts for this track.');
+            console.log(
+              '  · duplicate wrong match encountered; stopping further attempts for this track.',
+            );
             break;
           }
           seenMismatches.add(key5);

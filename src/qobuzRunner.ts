@@ -113,7 +113,7 @@ function normaliseTitleBase(s: string | undefined): string {
   if (!s) return '';
   // Remove trailing parenthetical/bracketed segments that contain remix/edit/version-like tokens
   const stripped = (s || '')
-    .replace(/\s*[\[(][^\])]*(?:remix|vip|edit|version)[^\])]*[\])]\s*$/i, '')
+    .replace(/\s*[[(][^\])]*(?:remix|vip|edit|version)[^\])]*[\])]\s*$/i, '')
     .trim();
   return normaliseTag(stripped);
 }
@@ -242,7 +242,8 @@ export async function runQobuzLuckyStrict(
           const v = (n: string, u: string) => Number(n) * (u === 'M' ? 1_000_000 : 1_000);
           bytes = v(m[1], m[2]);
           total = v(m[3], m[4]);
-          const percent = total > 0 ? Math.max(0, Math.min(100, Math.round((bytes / total) * 100))) : undefined;
+          const percent =
+            total > 0 ? Math.max(0, Math.min(100, Math.round((bytes / total) * 100))) : undefined;
           if (onProgress) onProgress({ raw: chunk, percent, bytes, total });
         }
       }
@@ -286,7 +287,15 @@ export async function runQobuzLuckyStrict(
   // If the tool reported files were already downloaded, treat as success to avoid falling back to 320.
   const alreadyDownloaded = res.code === 0 && addedAudio.length === 0;
   if (alreadyDownloaded) {
-    return { ok: true, added: [], cmd, logPath: null, already: true, mismatch: null, ...res } as unknown as RunQobuzResult;
+    return {
+      ok: true,
+      added: [],
+      cmd,
+      logPath: null,
+      already: true,
+      mismatch: null,
+      ...res,
+    } as unknown as RunQobuzResult;
   }
 
   // Write full qobuz-dl output to a per-run log file so we always have the complete output available
@@ -342,7 +351,8 @@ export async function runQobuzLuckyStrict(
         if (!artistOk && /\(([^)]*)\)/.test(fileTitleRaw)) {
           const paren = (fileTitleRaw.match(/\(([^)]*)\)/) || [])[1] || '';
           const normParen = normaliseTag(paren);
-          if (/(remix|vip|edit|version)/i.test(paren) && normParen.includes(expectedArtist)) artistOk = true;
+          if (/(remix|vip|edit|version)/i.test(paren) && normParen.includes(expectedArtist))
+            artistOk = true;
         }
       }
 
@@ -352,7 +362,8 @@ export async function runQobuzLuckyStrict(
         titleOk = false;
         const fileTitleBase = normaliseTitleBase(fileTitleRaw);
         if (fileTitle === expectedTitle) titleOk = true;
-        else if (fileTitleBase && expectedTitleBase && fileTitleBase === expectedTitleBase) titleOk = true;
+        else if (fileTitleBase && expectedTitleBase && fileTitleBase === expectedTitleBase)
+          titleOk = true;
       }
 
       if (!artistOk || !titleOk) {
@@ -442,7 +453,14 @@ export async function runQobuzLuckyStrict(
     }
   }
 
-  return { ok, added: addedAudio, cmd, logPath, mismatch: null, ...res } as unknown as RunQobuzResult;
+  return {
+    ok,
+    added: addedAudio,
+    cmd,
+    logPath,
+    mismatch: null,
+    ...res,
+  } as unknown as RunQobuzResult;
 }
 
 // --- Helpers: convert downloaded audio to AIFF, read metadata, and move into organised folders
@@ -679,7 +697,10 @@ export async function findOrganisedAiff(artist: string, title: string): Promise<
     const titleBase = sanitizeName(title || '');
     // Search each genre subdir for artist folder
     const genres = await fs.readdir(baseDir).catch(() => [] as string[]);
-    const titleRegex = new RegExp(`^${titleBase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?: \\((?:\\d+)\\))?\\.aiff$`, 'i');
+    const titleRegex = new RegExp(
+      `^${titleBase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?: \\((?:\\d+)\\))?\\.aiff$`,
+      'i',
+    );
     for (const g of genres) {
       const artistDir = path.join(baseDir, g, artistDirName);
       try {

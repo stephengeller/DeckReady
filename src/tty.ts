@@ -21,4 +21,3 @@ export const bold = wrap(1);
 export function isTTY() {
   return typeof process !== 'undefined' && !!process.stdout && !!process.stdout.isTTY;
 }
-

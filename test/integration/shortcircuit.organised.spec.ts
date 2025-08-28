@@ -1,3 +1,4 @@
+// integration: short-circuit existing AIFF
 const fs = require('node:fs/promises');
 const os = require('node:os');
 const path = require('node:path');
@@ -29,16 +30,23 @@ describe('short-circuit when AIFF already organised', () => {
     await fs.writeFile(aiff, 'AIFF');
 
     // Partially mock qobuzRunner: keep findOrganisedAiff real; mock runQobuzLuckyStrict
-    jest.doMock('../src/qobuzRunner.ts', () => {
-      const actual = jest.requireActual('../src/qobuzRunner.ts');
+    jest.doMock('../../src/qobuzRunner.ts', () => {
+      const actual = jest.requireActual('../../src/qobuzRunner.ts');
       return {
         ...actual,
-        runQobuzLuckyStrict: jest.fn(async () => ({ ok: true, added: [], cmd: 'cmd', code: 0, stdout: '', stderr: '' })),
+        runQobuzLuckyStrict: jest.fn(async () => ({
+          ok: true,
+          added: [],
+          cmd: 'cmd',
+          code: 0,
+          stdout: '',
+          stderr: '',
+        })),
       };
     });
 
-    const { runQobuzLuckyStrict } = require('../src/qobuzRunner.ts');
-    const runScript = require('../src/runLuckyForTracklist.ts').default;
+    const { runQobuzLuckyStrict } = require('../../src/qobuzRunner.ts');
+    const runScript = require('../../src/runLuckyForTracklist.ts').default;
 
     const tl = path.join(tmp, 'tracks.txt');
     await fs.writeFile(tl, `${title} - ${artist}\n`);
@@ -61,4 +69,3 @@ describe('short-circuit when AIFF already organised', () => {
     expect(logs.join('\n')).toMatch(/already organised/);
   });
 });
-

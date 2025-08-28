@@ -17,9 +17,10 @@ describe('runLuckyForTracklist summary output', () => {
 
   test('prints concise summary with counts', async () => {
     // Mock runner to return one match and one mismatch
-    jest.doMock('../src/qobuzRunner.ts', () => ({
+    jest.doMock('../../src/qobuzRunner.ts', () => ({
       runQobuzLuckyStrict: jest.fn(async (q, opts) => {
-        if (/MatchMe/.test(q)) return { ok: true, added: [path.join(opts.directory, 'a.flac')], cmd: 'cmd' };
+        if (/MatchMe/.test(q))
+          return { ok: true, added: [path.join(opts.directory, 'a.flac')], cmd: 'cmd' };
         return {
           ok: false,
           added: [],
@@ -32,7 +33,7 @@ describe('runLuckyForTracklist summary output', () => {
       }),
     }));
 
-    const runScript = require('../src/runLuckyForTracklist.ts').default;
+    const runScript = require('../../src/runLuckyForTracklist.ts').default;
     const tl = path.join(tmp, 'tracks.txt');
     await fs.writeFile(tl, 'MatchMe - Artist\nMismatch - Artist\n');
 

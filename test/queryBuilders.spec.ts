@@ -20,4 +20,3 @@ describe('buildQueries', () => {
     expect(qs.some((q: string) => q.includes('A B'))).toBe(true);
   });
 });
-

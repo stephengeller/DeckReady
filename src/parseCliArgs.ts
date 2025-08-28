@@ -29,8 +29,7 @@ export function parseCliArgs(argv: string[]): {
     else if (a === '--verbose') {
       out.verbose = true;
       out.quiet = false;
-    }
-    else if (a === '--progress') out.progress = true;
+    } else if (a === '--progress') out.progress = true;
     else if (a === '--no-color') out.noColor = true;
     else if (a === '--summary-only') out.summaryOnly = true;
     else if (a === '--json') out.json = true;

@@ -9,4 +9,3 @@ test('buildQueries basic', () => {
   expect(q.length).toBeGreaterThan(0);
   expect(q[0]).toMatch(/Artist A/);
 });
-

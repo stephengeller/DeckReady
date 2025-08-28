@@ -1,4 +1,4 @@
-import { parseCliArgs } from '../src/parseCliArgs';
+import { parseCliArgs } from '../../src/parseCliArgs';
 
 test('parseCliArgs basic', () => {
   const argv = ['node', 'script', 'http://spotify.com/abc', '--dir', 'out', '--dry'];
