@@ -42,6 +42,7 @@ export async function main() {
 
     // try each candidate; per-candidate: q=6, then q=5
     let matched = false;
+    const seenMismatches = new Set<string>();
 
     for (const q of candidates) {
       // Lossless
@@ -65,6 +66,10 @@ export async function main() {
         matched = true;
         break;
       }
+      if (res6?.mismatch) {
+        const key6 = `${res6.mismatch.artistNorm}|${res6.mismatch.titleNorm}`;
+        seenMismatches.add(key6);
+      }
 
       // 320 fallback
       const res5 = await runQobuzLuckyStrict(q, {
@@ -81,6 +86,15 @@ export async function main() {
         matched = true;
         break;
       } else {
+        // If the 320 fallback produced the same wrong track as lossless, stop trying more candidates.
+        if (res5?.mismatch) {
+          const key5 = `${res5.mismatch.artistNorm}|${res5.mismatch.titleNorm}`;
+          if (seenMismatches.has(key5)) {
+            console.log('  · duplicate wrong match encountered; stopping further attempts for this track.');
+            break;
+          }
+          seenMismatches.add(key5);
+        }
         // brief tail for debugging
         const tail = (res5?.stderr || res5?.stdout || '').split('\n').slice(-4).join('\n');
         console.log(
