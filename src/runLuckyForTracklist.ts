@@ -28,8 +28,14 @@ function validLine(line: string) {
 }
 
 export async function main() {
-  const { file, dir, dry, quiet } = parseCliArgs(process.argv);
+  const { file, dir, dry, quiet: quietArg, verbose } = parseCliArgs(process.argv);
+  const quiet = quietArg && !verbose; // verbose overrides quiet
   if (!dir) throw new Error('--dir is required so we can verify files were actually written');
+
+  let matchedCount = 0;
+  let alreadyCount = 0;
+  let mismatchCount = 0;
+  let notFoundCount = 0;
 
   for await (const raw of lineStream(file)) {
     const line = raw.trim();
@@ -64,10 +70,12 @@ export async function main() {
         console.log(`  ✓ matched (lossless) via: ${q}`);
         for (const p of res6?.added || []) console.log(`    → ${p}`);
         matched = true;
+        matchedCount += 1;
         break;
       } else if (res6?.already) {
         console.log(`  ✓ already downloaded (lossless) via: ${q}`);
         matched = true;
+        alreadyCount += 1;
         break;
       }
       if (res6?.mismatch) {
@@ -75,6 +83,7 @@ export async function main() {
         seenMismatches.add(key6);
         // Stop trying further candidates for this track after the first wrong match
         console.log('  · wrong match (lossless); stopping search for this track.');
+        mismatchCount += 1;
         break;
       }
 
@@ -91,6 +100,7 @@ export async function main() {
         console.log(`  ✓ matched (320) via: ${q}`);
         for (const p of res5?.added || []) console.log(`    → ${p}`);
         matched = true;
+        matchedCount += 1;
         break;
       } else {
         // If the 320 fallback produced the same wrong track as lossless, stop trying more candidates.
@@ -102,11 +112,13 @@ export async function main() {
           }
           seenMismatches.add(key5);
         }
-        // brief tail for debugging
-        const tail = (res5?.stderr || res5?.stdout || '').split('\n').slice(-4).join('\n');
-        console.log(
-          `  · candidate failed: ${q}\n${tail ? '    └─ tail:\n' + indent(tail, 6) : ''}`,
-        );
+        if (verbose) {
+          // brief tail for debugging (verbose only)
+          const tail = (res5?.stderr || res5?.stdout || '').split('\n').slice(-4).join('\n');
+          console.log(
+            `  · candidate failed: ${q}\n${tail ? '    └─ tail:\n' + indent(tail, 6) : ''}`,
+          );
+        }
       }
     }
 
@@ -116,11 +128,23 @@ export async function main() {
         const nf = path.join(dir, 'not-found.log');
         fs.appendFileSync(nf, `${line}\n`);
         console.log(`  ↪ appended to ${nf}`);
+        notFoundCount += 1;
       } else {
         console.log('  ✗ no candidate matched (dry-run).');
       }
     }
   }
+
+  // Print final summary (quiet-friendly)
+  console.log('');
+  console.log('Summary:');
+  console.log(`  ✓ matched: ${matchedCount}`);
+  console.log(`  ↺ already: ${alreadyCount}`);
+  console.log(`  ✗ mismatched: ${mismatchCount}`);
+  console.log(`  Ø not found: ${notFoundCount}`);
+  console.log('  Logs:');
+  console.log('    not-matched: <dir>/not-matched.log');
+  console.log('    not-found:   <dir>/not-found.log');
 }
 
 function indent(s: string | undefined | null, n = 2) {
