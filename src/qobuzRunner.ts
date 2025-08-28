@@ -263,6 +263,11 @@ export async function runQobuzLuckyStrict(
     const expectedArtist = normaliseTag(artist);
     const expectedTitle = normaliseTag(title);
     let tagsMatch = true;
+    let firstMismatch: {
+      file: string;
+      artist: string;
+      title: string;
+    } | null = null;
     for (const f of addedAudio) {
       // eslint-disable-next-line no-await-in-loop
       const tags = await readTags(f);
@@ -270,10 +275,28 @@ export async function runQobuzLuckyStrict(
       const fileTitle = normaliseTag(tags['title']);
       if ((artist && fileArtist !== expectedArtist) || (title && fileTitle !== expectedTitle)) {
         tagsMatch = false;
+        firstMismatch = {
+          file: f,
+          artist: tags['artist'] || tags['album_artist'] || '',
+          title: tags['title'] || '',
+        };
         break;
       }
     }
     if (!tagsMatch) {
+      // Append a simple line to not-matched.log to allow later spot checks
+      try {
+        const logFile = path.join(directory || '.', 'not-matched.log');
+        const expectedStr = `${artist || ''} - ${title || ''}`.trim();
+        const foundStr = firstMismatch
+          ? `${firstMismatch.artist} - ${firstMismatch.title}`.trim()
+          : 'unknown';
+        const line = `[${new Date().toISOString()}] query="${query}" expected="${expectedStr}" found="${foundStr}" file="${firstMismatch?.file || ''}"\n`;
+        await fs.appendFile(logFile, line, 'utf8');
+      } catch (e) {
+        // best effort logging only
+        void e;
+      }
       await Promise.all(
         addedAudio.map(async (p) => {
           try {
@@ -360,20 +383,9 @@ export async function processDownloadedAudio(inputPath: string, runner?: Runner)
       );
     }
 
-    const moveSearchFile = async (src: string, dest: string) => {
-      const srcTxt = src + '.search.txt';
-      const destTxt = dest + '.search.txt';
-      try {
-        await fs.rename(srcTxt, destTxt);
-      } catch (e) {
-        void e; // best effort
-      }
-    };
-
     if (isAIFF) {
       // already AIFF, just move
       await fs.rename(inputPath, destPath);
-      await moveSearchFile(inputPath, destPath);
       console.log(`Organised (moved AIFF): ${inputPath} -> ${destPath}`);
       return;
     }
@@ -440,9 +452,8 @@ export async function processDownloadedAudio(inputPath: string, runner?: Runner)
       throw new Error(`ffmpeg failed: ${ff.stderr || ff.stdout}`);
     }
 
-    // Move converted into final location
+    // Move converted into final location (do not move .search.txt)
     await fs.rename(converted, destPath);
-    await moveSearchFile(inputPath, destPath);
 
     // Verify tags made it into the AIFF. If key tags are missing, inject metadata explicitly using ffmpeg (copy).
     try {
