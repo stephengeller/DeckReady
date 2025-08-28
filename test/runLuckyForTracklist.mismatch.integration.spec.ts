@@ -88,9 +88,9 @@ describe('runLuckyForTracklist integration: mismatch is deleted and logged', () 
     expect(mm).toMatch(/expected="Virus Syndicate - When I\'m On"/);
     expect(mm).toMatch(/found="Rikas - It’s a Beautiful World/);
 
-    // and since no candidate matched, not-found.log should also contain the original line
+    // With mismatch, we do not also write not-found.log to avoid duplicates
     const nfLog = path.join(tmp, 'not-found.log');
-    const nf = await fs.readFile(nfLog, 'utf8');
-    expect(nf).toMatch(/When I\'m On - Virus Syndicate/);
+    const nfExists = await fs.stat(nfLog).then(() => true).catch(() => false);
+    expect(nfExists).toBe(false);
   });
 });

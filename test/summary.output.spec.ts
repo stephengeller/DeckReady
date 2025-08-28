@@ -52,8 +52,8 @@ describe('runLuckyForTracklist summary output', () => {
     expect(out).toMatch(/Summary:/);
     expect(out).toMatch(/matched: 1/);
     expect(out).toMatch(/mismatched: 1/);
-    expect(out).toMatch(/not found: 1/);
+    // A mismatch no longer contributes to not-found; summary should show 0
+    expect(out).toMatch(/not found: 0/);
     expect(out).toMatch(/not-matched: <dir>\/not-matched\.log/);
   });
 });
-
