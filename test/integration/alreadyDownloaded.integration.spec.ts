@@ -1,3 +1,4 @@
+// integration: already-downloaded handling
 const fs = require('node:fs/promises');
 const os = require('node:os');
 const path = require('node:path');
@@ -33,7 +34,8 @@ describe('runLuckyForTracklist: respects already-downloaded and skips fallback',
           if (cmd === 'qobuz-dl') {
             qobuzCalls += 1;
             // Simulate qobuz saying this file has already been downloaded
-            const msg = 'cover.jpg was already downloaded\nBig Fi Dem was already downloaded\nCompleted\n';
+            const msg =
+              'cover.jpg was already downloaded\nBig Fi Dem was already downloaded\nCompleted\n';
             stdoutListeners.forEach((cb) => cb(Buffer.from(msg)));
             closeListeners.forEach((cb) => cb(0));
           } else {
@@ -44,7 +46,7 @@ describe('runLuckyForTracklist: respects already-downloaded and skips fallback',
       },
     }));
 
-    const runScript = require('../src/runLuckyForTracklist.ts').default;
+    const runScript = require('../../src/runLuckyForTracklist.ts').default;
 
     const tl = path.join(tmp, 'tracks.txt');
     await fs.writeFile(tl, 'Big Fi Dem - Cesco, Sparkz\n');
@@ -63,7 +65,10 @@ describe('runLuckyForTracklist: respects already-downloaded and skips fallback',
 
     // not-found should not be written for this line
     const nfLog = path.join(tmp, 'not-found.log');
-    const exists = await fs.stat(nfLog).then(() => true).catch(() => false);
+    const exists = await fs
+      .stat(nfLog)
+      .then(() => true)
+      .catch(() => false);
     expect(exists).toBe(false);
   });
 });

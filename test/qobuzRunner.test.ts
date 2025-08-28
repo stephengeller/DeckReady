@@ -10,4 +10,3 @@ test('dry run returns cmd and dry flag', async () => {
   expect(res.dry).toBeTruthy();
   expect(res.cmd).toMatch(/qobuz-dl/);
 });
-
