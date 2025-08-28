@@ -22,4 +22,20 @@ module.exports = {
       typescript: {},
     },
   },
+  overrides: [
+    {
+      files: ['test/**/*.ts', 'test/**/*.js'],
+      env: { jest: true, node: true },
+      rules: {
+        '@typescript-eslint/no-require-imports': 'off',
+        '@typescript-eslint/no-explicit-any': 'off',
+        '@typescript-eslint/no-unused-vars': [
+          'warn',
+          { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+        ],
+        'no-useless-escape': 'off',
+        'no-undef': 'off',
+      },
+    },
+  ],
 };

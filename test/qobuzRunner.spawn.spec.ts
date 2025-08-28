@@ -424,3 +424,4 @@ describe('runQobuzLuckyStrict spawn integration (mocked spawn)', () => {
     expect(exists).toBe(false);
   });
 });
+export {};

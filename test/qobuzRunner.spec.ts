@@ -42,3 +42,4 @@ describe('qobuzRunner filesystem helpers', () => {
     expect(res.cmd).toMatch(/qobuz-dl/);
   });
 });
+export {};

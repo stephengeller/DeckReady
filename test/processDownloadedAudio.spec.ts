@@ -82,3 +82,4 @@ describe('processDownloadedAudio (unit, mocked ffmpeg/ffprobe)', () => {
     expect(exists).toBe(true);
   });
 });
+export {};
