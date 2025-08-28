@@ -7,3 +7,4 @@ test('parseCliArgs basic', () => {
   expect(p.dir).toBe('out');
   expect(p.dry).toBe(true);
 });
+

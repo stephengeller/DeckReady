@@ -40,3 +40,4 @@ describe('normalize', () => {
     expect(r.primArtist).toBe('A');
   });
 });
+
