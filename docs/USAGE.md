@@ -50,6 +50,8 @@ Add to `.env`:
 - `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`: required for Spotify Web API access (client credentials).
 - `ORGANISED_AIFF_DIR`: destination base for AIFF files; default `~/Music/rekordbox/Organised_AIFF`.
 
+How to obtain Spotify credentials: see `docs/CREDENTIALS.md:1`.
+
 ## Notes
 
 - You must install and configure `qobuz-dl` with your credentials. This repo does not handle Qobuz auth.

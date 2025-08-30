@@ -39,6 +39,19 @@ Open `.env` at the repo root and set:
 
 See `.env.example:1` for a starting point.
 
+Getting Spotify Credentials
+
+- Go to the Spotify Developer Dashboard: https://developer.spotify.com/dashboard
+- Log in and click “Create app” (any name/description is fine for local use).
+- Open the app and copy the `Client ID`. Click “View client secret” to reveal the `Client secret`.
+- No redirect URI or OAuth scopes are required for this project; it uses the Client Credentials flow to access public content only.
+- Paste values into your `.env`:
+  - `SPOTIFY_CLIENT_ID=...`
+  - `SPOTIFY_CLIENT_SECRET=...`
+- If you see 401/403 errors, double‑check the values and try generating a new client secret.
+
+More details: `docs/CREDENTIALS.md:1`.
+
 Quick Start
 
 1. Make an output directory (where qobuz-dl writes): `mkdir -p out`
