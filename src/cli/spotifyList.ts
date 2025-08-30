@@ -17,10 +17,10 @@ function usageAndExit() {
 }
 
 (async () => {
-  const url = process.argv[2];
-  if (!url) usageAndExit();
+  const spotifyUrl = process.argv[2];
+  if (!spotifyUrl) usageAndExit();
 
-  const lines = await getLinesFromSpotifyUrl(url);
+  const lines = await getLinesFromSpotifyUrl(spotifyUrl);
   if (!lines.length) {
     console.error('No tracks found (playlist/album may be empty or inaccessible).');
     process.exit(2);
