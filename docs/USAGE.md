@@ -48,6 +48,7 @@
 Add to `.env`:
 
 - `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`: required for Spotify Web API access (client credentials).
+- `SPOTIFY_USER_TOKEN` (optional): a user access token (Authorization Code flow) with `playlist-modify-private` scope to enable automatic creation of a Spotify playlist containing tracks that failed to match or download from Qobuz.
 - `ORGANISED_AIFF_DIR`: destination base for AIFF files; default `~/Music/rekordbox/Organised_AIFF`.
 
 ## Notes

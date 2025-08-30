@@ -4,7 +4,7 @@ import readline from 'node:readline';
 import { parseCliArgs } from './parseCliArgs';
 import { setColorEnabled, green, yellow, red, magenta, cyan, isTTY, dim } from './ui/colors';
 // Load environment variables from .env
-import { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET } from './env';
+import { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_USER_TOKEN } from './env';
 void SPOTIFY_CLIENT_ID;
 void SPOTIFY_CLIENT_SECRET;
 
@@ -12,6 +12,7 @@ import { makeBaseParts } from './normalize';
 import { buildQueries } from './queryBuilders';
 import { runQobuzLuckyStrict, findOrganisedAiff } from './qobuzRunner';
 import { createSpinner } from './ui/spinner';
+import { createPlaylistFromProblemLines } from './spotifyApi';
 
 async function* lineStream(file: string | null) {
   if (file) {
@@ -47,6 +48,8 @@ export async function main() {
   let alreadyCount = 0;
   let mismatchCount = 0;
   let notFoundCount = 0;
+  const notFoundLines: string[] = [];
+  const notMatchedLines: string[] = [];
 
   for await (const raw of lineStream(file)) {
     const line = raw.trim();
@@ -170,7 +173,9 @@ export async function main() {
           fs.appendFileSync(nf, `${line}\n`);
           if (!summaryOnly) console.log(`  ${dim('↪')} appended to ${nf}`);
           notFoundCount += 1;
+          notFoundLines.push(line);
         }
+        if (hadMismatch) notMatchedLines.push(line);
       } else {
         if (!summaryOnly) console.log(`  ${red('✗')} no candidate matched (dry-run).`);
       }
@@ -197,6 +202,36 @@ export async function main() {
     console.log('  Logs:');
     console.log('    not-matched: <dir>/not-matched.log');
     console.log('    not-found:   <dir>/not-found.log');
+  }
+
+  // Optionally create a Spotify playlist with unfound or mismatched tracks
+  try {
+    const problemLines = Array.from(new Set([...notFoundLines, ...notMatchedLines]));
+    if (!dry && problemLines.length > 0 && (SPOTIFY_USER_TOKEN || '').trim()) {
+      const { url, added, resolved } = await createPlaylistFromProblemLines(problemLines).catch(
+        (e) => {
+          console.error(
+            'Failed to create Spotify playlist for unfound tracks:',
+            e?.message || String(e),
+          );
+          return { url: '', added: 0, resolved: 0 };
+        },
+      );
+      if (url && !summaryOnly) {
+        console.log('');
+        console.log(
+          `Created Spotify playlist for unresolved tracks (${added}/${problemLines.length} added):`,
+        );
+        console.log(`  ${url}`);
+        if (resolved < problemLines.length) {
+          console.log(
+            `  Note: ${problemLines.length - resolved} items could not be resolved on Spotify search.`,
+          );
+        }
+      }
+    }
+  } catch (e) {
+    console.error('Error during Spotify playlist creation:', e?.message || String(e));
   }
 }
 
