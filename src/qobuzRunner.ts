@@ -553,25 +553,74 @@ export async function processDownloadedAudio(
       metaArgs.push('-metadata', `${outKey}=${v}`);
     }
 
-    // Main conversion command: map original metadata and also pass explicit -metadata entries for compatibility
-    const convArgs = [
-      '-y',
-      '-i',
-      inputPath,
-      '-map_metadata',
-      '0',
-      '-vn',
-      '-c:a',
-      codec,
-      ...metaArgs,
-      '-write_id3v2',
-      '1',
-      '-id3v2_version',
-      '3',
-      '-f',
-      'aiff',
-      converted,
-    ];
+    // Look for a nearby cover image to embed if the source audio lacks one.
+    const coverCandidates = ['cover.jpg', 'cover.jpeg', 'cover.png'];
+    let coverPath: string | null = null;
+    for (const name of coverCandidates) {
+      const p = path.join(path.dirname(inputPath), name);
+      try {
+        await fs.access(p);
+        coverPath = p;
+        break;
+      } catch {
+        /* ignore missing cover */
+      }
+    }
+
+    // Main conversion command: preserve original streams (including any embedded cover)
+    // and explicitly embed a nearby cover image when available.
+    let convArgs: string[];
+    if (coverPath) {
+      convArgs = [
+        '-y',
+        '-i',
+        inputPath,
+        '-i',
+        coverPath,
+        '-map_metadata',
+        '0',
+        '-map',
+        '0:a',
+        '-map',
+        '1:v',
+        '-c:a',
+        codec,
+        '-c:v',
+        'copy',
+        ...metaArgs,
+        '-disposition:v',
+        'attached_pic',
+        '-write_id3v2',
+        '1',
+        '-id3v2_version',
+        '3',
+        '-f',
+        'aiff',
+        converted,
+      ];
+    } else {
+      convArgs = [
+        '-y',
+        '-i',
+        inputPath,
+        '-map',
+        '0',
+        '-map_metadata',
+        '0',
+        '-c',
+        'copy',
+        '-c:a',
+        codec,
+        ...metaArgs,
+        '-write_id3v2',
+        '1',
+        '-id3v2_version',
+        '3',
+        '-f',
+        'aiff',
+        converted,
+      ];
+    }
 
     const ff = runner
       ? await runner('ffmpeg', convArgs)
