@@ -2,7 +2,7 @@
 
 Helper tools to turn a Spotify playlist/album/track into an organised, Rekordbox-ready AIFF library by:
 
-- Scraping tracklines from a Spotify URL (Song Title - Artist 1, Artist 2).
+- Fetching tracklines from the Spotify Web API (Song Title - Artist 1, Artist 2).
 - Searching/downloading best matches from Qobuz using `qobuz-dl` (lossless preferred; 320 fallback).
 - Converting to AIFF and organising to a genre/artist folder tree with metadata preserved.
 
@@ -12,28 +12,25 @@ What this repository provides
 
 - High-level runner `script/run` for one-command end-to-end flow.
 - TypeScript CLI `run-lucky` to run Qobuz “lucky” searches from a tracklist with validation and logging.
-- TypeScript CLI `script/spotify-list` to scrape Spotify pages via Playwright.
+- TypeScript CLI `script/spotify-list` to fetch tracklines via the Spotify Web API.
 - Organiser that converts audio to AIFF and places it under `ORGANISED_AIFF_DIR/Genre/Artist/Title.aiff`.
 
 Requirements
 
-- node: 18+ (Playwright requires Node 18 or newer)
+- node: 18+
 - qobuz-dl: available in your PATH and configured with your Qobuz credentials
 - ffmpeg and ffprobe: required for tag inspection and AIFF conversion
-- playwright browsers: run `npx playwright install chromium` once after install
 
 Install
 
 - Clone the repo, then install deps:
   - `yarn install` (preferred) or `npm install`
-- Install Playwright browsers (first time):
-  - `npx playwright install chromium`
 
 Configuration
 
-Create a `.env` (or edit the provided example) at repo root if desired:
+Create a `.env` (or edit the provided example) at repo root:
 
-- `SPOTIFY_CLIENT_ID` / `SPOTIFY_CLIENT_SECRET`: optional; currently not required for public scraping but loaded if present.
+- `SPOTIFY_CLIENT_ID` / `SPOTIFY_CLIENT_SECRET`: required for Spotify Web API access (client credentials flow).
 - `ORGANISED_AIFF_DIR`: base folder for organised AIFF files. Default: `~/Music/rekordbox/Organised_AIFF`.
 
 See `.env.example:1` for a starting point.
@@ -73,7 +70,7 @@ CLI Details
 - `script/spotify-list`:
   - Usage: `script/spotify-list "https://open.spotify.com/{playlist|album|track}/..."`
   - Prints one line per track: `Song Title - Artist 1, Artist 2`.
-  - Works for public pages; private content will not be accessible in headless mode.
+  - Works for public content; private playlists require appropriate OAuth flows and are not supported.
 
 Options (summary)
 
@@ -95,8 +92,7 @@ Output & Logs
 Troubleshooting
 
 - qobuz-dl not found: ensure it’s installed and in PATH.
-- Playwright fails to launch: run `npx playwright install chromium`.
-- Private playlists/tracks: headless scraping can’t access private content. Make the playlist public or extract a tracklist manually.
+- Spotify API auth errors: ensure `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET` are set and valid. Private playlists are not accessible with client credentials.
 - FFmpeg/ffprobe missing: install both and ensure they’re available in PATH.
 - Files not appearing in organised folder: check `ORGANISED_AIFF_DIR` and logs in `<dir>/.qobuz-logs`.
 
@@ -111,7 +107,7 @@ Repo Guide
 
 - `src/cli/runLucky.ts`: CLI entry for qobuz-dl flow
 - `src/lib/runLuckyForTracklist.ts`: core orchestration (queries, matching, validation, summary)
-- `src/cli/spotifyList.ts`: Spotify scraper (Playwright)
+- `src/cli/spotifyList.ts`: Spotify API-based tracklist fetcher
 - `src/lib/normalize.ts`, `src/lib/queryBuilders.ts`: query generation helpers
 - `src/qobuzRunner.ts`: qobuz-dl integration, tagging, AIFF conversion, organisation
 - `script/run`, `script/run-lucky`, `script/spotify-list`: small shims to run CLIs via ts-node

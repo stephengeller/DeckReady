@@ -5,10 +5,11 @@
 - Install `qobuz-dl` and ensure it’s in your PATH. Verify with `qobuz-dl --help`.
 - Configure your Qobuz credentials per the qobuz-dl docs.
 
-## Playwright fails to launch
+## Spotify API errors
 
-- Run: `npx playwright install chromium`.
-- Ensure Node 18+ and no corporate proxy blocks the browser download.
+- 400/401/403 responses often indicate missing or invalid credentials.
+- Ensure `.env` has `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET` and they match your app settings.
+- Private playlists require OAuth flows not supported by this tool; only public content is available with client credentials.
 
 ## Private playlists/albums
 

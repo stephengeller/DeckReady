@@ -13,7 +13,7 @@
 
 `script/run` will:
 
-- Generate lines from the Spotify URL via `script/spotify-list` unless `--tracklist` is supplied.
+- Generate lines from the Spotify URL via `script/spotify-list` (Spotify Web API) unless `--tracklist` is supplied.
 - Call `run-lucky` to run Qobuz searches with validation.
 - Convert files to AIFF and organise them under `ORGANISED_AIFF_DIR`.
 
@@ -45,13 +45,12 @@
 
 ## Environment
 
-Add to `.env` if needed:
+Add to `.env`:
 
-- `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`: optional (not required for public scraping).
+- `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`: required for Spotify Web API access (client credentials).
 - `ORGANISED_AIFF_DIR`: destination base for AIFF files; default `~/Music/rekordbox/Organised_AIFF`.
 
 ## Notes
 
 - You must install and configure `qobuz-dl` with your credentials. This repo does not handle Qobuz auth.
 - Install ffmpeg/ffprobe and ensure they’re in your PATH.
-- Install Playwright browsers: `npx playwright install chromium`.
