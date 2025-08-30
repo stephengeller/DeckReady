@@ -1,5 +1,6 @@
 // Utilities to clean titles/artists into better search strings
 
+/** Return the first/primary artist from a joined artist string. */
 export function primaryArtist(artists: string | null | undefined): string | null | undefined {
   if (!artists) return artists;
   const parts = artists
@@ -9,6 +10,10 @@ export function primaryArtist(artists: string | null | undefined): string | null
   return parts[0] || artists.trim();
 }
 
+/**
+ * Remove trailing decorations like "- Remastered 2011", "- Radio Edit", and
+ * bracketed feat./live/remaster qualifiers at the end of the title, while keeping remix-like tokens.
+ */
 export function stripDecorations(title: string | null | undefined): string | null | undefined {
   if (!title) return title;
   let t = title;
@@ -29,6 +34,7 @@ export function stripDecorations(title: string | null | undefined): string | nul
   return t.replace(/\s+/g, ' ').trim();
 }
 
+/** Split a joined artist string into individual artist names. */
 export function splitArtists(artistStr: string | null | undefined): string[] {
   if (!artistStr) return [];
   return artistStr
@@ -37,7 +43,9 @@ export function splitArtists(artistStr: string | null | undefined): string[] {
     .filter(Boolean);
 }
 
-// Only strip feat./ft. if bracketed at the end; don't touch words like "Left"
+/**
+ * Only strip feat./ft. if bracketed at the end; don't touch words like "Left".
+ */
 export function stripFeat(text: string | null | undefined): string | null | undefined {
   if (!text) return text;
   return text
@@ -47,11 +55,14 @@ export function stripFeat(text: string | null | undefined): string | null | unde
     .trim();
 }
 
+/** Heuristic: does the title look like a remix/edit variant? */
 export function looksLikeRemix(title: string | null | undefined): boolean {
   return Boolean(title && /\b(remix|vip|edit|bootleg)\b/i.test(title));
 }
 
-// Remove most punctuation/diacritics that hurt search, keep quotes for exact title variant
+/**
+ * Remove most punctuation/diacritics that hurt search; keep quotes for exact title variants.
+ */
 export function normaliseForSearch(s: string): string {
   return s
     .normalize('NFD')
@@ -62,6 +73,9 @@ export function normaliseForSearch(s: string): string {
     .trim();
 }
 
+/**
+ * Parse a "Title - Artist 1, Artist 2" line into base parts for query building.
+ */
 export function makeBaseParts(line: string): {
   title: string;
   artists: string;

@@ -1,10 +1,18 @@
 import { spawnStreaming } from './proc';
 
+/**
+ * A function that executes a command and returns code/stdout/stderr.
+ * Used to inject a fake runner in tests.
+ */
 export type Runner = (
   cmd: string,
   args: string[],
 ) => Promise<{ code: number; stdout: string; stderr: string }>;
 
+/**
+ * Read tags from an audio file via ffprobe.
+ * Returns a lowercased key map (e.g. artist, album, title, genre, ...).
+ */
 export async function readTags(
   inputPath: string,
   runner?: Runner,
@@ -35,6 +43,7 @@ export async function readTags(
   return tags;
 }
 
+/** Basic normalisation of a tag value; strips diacritics and lowercases. */
 export function normaliseTag(s: string | undefined): string {
   if (!s) return '';
   // Defer to normalize utilities, but keep a simple lowercased normal form here
@@ -46,6 +55,10 @@ export function normaliseTag(s: string | undefined): string {
     .toLowerCase();
 }
 
+/**
+ * Title normalisation that removes trailing remix/edit/version parentheticals,
+ * then applies tag normalisation.
+ */
 export function normaliseTitleBase(s: string | undefined): string {
   if (!s) return '';
   const stripped = (s || '')

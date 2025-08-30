@@ -5,6 +5,10 @@ import { normaliseForSearch } from './normalize';
 import { spawnStreaming } from './proc';
 import { readTags, Runner } from './tags';
 
+/**
+ * Convert a downloaded audio file to AIFF (if needed), copy metadata, and move
+ * it into the organised AIFF folder tree under ORGANISED_AIFF_DIR/Genre/Artist/Title.aiff.
+ */
 export async function processDownloadedAudio(
   inputPath: string,
   runner?: Runner,
@@ -226,6 +230,10 @@ export async function processDownloadedAudio(
   }
 }
 
+/**
+ * Choose a preferred genre from a comma-separated list, with special handling
+ * to prefer specific subgenres like "Drum & Bass" over generic ones.
+ */
 export function pickGenre(raw: string): string {
   if (!raw) return 'Unknown';
   const parts = raw
@@ -242,6 +250,10 @@ export function pickGenre(raw: string): string {
   return parts[0] || 'Unknown';
 }
 
+/**
+ * Sanitize strings for filesystem paths: remove control chars and reserved symbols,
+ * collapse whitespace, and keep names readable.
+ */
 export function sanitizeName(s: string) {
   if (!s) return 'Unknown';
   const noControl = s.replace(/\p{Cc}/gu, '');
@@ -249,6 +261,10 @@ export function sanitizeName(s: string) {
   return cleaned.replace(/\s+/g, ' ');
 }
 
+/**
+ * Locate an already-organised AIFF under ORGANISED_AIFF_DIR matching artist/title.
+ * Checks each genre subdirectory for an artist folder and title-matching file.
+ */
 export async function findOrganisedAiff(artist: string, title: string): Promise<string | null> {
   try {
     const baseDir = process.env.ORGANISED_AIFF_DIR || ORGANISED_AIFF_DIR;

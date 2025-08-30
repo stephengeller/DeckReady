@@ -1,3 +1,16 @@
+/**
+ * Parse CLI arguments for run-lucky style commands.
+ *
+ * Recognised flags:
+ * - --dir <path>
+ * - --dry
+ * - --quiet | --verbose
+ * - --progress
+ * - --no-color
+ * - --summary-only
+ * - --json
+ * The first non-flag argument is treated as an optional file path (tracklist).
+ */
 export function parseCliArgs(argv: string[]): {
   file: string | null;
   dir: string | null;

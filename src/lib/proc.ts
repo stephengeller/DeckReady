@@ -1,5 +1,12 @@
 import { spawn } from 'node:child_process';
 
+/**
+ * Spawn a child process and collect stdout/stderr while optionally streaming output.
+ *
+ * - When `quiet` is false, mirrors child output to the current process stdout/stderr.
+ * - When `onStdout` is provided, it receives stdout chunks (useful for progress parsing).
+ * - Resolves with exit `code`, aggregated `stdout`, and `stderr`.
+ */
 export function spawnStreaming(
   cmd: string,
   args: string[],

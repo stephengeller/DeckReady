@@ -13,20 +13,30 @@ import {
 import { processDownloadedAudio } from './lib/organiser';
 
 export type RunQobuzResult = {
+  /** True if qobuz-dl returned success and at least one new audio file was detected. */
   ok: boolean;
+  /** Files detected as newly added by the run (post-snapshot). */
   added: string[];
+  /** Exact qobuz-dl command used. */
   cmd: string;
+  /** Aggregated qobuz-dl stdout. */
   stdout: string;
+  /** Aggregated qobuz-dl stderr. */
   stderr: string;
+  /** Exit code from qobuz-dl. */
   code: number;
+  /** True when invoked with dryRun (no process spawned). */
   dry?: boolean;
+  /** Full per-run log path on disk, when available. */
   logPath?: string | null;
+  /** Present when a wrong file was matched; used to short-circuit further candidates. */
   mismatch?: {
     artistNorm: string;
     titleNorm: string;
     artistRaw: string;
     titleRaw: string;
   } | null;
+  /** True when qobuz-dl reported success but no new audio landed (already downloaded). */
   already?: boolean;
 };
 
@@ -34,7 +44,7 @@ export type RunQobuzResult = {
  * Run qobuz-dl in "lucky" mode for a single query, with strict validation and logging.
  * - Detects new files by snapshotting the target directory before/after.
  * - Writes per-run logs and search-term sidecar files.
- * - Validates tags against expected artist/title; deletes wrong matches.
+ * - Validates tags against expected artist/title; deletes wrong matches and reports a mismatch.
  */
 export async function runQobuzLuckyStrict(
   query: string,
