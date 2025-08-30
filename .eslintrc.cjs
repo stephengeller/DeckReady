@@ -1,9 +1,4 @@
 module.exports = {
-  parser: '@typescript-eslint/parser',
-  parserOptions: {
-    project: './tsconfig.json',
-    sourceType: 'module',
-  },
   plugins: ['@typescript-eslint', 'prettier', 'import'],
   extends: [
     'eslint:recommended',
@@ -23,6 +18,15 @@ module.exports = {
     },
   },
   overrides: [
+    // Enable the TS parser and project-based rules only for TypeScript files
+    {
+      files: ['**/*.ts', '**/*.tsx'],
+      parser: '@typescript-eslint/parser',
+      parserOptions: {
+        project: './tsconfig.json',
+        sourceType: 'module',
+      },
+    },
     {
       files: ['test/**/*.ts', 'test/**/*.js'],
       env: { jest: true, node: true },
