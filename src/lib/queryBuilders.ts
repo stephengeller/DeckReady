@@ -1,5 +1,9 @@
 import { splitArtists, stripFeat, looksLikeRemix, normaliseForSearch } from './normalize';
 
+/**
+ * Build a ranked list of search query candidates from a track’s title/artists.
+ * Produces tighter queries first (artist + exact title), then looser fallbacks.
+ */
 export function buildQueries({
   title,
   artists,
@@ -10,36 +14,36 @@ export function buildQueries({
   primArtist: string;
 }) {
   const artistList = splitArtists(artists || '');
-  const cleanTitle = stripFeat(title || '');
-  const remixy = looksLikeRemix(title || '');
+  const cleanedTitle = stripFeat(title || '');
+  const isRemixLike = looksLikeRemix(title || '');
 
-  const Q = (t: string, a: string) => normaliseForSearch(`${t} ${a}`.trim());
+  const buildNormalizedQuery = (t: string, a: string) => normaliseForSearch(`${t} ${a}`.trim());
 
   const queries: string[] = [];
 
-  // tight variants (quoted and unquoted artist-first)
-  queries.push(`${primArtist} "${cleanTitle}"`);
-  queries.push(normaliseForSearch(`${primArtist} ${cleanTitle}`));
+  // Artist-first variants (exact phrase and loose)
+  queries.push(`${primArtist} "${cleanedTitle}"`);
+  queries.push(normaliseForSearch(`${primArtist} ${cleanedTitle}`));
 
-  // title-first (quoted exact and loose)
-  queries.push(normaliseForSearch(`${cleanTitle} ${primArtist}`));
-  queries.push(normaliseForSearch(`"${cleanTitle}" ${primArtist}`));
-  queries.push(normaliseForSearch(`"${cleanTitle}"`));
+  // Title-first variants (loose and exact phrase)
+  queries.push(normaliseForSearch(`${cleanedTitle} ${primArtist}`));
+  queries.push(normaliseForSearch(`"${cleanedTitle}" ${primArtist}`));
+  queries.push(normaliseForSearch(`"${cleanedTitle}"`));
 
-  // include small artist lists (2–3 total) as unquoted
+  // Small artist lists (2–3) as unquoted
   if (artistList.length > 1 && artistList.length <= 3) {
-    queries.push(Q(cleanTitle, artistList.join(' ')));
+    queries.push(buildNormalizedQuery(cleanedTitle, artistList.join(' ')));
   }
 
-  // remix-aware exact phrase
-  if (remixy) {
+  // Remix-aware exact phrase variants
+  if (isRemixLike) {
     queries.push(normaliseForSearch(`"${title}" ${primArtist}`));
-    queries.push(normaliseForSearch(`"${cleanTitle}" ${primArtist} remix`));
+    queries.push(normaliseForSearch(`"${cleanedTitle}" ${primArtist} remix`));
   }
 
-  // loose fallback: title only
-  queries.push(normaliseForSearch(cleanTitle));
+  // Loose fallback: title only
+  queries.push(normaliseForSearch(cleanedTitle));
 
-  // de-dupe, preserve order
+  // De-dupe while preserving order
   return Array.from(new Set(queries.filter(Boolean)));
 }

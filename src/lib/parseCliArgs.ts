@@ -10,7 +10,7 @@ export function parseCliArgs(argv: string[]): {
   json: boolean;
 } {
   // Default to quiet output; enable verbose for full qobuz-dl streams
-  const out = {
+  const result = {
     file: null as string | null,
     dir: null as string | null,
     dry: false,
@@ -21,20 +21,41 @@ export function parseCliArgs(argv: string[]): {
     summaryOnly: false,
     json: false,
   };
+
+  // Skip node and script path
   for (let i = 2; i < argv.length; i++) {
-    const a = argv[i];
-    if (!a) continue;
-    if (a === '--dry') out.dry = true;
-    else if (a === '--quiet') out.quiet = true;
-    else if (a === '--verbose') {
-      out.verbose = true;
-      out.quiet = false;
-    } else if (a === '--progress') out.progress = true;
-    else if (a === '--no-color') out.noColor = true;
-    else if (a === '--summary-only') out.summaryOnly = true;
-    else if (a === '--json') out.json = true;
-    else if (a === '--dir') out.dir = argv[++i] || null;
-    else if (!a.startsWith('--') && !out.file) out.file = a;
+    const arg = argv[i];
+    if (!arg) continue;
+    switch (arg) {
+      case '--dry':
+        result.dry = true;
+        break;
+      case '--quiet':
+        result.quiet = true;
+        break;
+      case '--verbose':
+        result.verbose = true;
+        result.quiet = false;
+        break;
+      case '--progress':
+        result.progress = true;
+        break;
+      case '--no-color':
+        result.noColor = true;
+        break;
+      case '--summary-only':
+        result.summaryOnly = true;
+        break;
+      case '--json':
+        result.json = true;
+        break;
+      case '--dir':
+        result.dir = argv[++i] || null;
+        break;
+      default:
+        if (!arg.startsWith('--') && !result.file) result.file = arg;
+        break;
+    }
   }
-  return out;
+  return result;
 }

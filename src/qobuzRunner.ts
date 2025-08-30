@@ -164,6 +164,12 @@ export type RunQobuzResult = {
   already?: boolean;
 };
 
+/**
+ * Run qobuz-dl in "lucky" mode for a single query, with strict validation and logging.
+ * - Detects new files by snapshotting the target directory before/after.
+ * - Writes per-run logs and search-term sidecar files.
+ * - Validates tags against expected artist/title; deletes wrong matches.
+ */
 export async function runQobuzLuckyStrict(
   query: string,
   {
@@ -248,7 +254,7 @@ export async function runQobuzLuckyStrict(
       }
     : undefined;
 
-  const res = await spawnStreaming('qobuz-dl', args, { quiet, onStdout });
+  const proc = await spawnStreaming('qobuz-dl', args, { quiet, onStdout });
   const after = await snapshot(directory || '.');
 
   const addedAudio = diffNewAudio(before.files, after.files);
@@ -284,7 +290,7 @@ export async function runQobuzLuckyStrict(
   }
 
   // If the tool reported files were already downloaded, treat as success to avoid falling back to 320.
-  const alreadyDownloaded = res.code === 0 && addedAudio.length === 0;
+  const alreadyDownloaded = proc.code === 0 && addedAudio.length === 0;
   if (alreadyDownloaded) {
     return {
       ok: true,
@@ -293,7 +299,7 @@ export async function runQobuzLuckyStrict(
       logPath: null,
       already: true,
       mismatch: null,
-      ...res,
+      ...proc,
     } as unknown as RunQobuzResult;
   }
 
@@ -306,7 +312,7 @@ export async function runQobuzLuckyStrict(
       const safeQuery = query.replace(/[^a-z0-9_\-.]/gi, '_').slice(0, 120);
       const fname = `${Date.now()}_${quality}_${safeQuery}.log`;
       logPath = path.join(logDir, fname);
-      const content = `CMD: ${cmd}\n\nSTDOUT:\n${res.stdout}\n\nSTDERR:\n${res.stderr}\n`;
+      const content = `CMD: ${cmd}\n\nSTDOUT:\n${proc.stdout}\n\nSTDERR:\n${proc.stderr}\n`;
       await fs.writeFile(logPath, content, 'utf8');
     }
   } catch (e) {
@@ -430,11 +436,11 @@ export async function runQobuzLuckyStrict(
             titleRaw: firstMismatch.title,
           }
         : null;
-      return { ok: false, added: [], cmd, logPath, mismatch, ...res } as unknown as RunQobuzResult;
+      return { ok: false, added: [], cmd, logPath, mismatch, ...proc } as unknown as RunQobuzResult;
     }
   }
 
-  const ok = res.code === 0 && addedAudio.length > 0;
+  const ok = proc.code === 0 && addedAudio.length > 0;
 
   // After each successful download, convert to AIFF and organise by genre/artist/title
   if (addedAudio.length > 0) {
@@ -458,11 +464,15 @@ export async function runQobuzLuckyStrict(
     cmd,
     logPath,
     mismatch: null,
-    ...res,
+    ...proc,
   } as unknown as RunQobuzResult;
 }
 
 // --- Helpers: convert downloaded audio to AIFF, read metadata, and move into organised folders
+/**
+ * Convert a downloaded audio file to AIFF (if needed), copy metadata, and move
+ * it into the organised AIFF folder tree under ORGANISED_AIFF_DIR/Genre/Artist/Title.aiff.
+ */
 export async function processDownloadedAudio(
   inputPath: string,
   runner?: Runner,
@@ -738,6 +748,9 @@ export function sanitizeName(s: string) {
 }
 
 // Find an already-organised AIFF for the given artist/title anywhere under ORGANISED_AIFF_DIR
+/**
+ * Locate an already-organised AIFF for the given artist/title anywhere under ORGANISED_AIFF_DIR.
+ */
 export async function findOrganisedAiff(artist: string, title: string): Promise<string | null> {
   try {
     const baseDir = process.env.ORGANISED_AIFF_DIR || ORGANISED_AIFF_DIR;
