@@ -6,10 +6,9 @@
 - Yarn (preferred) or npm
 - qobuz-dl, ffmpeg, ffprobe (runtime integration tests)
 
-Install deps and browsers:
+Install deps:
 
 - `yarn install`
-- `npx playwright install chromium`
 
 ## Scripts
 

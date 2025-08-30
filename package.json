@@ -17,8 +17,7 @@
     "run-lucky": "script/run-lucky"
   },
   "dependencies": {
-    "dotenv": "^16.4.5",
-    "playwright": "^1.55.0"
+    "dotenv": "^16.4.5"
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",

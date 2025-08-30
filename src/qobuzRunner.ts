@@ -204,7 +204,6 @@ export async function runQobuzLuckyStrict(
     '--no-db', // always attempt fresh download (ignore DB)
     '--no-m3u',
     '--no-fallback', // we control fallback explicitly (q=6 then q=5)
-    // '--no-cover',        // progress remains clear; we verify by audio files
 
     // Consistent names (no slashes):
     '-ff',
