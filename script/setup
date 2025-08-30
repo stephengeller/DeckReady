@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Idempotent local setup for spotify-to-rekordbox
+# - Installs Node deps (yarn or npm)
+# - Ensures .env exists with required keys
+# - Creates default organised AIFF folder if missing
+# - Verifies required external tools
+
+ROOT_DIR="$(cd -- "$(dirname "${BASH_SOURCE[0]}")/.." >/dev/null 2>&1 && pwd)"
+cd "$ROOT_DIR"
+
+echo "==> Detecting package manager"
+PKG="npm"
+if [[ -f yarn.lock ]]; then
+  if command -v yarn >/dev/null 2>&1; then PKG="yarn"; fi
+fi
+echo "    using: $PKG"
+
+echo "==> Installing Node dependencies (idempotent)"
+if [[ "$PKG" == "yarn" ]]; then
+  yarn install --silent || yarn install
+else
+  npm install --silent || npm install
+fi
+
+ENV_FILE=".env"
+ENV_EXAMPLE=".env.example"
+
+echo "==> Ensuring $ENV_FILE exists"
+if [[ ! -f "$ENV_FILE" ]]; then
+  if [[ -f "$ENV_EXAMPLE" ]]; then
+    cp "$ENV_EXAMPLE" "$ENV_FILE"
+    echo "    created $ENV_FILE from $ENV_EXAMPLE"
+  else
+    cat > "$ENV_FILE" <<'EOF'
+# Spotify API credentials (Client Credentials flow)
+SPOTIFY_CLIENT_ID=
+SPOTIFY_CLIENT_SECRET=
+
+# Where organised AIFF files are stored (defaults to ~/Music/rekordbox/Organised_AIFF)
+# ORGANISED_AIFF_DIR=
+EOF
+    echo "    created minimal $ENV_FILE"
+  fi
+else
+  # Ensure required keys are present (append if missing)
+  if ! grep -q '^SPOTIFY_CLIENT_ID=' "$ENV_FILE"; then echo 'SPOTIFY_CLIENT_ID=' >> "$ENV_FILE"; fi
+  if ! grep -q '^SPOTIFY_CLIENT_SECRET=' "$ENV_FILE"; then echo 'SPOTIFY_CLIENT_SECRET=' >> "$ENV_FILE"; fi
+  if ! grep -q '^# ORGANISED_AIFF_DIR=' "$ENV_FILE" && ! grep -q '^ORGANISED_AIFF_DIR=' "$ENV_FILE"; then
+    echo '' >> "$ENV_FILE"
+    echo '# ORGANISED_AIFF_DIR=' >> "$ENV_FILE"
+  fi
+  echo "    $ENV_FILE present"
+fi
+
+echo "==> Creating default organised AIFF folder if missing"
+DEFAULT_ORG="$HOME/Music/rekordbox/Organised_AIFF"
+mkdir -p "$DEFAULT_ORG" || true
+echo "    ensured: $DEFAULT_ORG"
+
+echo "==> Verifying required external tools (qobuz-dl, ffmpeg, ffprobe)"
+missing=()
+for cmd in qobuz-dl ffmpeg ffprobe; do
+  if ! command -v "$cmd" >/dev/null 2>&1; then
+    missing+=("$cmd")
+  fi
+done
+
+if [[ ${#missing[@]} -gt 0 ]]; then
+  echo "    missing: ${missing[*]}"
+  echo "--"
+  echo "Install guidance:"
+  echo "  qobuz-dl  : pipx install qobuz-dl    (or pip install --user qobuz-dl)"
+  echo "  ffmpeg    : macOS(brew): brew install ffmpeg | Ubuntu: sudo apt-get install ffmpeg"
+  echo "  ffprobe   : included with ffmpeg packages"
+  echo "--"
+else
+  echo "    all found"
+fi
+
+echo "==> Setup complete"
+echo "Next:"
+echo "  1) Open .env and set SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET"
+echo "  2) Try: script/run https://open.spotify.com/playlist/... --dir out --dry"
+

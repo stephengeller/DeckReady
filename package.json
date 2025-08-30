@@ -4,6 +4,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
+    "setup": "script/setup",
     "typecheck": "tsc --noEmit",
     "start": "ts-node src/cli/runLucky.ts",
     "test": "jest --runInBand --reporters=default",

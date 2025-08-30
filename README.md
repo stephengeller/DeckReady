@@ -21,14 +21,18 @@ Requirements
 - qobuz-dl: available in your PATH and configured with your Qobuz credentials
 - ffmpeg and ffprobe: required for tag inspection and AIFF conversion
 
-Install
+Install & Setup
 
-- Clone the repo, then install deps:
-  - `yarn install` (preferred) or `npm install`
+- Clone the repo, then run the setup script (idempotent):
+  - `script/setup` (or `yarn setup` / `npm run setup`)
+    - Installs Node dependencies
+    - Ensures `.env` exists (copies from `.env.example` if missing)
+    - Creates the default organised AIFF folder at `~/Music/rekordbox/Organised_AIFF`
+    - Checks for external tools: `qobuz-dl`, `ffmpeg`, `ffprobe`
 
 Configuration
 
-Create a `.env` (or edit the provided example) at repo root:
+Open `.env` at the repo root and set:
 
 - `SPOTIFY_CLIENT_ID` / `SPOTIFY_CLIENT_SECRET`: required for Spotify Web API access (client credentials flow).
 - `ORGANISED_AIFF_DIR`: base folder for organised AIFF files. Default: `~/Music/rekordbox/Organised_AIFF`.
