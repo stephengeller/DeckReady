@@ -3,6 +3,7 @@ import { splitArtists, stripFeat, looksLikeRemix, normaliseForSearch } from './n
 /**
  * Build a ranked list of search query candidates from a track’s title/artists.
  * Produces tighter queries first (artist + exact title), then looser fallbacks.
+ * Order is preserved and duplicates are removed.
  */
 export function buildQueries({
   title,

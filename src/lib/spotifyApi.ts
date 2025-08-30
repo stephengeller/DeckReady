@@ -4,6 +4,7 @@ type SpotifyType = 'playlist' | 'album' | 'track';
 
 /**
  * Parse a URL from open.spotify.com and extract the resource type and id.
+ * Throws if the host is not open.spotify.com or the URL does not contain a supported resource.
  */
 export function parseSpotifyUrl(url: string): { type: SpotifyType; id: string } {
   const parsed = new URL(url);
@@ -21,9 +22,7 @@ export function parseSpotifyUrl(url: string): { type: SpotifyType; id: string } 
   return { type: resourceType, id };
 }
 
-/**
- * Obtain a Client Credentials access token using configured client id/secret.
- */
+/** Obtain a Client Credentials access token using configured client id/secret. */
 async function fetchClientCredentialsToken(): Promise<string> {
   const clientId = SPOTIFY_CLIENT_ID;
   const clientSecret = SPOTIFY_CLIENT_SECRET;
@@ -48,9 +47,7 @@ async function fetchClientCredentialsToken(): Promise<string> {
   return json.access_token;
 }
 
-/**
- * Format a Spotify track object to `Title - Artist 1, Artist 2`.
- */
+/** Format a Spotify track object to `Title - Artist 1, Artist 2`. */
 function formatTrackLine(track: {
   name?: string | null;
   artists?: { name?: string | null }[] | null;
@@ -125,9 +122,7 @@ async function fetchTrackLine(trackId: string, token: string): Promise<string[]>
   return line ? [line] : [];
 }
 
-/**
- * Generate `Title - Artist…` lines for a Spotify playlist/album/track URL.
- */
+/** Generate `Title - Artist…` lines for a Spotify playlist/album/track URL. */
 export async function getLinesFromSpotifyUrl(url: string): Promise<string[]> {
   const { type, id } = parseSpotifyUrl(url);
   const token = await fetchClientCredentialsToken();

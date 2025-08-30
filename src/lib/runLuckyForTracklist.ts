@@ -13,7 +13,9 @@ import { buildQueries } from './queryBuilders';
 import { runQobuzLuckyStrict, findOrganisedAiff } from './qobuzRunner';
 import { createSpinner } from './ui/spinner';
 
-// Yield input lines either from a file path or stdin
+/**
+ * Stream input lines from a file path (if provided) or stdin.
+ */
 async function* lineStream(file: string | null) {
   if (file) {
     const abs = path.resolve(file);
@@ -25,9 +27,10 @@ async function* lineStream(file: string | null) {
   }
 }
 
-// Accept only "Title - Artist" style lines (simple guard)
+/** Accept only "Title - Artist" style lines (simple guard). */
 const isTrackLine = (line: string) => /\s-\s/.test(line.trim());
 
+/** Main entrypoint for processing a tracklist with qobuz-dl and organising output. */
 export async function main() {
   const {
     file,
@@ -206,6 +209,7 @@ export async function main() {
   }
 }
 
+/** Indent a multi-line string by `n` spaces per line. */
 function indent(s: string | undefined | null, n = 2) {
   const pad = ' '.repeat(n);
   return (s || '')
