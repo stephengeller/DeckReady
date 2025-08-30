@@ -81,5 +81,40 @@ describe('processDownloadedAudio (unit, mocked ffmpeg/ffprobe)', () => {
       .catch(() => false);
     expect(exists).toBe(true);
   });
+
+  test('embeds cover art when a nearby cover image is present', async () => {
+    const src = path.join(tmp.dir, '02 - someSong.flac');
+    await fs.writeFile(src, 'FAKE-FLAC');
+    const cover = path.join(tmp.dir, 'cover.jpg');
+    await fs.writeFile(cover, 'IMG');
+
+    let ffmpegArgs: string[] | null = null;
+    const fakeRunner = async (cmd: string, args: string[]) => {
+      if (cmd === 'ffprobe') {
+        const out = [
+          'TAG:genre=Electronic',
+          'TAG:artist=Test Artist',
+          'TAG:title=someSong',
+          '',
+        ].join('\n');
+        return { code: 0, stdout: out, stderr: '' };
+      }
+
+      if (cmd === 'ffmpeg') {
+        ffmpegArgs = args;
+        const outPath = args[args.length - 1];
+        await fs.writeFile(outPath, 'AIFFDATA');
+        return { code: 0, stdout: '', stderr: '' };
+      }
+
+      return { code: 1, stdout: '', stderr: 'unknown command' };
+    };
+
+    await processDownloadedAudio(src, fakeRunner);
+
+    expect(ffmpegArgs).toBeTruthy();
+    expect(ffmpegArgs).toContain(cover);
+    expect(ffmpegArgs).toEqual(expect.arrayContaining(['-disposition:v', 'attached_pic']));
+  });
 });
 export {};
