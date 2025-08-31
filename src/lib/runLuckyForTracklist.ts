@@ -186,6 +186,21 @@ export async function main() {
     }
   }
 
+  // Convenience: persist last run dir and copy summary logs into repo-local logs/last-run
+  try {
+    const repoLogsBase = path.join(process.cwd(), 'logs', 'last-run');
+    fs.mkdirSync(repoLogsBase, { recursive: true });
+    if (dir) {
+      fs.writeFileSync(path.join(repoLogsBase, 'last-run-dir.txt'), dir);
+      const nmSrc = path.join(dir, 'not-matched.log');
+      const nfSrc = path.join(dir, 'not-found.log');
+      if (fs.existsSync(nmSrc)) fs.copyFileSync(nmSrc, path.join(repoLogsBase, 'not-matched.log'));
+      if (fs.existsSync(nfSrc)) fs.copyFileSync(nfSrc, path.join(repoLogsBase, 'not-found.log'));
+    }
+  } catch {
+    // best-effort only
+  }
+
   // Print final summary (quiet-friendly)
   if (json) {
     const summary = {

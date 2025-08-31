@@ -7,6 +7,7 @@
     "setup": "script/setup",
     "typecheck": "tsc --noEmit",
     "start": "ts-node src/cli/runLucky.ts",
+    "not-matched:spotify": "ts-node src/cli/notMatchedToSpotify.ts",
     "test": "jest --runInBand --reporters=default",
     "lint": "eslint --config .eslintrc.cjs --ext .ts src test",
     "lint:fix": "eslint --config .eslintrc.cjs --ext .ts src test --fix",
