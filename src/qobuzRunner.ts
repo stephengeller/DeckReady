@@ -217,7 +217,8 @@ export async function runQobuzLuckyStrict(
       // Relaxed artist match rules:
       // - exact normalized match
       // - OR expected artist appears in the split artist list from the tag
-      // - OR (if title indicates remix/edit), expected artist appears in the parentheses content
+      // - OR (if title indicates remix/edit/mix/version), expected artist (or its core without mix/remix tokens)
+      //   appears in ANY parentheses content
       let artistOk = true;
       if (artist) {
         artistOk = false;
@@ -230,10 +231,22 @@ export async function runQobuzLuckyStrict(
           if (parts.includes(expectedArtist)) artistOk = true;
         }
         if (!artistOk && /\(([^)]*)\)/.test(fileTitleRaw)) {
-          const paren = (fileTitleRaw.match(/\(([^)]*)\)/) || [])[1] || '';
-          const normParen = normaliseTag(paren);
-          if (/(remix|vip|edit|version)/i.test(paren) && normParen.includes(expectedArtist))
-            artistOk = true;
+          const parens = Array.from(fileTitleRaw.matchAll(/\(([^)]*)\)/g)).map((m) => m[1] || '');
+          const expectedCore = normaliseTag(
+            (artist || '').replace(/\b(remix|vip|edit|mix|version)\b/gi, '').trim(),
+          );
+          for (const p of parens) {
+            const normParen = normaliseTag(p);
+            const remixLike = /\b(remix|vip|edit|mix|version)\b/i.test(p);
+            if (
+              remixLike &&
+              (normParen.includes(expectedArtist) ||
+                (!!expectedCore && normParen.includes(expectedCore)))
+            ) {
+              artistOk = true;
+              break;
+            }
+          }
         }
       }
 
