@@ -270,11 +270,21 @@ export async function findOrganisedAiff(artist: string, title: string): Promise<
     const baseDir = process.env.ORGANISED_AIFF_DIR || ORGANISED_AIFF_DIR;
     const artistDirName = sanitizeName(artist || '');
     const titleBase = sanitizeName(title || '');
-    const genres = await fs.readdir(baseDir).catch(() => [] as string[]);
+
+    // Only consider actual genre directories (ignore files like .DS_Store)
+    const genreDirents = await fs
+      .readdir(baseDir, { withFileTypes: true })
+      .catch(() => [] as Array<{ name: string; isDirectory: () => boolean }>);
+
+    const genres = genreDirents
+      .filter((d) => d && typeof d.isDirectory === 'function' && d.isDirectory())
+      .map((d) => d.name);
+
     const titleRegex = new RegExp(
       `^${titleBase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?: \\((?:\\d+)\\))?\\.aiff$`,
       'i',
     );
+
     for (const g of genres) {
       const artistDir = path.join(baseDir, g, artistDirName);
       try {
@@ -283,8 +293,11 @@ export async function findOrganisedAiff(artist: string, title: string): Promise<
           if (!e.isFile()) continue;
           if (titleRegex.test(e.name)) return path.join(artistDir, e.name);
         }
-      } catch {
-        console.warn(`Warning: could not access artist dir ${artistDir}`);
+      } catch (err) {
+        // Missing artist directory under a genre is normal; only warn on unexpected errors
+        if (err?.code !== 'ENOENT') {
+          console.warn(`Warning: could not access artist dir ${artistDir}`);
+        }
       }
     }
   } catch {
