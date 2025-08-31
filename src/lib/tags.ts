@@ -61,8 +61,14 @@ export function normaliseTag(s: string | undefined): string {
  */
 export function normaliseTitleBase(s: string | undefined): string {
   if (!s) return '';
-  const stripped = (s || '')
-    .replace(/\s*[[(][^\])]*(?:remix|vip|edit|version)[^\])]*[\])]\s*$/i, '')
-    .trim();
+  // Repeatedly strip trailing bracketed qualifiers like (feat. X), (Remix), (VIP Mix), (Acoustic), (Remaster), etc.
+  // Allow multiple groups at the end (e.g., Title (Remix) (VIP)) to be removed.
+  let t = (s || '').trim();
+  const tailParenRe =
+    /\s*(?:[[(][^\])]*?(?:remix|vip|edit|mix|version|cover|acoustic|remaster|mono|stereo|feat\.?|ft\.?)\b[^\])]*?[\])])+\s*$/i;
+  while (tailParenRe.test(t)) {
+    t = t.replace(tailParenRe, '').trim();
+  }
+  const stripped = t;
   return normaliseTag(stripped);
 }
