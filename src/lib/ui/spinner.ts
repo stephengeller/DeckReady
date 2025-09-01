@@ -3,6 +3,7 @@ import { dim } from './colors';
 export type Spinner = {
   start: (text?: string) => void;
   stop: () => void;
+  setText: (text: string) => void;
 };
 
 export function createSpinner(enabled: boolean, intervalMs = 80): Spinner {
@@ -27,5 +28,9 @@ export function createSpinner(enabled: boolean, intervalMs = 80): Spinner {
     if (enabled) process.stdout.write('\r\x1b[2K');
   };
 
-  return { start, stop };
+  const setText = (text: string) => {
+    lastText = text;
+  };
+
+  return { start, stop, setText };
 }

@@ -16,6 +16,7 @@ Works entirely from the CLI and does not require a Spotify login for public cont
 - [Configuration](#configuration)
 - [Quick Start](#quick-start)
 - [CLI Reference](#cli-reference)
+- [Qobuz URLs](#qobuz-urls)
 - [Output & Logs](#output--logs)
 - [Troubleshooting](#troubleshooting)
 - [Development](#development)
@@ -70,7 +71,7 @@ mkdir -p out
 2. Run the end‑to‑end helper:
 
 ```bash
-script/run <spotify_url> --dir out [--dry] [--quality Q]
+script/run <spotify_url|qobuz_url> --dir out [--dry] [--quality Q]
 ```
 
 Notes:
@@ -89,6 +90,11 @@ script/run https://open.spotify.com/track/... --dir out
 
 # Use a pre-made "Title - Artist" file, skip Spotify
 script/run --tracklist path/to/tracklist.txt --dir out
+
+# Qobuz direct URL (playlist, track, album)
+script/run https://open.qobuz.com/playlist/35590683 --dir out
+script/run https://open.qobuz.com/track/349546995 --dir out
+script/run https://open.qobuz.com/album/... --dir out
 ```
 
 ## CLI Reference
@@ -137,6 +143,26 @@ Title - Artist 1, Artist 2
 - `--summary-only`: suppress per‑file logs; emit summary at the end
 - `--json`: JSON summary output
 
+## Qobuz URLs
+
+You can skip Spotify entirely and download directly from Qobuz links using the same wrapper:
+
+- Supported: playlist, album, track (and artist/label pages supported by `qobuz-dl dl`)
+
+Usage:
+
+```bash
+script/run https://open.qobuz.com/{playlist|album|track}/... --dir out [--dry] [--quality Q] [--quiet|--verbose]
+```
+
+Behavior:
+
+- Uses `qobuz-dl dl <URL>` under the hood
+- Shows a tidy spinner with the active track and percent; use `--verbose` for raw `qobuz-dl` output
+- Converts downloaded audio to AIFF and organises into `ORGANISED_AIFF_DIR/Genre/Artist/Title.aiff`
+- Skips duplicates: if an organised AIFF already exists for the detected artist/title, the new file is removed and a message is printed (suppressed with `--quiet`)
+- Writes per-run logs under `<dir>/.qobuz-logs`
+
 ## Output & Logs
 
 - Organised AIFF files land under `ORGANISED_AIFF_DIR/Genre/Artist/Title.aiff`
@@ -166,6 +192,7 @@ See: [docs/DEVELOPMENT.md](./docs/DEVELOPMENT.md)
 
 - `script/run`, `script/run-lucky`, `script/spotify-list`: shims to run CLIs via ts-node
 - `src/cli/runLucky.ts`: CLI entry for qobuz-dl flow
+- `script/qobuz-dl-url`, `src/cli/qobuzDl.ts`: direct Qobuz URL CLI
 - `src/lib/runLuckyForTracklist.ts`: orchestration (queries, matching, validation, summary)
 - `src/lib/normalize.ts`, `src/lib/queryBuilders.ts`: normalisation and query generation
 - `src/qobuzRunner.ts`: qobuz‑dl integration (spawning, validation, logging)

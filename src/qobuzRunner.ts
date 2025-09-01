@@ -10,7 +10,7 @@ import {
   rmIfOldTmp,
   pruneEmptyDirs,
 } from './lib/fsWalk';
-import { processDownloadedAudio } from './lib/organiser';
+import { processDownloadedAudio, findOrganisedAiff } from './lib/organiser';
 
 export type RunQobuzResult = {
   /** True if qobuz-dl returned success and at least one new audio file was detected. */
@@ -119,18 +119,19 @@ export async function runQobuzLuckyStrict(
   const onStdout = progress
     ? (chunk: string) => {
         const m = chunk.match(/(\d+(?:\.\d+)?)([kM])\/(\d+(?:\.\d+)?)([kM])/);
+        let percent: number | undefined;
         if (m) {
           const v = (n: string, u: string) => Number(n) * (u === 'M' ? 1_000_000 : 1_000);
           bytes = v(m[1], m[2]);
           total = v(m[3], m[4]);
-          const percent =
+          percent =
             total > 0 ? Math.max(0, Math.min(100, Math.round((bytes / total) * 100))) : undefined;
-          if (onProgress) onProgress({ raw: chunk, percent, bytes, total });
         }
+        if (onProgress) onProgress({ raw: chunk, percent, bytes, total });
       }
     : undefined;
 
-  const proc = await spawnStreaming('qobuz-dl', args, { quiet, onStdout });
+  const proc = await spawnStreaming('qobuz-dl', args, { quiet, onStdout, onStderr: onStdout });
   const after = await snapshot(directory || '.');
 
   const addedAudio = diffNewAudio(before.files, after.files);
@@ -353,6 +354,195 @@ export async function runQobuzLuckyStrict(
     cmd,
     logPath,
     mismatch: null,
+    ...proc,
+  } as unknown as RunQobuzResult;
+}
+
+/**
+ * Run qobuz-dl in direct URL mode (dl) for a Qobuz URL (track/album/playlist/artist/label).
+ * - Mirrors snapshot/new-file detection and post-processing from runQobuzLuckyStrict.
+ * - Does NOT perform artist/title tag validation since the URL is authoritative.
+ */
+export async function runQobuzDl(
+  url: string,
+  {
+    directory,
+    quality = 6,
+    dryRun = false,
+    quiet = false,
+    progress = false,
+    onProgress,
+  }: {
+    directory?: string;
+    quality?: number;
+    dryRun?: boolean;
+    quiet?: boolean;
+    progress?: boolean;
+    onProgress?: (info: { raw: string; percent?: number; bytes?: number; total?: number }) => void;
+  } = {},
+): Promise<RunQobuzResult> {
+  const args = [
+    'dl',
+    '-q',
+    String(quality),
+    ...(directory ? ['-d', directory] : []),
+
+    '--no-db',
+    '--no-m3u',
+    '--no-fallback',
+
+    '-ff',
+    '{artist} - {album} ({year}) [{bit_depth}B-{sampling_rate}kHz]',
+    '-tf',
+    '{tracktitle}',
+
+    url,
+  ];
+
+  const cmd = `qobuz-dl ${args.join(' ')}`;
+
+  if (dryRun) {
+    if (!quiet) console.log(cmd);
+    return {
+      ok: true,
+      added: [],
+      cmd,
+      stdout: '',
+      stderr: '',
+      code: 0,
+      dry: true,
+    } as RunQobuzResult;
+  }
+
+  const before = await snapshot(directory || '.');
+  let bytes = 0;
+  let total = 0;
+  const onStdout = progress
+    ? (chunk: string) => {
+        const m = chunk.match(/(\d+(?:\.\d+)?)([kM])\/(\d+(?:\.\d+)?)([kM])/);
+        let percent: number | undefined;
+        if (m) {
+          const v = (n: string, u: string) => Number(n) * (u === 'M' ? 1_000_000 : 1_000);
+          bytes = v(m[1], m[2]);
+          total = v(m[3], m[4]);
+          percent =
+            total > 0 ? Math.max(0, Math.min(100, Math.round((bytes / total) * 100))) : undefined;
+        }
+        if (onProgress) onProgress({ raw: chunk, percent, bytes, total });
+      }
+    : undefined;
+
+  const proc = await spawnStreaming('qobuz-dl', args, { quiet, onStdout, onStderr: onStdout });
+  const after = await snapshot(directory || '.');
+
+  const addedAudio = diffNewAudio(before.files, after.files);
+
+  // Write the original URL next to each downloaded audio file for debugging
+  if (addedAudio.length > 0) {
+    await Promise.all(
+      addedAudio.map(async (p) => {
+        try {
+          await fs.writeFile(`${p}.search.txt`, url, 'utf8');
+        } catch (err) {
+          console.error('Failed to write URL sidecar:', err);
+        }
+      }),
+    );
+  }
+
+  // If no audio landed, cleanup fresh tmp files/dirs
+  if (addedAudio.length === 0) {
+    const newFiles = diffNew(before.files, after.files);
+    await Promise.all(newFiles.map((p) => rmIfOldTmp(p, 0)));
+    const newDirs = diffNew(before.dirs, after.dirs);
+    for (const d of newDirs) {
+      try {
+        const left = await fs.readdir(d);
+        if (left.length === 0) await fs.rmdir(d);
+      } catch (err) {
+        void err;
+      }
+    }
+    await pruneEmptyDirs(directory || '.');
+  }
+
+  const alreadyDownloaded = proc.code === 0 && addedAudio.length === 0;
+  if (alreadyDownloaded) {
+    return {
+      ok: true,
+      added: [],
+      cmd,
+      logPath: null,
+      already: true,
+      mismatch: null,
+      ...proc,
+    } as unknown as RunQobuzResult;
+  }
+
+  // Log full output per run (best-effort)
+  let logPath: string | null = null;
+  try {
+    if (directory) {
+      const logDir = path.join(directory, '.qobuz-logs');
+      await fs.mkdir(logDir, { recursive: true });
+      const safeUrl = url.replace(/[^a-z0-9_\-.]/gi, '_').slice(0, 120);
+      const fname = `${Date.now()}_${quality}_${safeUrl}.log`;
+      logPath = path.join(logDir, fname);
+      const content = `CMD: ${cmd}\n\nSTDOUT:\n${proc.stdout}\n\nSTDERR:\n${proc.stderr}\n`;
+      await fs.writeFile(logPath, content, 'utf8');
+    }
+  } catch (e) {
+    console.error('Failed to write qobuz-dl log:', e);
+  }
+
+  // Short-circuit per file when an organised AIFF already exists
+  const keptAudio: string[] = [];
+  if (addedAudio.length > 0) {
+    for (const f of addedAudio) {
+      try {
+        // eslint-disable-next-line no-await-in-loop
+        const tags = await readTags(f);
+        const artistRaw = tags['artist'] || tags['album_artist'] || '';
+        const titleRaw = tags['title'] || '';
+        // eslint-disable-next-line no-await-in-loop
+        const existing = await findOrganisedAiff(artistRaw, titleRaw);
+        if (existing) {
+          if (!quiet) console.log(`  \u21BA already organised: ${existing}`);
+          try {
+            await fs.rm(f, { force: true });
+            await fs.rm(`${f}.search.txt`, { force: true });
+          } catch {
+            /* ignore */
+          }
+        } else {
+          keptAudio.push(f);
+        }
+      } catch {
+        keptAudio.push(f);
+      }
+    }
+  }
+
+  const ok = proc.code === 0 && keptAudio.length > 0;
+
+  if (keptAudio.length > 0) {
+    for (const f of keptAudio) {
+      try {
+        // eslint-disable-next-line no-await-in-loop
+        await processDownloadedAudio(f, undefined, { quiet });
+      } catch (e) {
+        console.error('processDownloadedAudio failed for', f, e);
+      }
+    }
+  }
+
+  return {
+    ok,
+    added: keptAudio,
+    cmd,
+    logPath,
+    mismatch: null,
+    already: proc.code === 0 && keptAudio.length === 0 ? true : undefined,
     ...proc,
   } as unknown as RunQobuzResult;
 }
