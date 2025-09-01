@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Organize dropped audio files into /Users/stephengeller/Music/rekordbox/ALL_MUSIC_BY_ARTIST
+Organize dropped audio files into ~/Music/rekordbox/ALL_MUSIC_BY_ARTIST
 by Artist/Title based on metadata. Works as a CLI for Automator's "Run Shell Script".
 
 Features
@@ -14,7 +14,7 @@ Features
 
 Usage (example)
   python3 scripts/organize_audio.py \
-    --dest "/Users/stephengeller/Music/rekordbox/ALL_MUSIC_BY_ARTIST" \
+    --dest "~/Music/rekordbox/ALL_MUSIC_BY_ARTIST" \
     "$@"   # when used from Automator "Run Shell Script" with input as arguments
 
 Recommended: install mutagen for best tag coverage
@@ -42,7 +42,7 @@ except Exception:  # noqa: BLE001 - mutagen may not be installed
     ID3 = None  # type: ignore
 
 
-DEFAULT_DEST = "/Users/stephengeller/Music/rekordbox/ALL_MUSIC_BY_ARTIST"
+DEFAULT_DEST = str(Path.home() / "Music/rekordbox/ALL_MUSIC_BY_ARTIST")
 
 SUPPORTED_EXTS = {
     ".mp3",
