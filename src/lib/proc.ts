@@ -10,7 +10,15 @@ import { spawn } from 'node:child_process';
 export function spawnStreaming(
   cmd: string,
   args: string[],
-  { quiet = false, onStdout }: { quiet?: boolean; onStdout?: (chunk: string) => void } = {},
+  {
+    quiet = false,
+    onStdout,
+    onStderr,
+  }: {
+    quiet?: boolean;
+    onStdout?: (chunk: string) => void;
+    onStderr?: (chunk: string) => void;
+  } = {},
 ) {
   return new Promise<{ code: number; stdout: string; stderr: string }>((resolve) => {
     const child = spawn(cmd, args, { stdio: ['ignore', 'pipe', 'pipe'] });
@@ -25,7 +33,8 @@ export function spawnStreaming(
     child.stderr.on('data', (d) => {
       const s = d.toString();
       stderr += s;
-      if (!quiet) process.stderr.write(s);
+      if (onStderr) onStderr(s);
+      else if (!quiet) process.stderr.write(s);
     });
     child.on('error', (err) => {
       stderr += String(err);

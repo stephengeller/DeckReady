@@ -8,6 +8,7 @@ SCRIPT_DIR="$(cd -- "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 # Use our ts-node shims by default so the CLI runs TypeScript entrypoints directly
 RUN_LUCKY_JS="${RUN_LUCKY_JS:-"$SCRIPT_DIR/run-lucky"}"
 SPOTIFY_LIST_JS="${SPOTIFY_LIST_JS:-"$SCRIPT_DIR/spotify-list"}"
+QOBUZ_DL_URL_JS="${QOBUZ_DL_URL_JS:-"$SCRIPT_DIR/qobuz-dl-url"}"
 
 # -----------------------
 # Config defaults
@@ -17,11 +18,13 @@ QUALITY="${QUALITY:-6}"
 DRY_RUN="${DRY_RUN:-0}"
 TRACKLIST_FILE=""
 DO_CONVERT=0
+VERBOSE=0
+QUIET=0
 
 usage() {
   cat <<EOF
 Usage:
-  $(basename "$0") <spotify_url> [options]
+  $(basename "$0") <spotify_url|qobuz_url> [options]
 
 Options:
   --dir DIR            Output directory for downloads (default: $OUT_DIR)
@@ -34,6 +37,7 @@ Options:
 Env overrides:
   RUN_LUCKY_JS=/path/to/runLuckyForTracklist.js
   SPOTIFY_LIST_JS=/path/to/spotify_list.js
+  QOBUZ_DL_URL_JS=/path/to/qobuzDl.js
 EOF
 }
 
@@ -42,6 +46,7 @@ EOF
 # -----------------------
 if [[ $# -lt 1 ]]; then usage; exit 1; fi
 SPOTIFY_URL=""
+QOBUZ_URL=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -h|--help) usage; exit 0 ;;
@@ -50,13 +55,16 @@ while [[ $# -gt 0 ]]; do
     --dry) DRY_RUN=1; shift ;;
     --tracklist) TRACKLIST_FILE="$2"; shift 2 ;;
     --convert) DO_CONVERT=1; shift ;;
+    --verbose) VERBOSE=1; shift ;;
+    --quiet) QUIET=1; shift ;;
     http*spotify.com*) SPOTIFY_URL="$1"; shift ;;
+    http*qobuz.com*) QOBUZ_URL="$1"; shift ;;
     *) echo "Unknown arg: $1"; usage; exit 1 ;;
   esac
 done
 
-if [[ -z "$SPOTIFY_URL" && -z "$TRACKLIST_FILE" ]]; then
-  echo "Provide a Spotify URL or --tracklist <file>."
+if [[ -z "$SPOTIFY_URL" && -z "$QOBUZ_URL" && -z "$TRACKLIST_FILE" ]]; then
+  echo "Provide a Spotify or Qobuz URL, or --tracklist <file>."
   exit 1
 fi
 
@@ -67,7 +75,8 @@ need() { command -v "$1" >/dev/null 2>&1 || { echo "Missing: $1"; exit 1; }; }
 need node
 need qobuz-dl
 [[ -f "$RUN_LUCKY_JS" ]] || { echo "runLucky script not found at: $RUN_LUCKY_JS"; exit 1; }
-if [[ -z "$TRACKLIST_FILE" ]]; then
+[[ -f "$QOBUZ_DL_URL_JS" ]] || { echo "qobuzDl script not found at: $QOBUZ_DL_URL_JS"; exit 1; }
+if [[ -z "$TRACKLIST_FILE" && -n "$SPOTIFY_URL" ]]; then
   [[ -f "$SPOTIFY_LIST_JS" ]] || { echo "spotify_list.js not found at: $SPOTIFY_LIST_JS"; exit 1; }
 fi
 
@@ -78,6 +87,17 @@ mkdir -p "$OUT_DIR"
 # -----------------------
 TMP_ROOT="$(mktemp -d -t s2r.XXXXXX)"
 trap 'rm -rf "$TMP_ROOT"' EXIT
+
+if [[ -n "$QOBUZ_URL" ]]; then
+  echo "Downloading from Qobuz URL via qobuz-dl dl..."
+  ARGS=("$QOBUZ_DL_URL_JS" "$QOBUZ_URL" --dir "$OUT_DIR")
+  [[ "$DRY_RUN" -eq 1 ]] && ARGS+=(--dry)
+  [[ "$VERBOSE" -eq 1 ]] && ARGS+=(--verbose)
+  [[ "$QUIET" -eq 1 ]] && ARGS+=(--quiet)
+  QUALITY="$QUALITY" "${ARGS[@]}"
+  echo "Done."
+  exit 0
+fi
 
 TRACKS_TXT="$TRACKLIST_FILE"
 if [[ -z "$TRACKLIST_FILE" ]]; then
@@ -97,11 +117,11 @@ echo "Found $LINES tracks."
 # Step 2: run qobuz-dl lucky via local JS
 # -----------------------
 echo "Starting qobuz downloads…"
-if [[ "$DRY_RUN" -eq 1 ]]; then
-  "$RUN_LUCKY_JS" "$TRACKS_TXT" --dir "$OUT_DIR" --quality "$QUALITY" --dry
-else
-  "$RUN_LUCKY_JS" "$TRACKS_TXT" --dir "$OUT_DIR" --quality "$QUALITY"
-fi
+ARGS=("$RUN_LUCKY_JS" "$TRACKS_TXT" --dir "$OUT_DIR" --quality "$QUALITY")
+[[ "$DRY_RUN" -eq 1 ]] && ARGS+=(--dry)
+[[ "$VERBOSE" -eq 1 ]] && ARGS+=(--verbose)
+[[ "$QUIET" -eq 1 ]] && ARGS+=(--quiet)
+"${ARGS[@]}"
 
 # -----------------------
 # Step 4 (optional placeholder): FFmpeg → AIFF
