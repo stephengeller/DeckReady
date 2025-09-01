@@ -10,7 +10,7 @@ import {
   rmIfOldTmp,
   pruneEmptyDirs,
 } from './lib/fsWalk';
-import { processDownloadedAudio } from './lib/organiser';
+import { processDownloadedAudio, findOrganisedAiff } from './lib/organiser';
 
 export type RunQobuzResult = {
   /** True if qobuz-dl returned success and at least one new audio file was detected. */
@@ -495,10 +495,38 @@ export async function runQobuzDl(
     console.error('Failed to write qobuz-dl log:', e);
   }
 
-  const ok = proc.code === 0 && addedAudio.length > 0;
-
+  // Short-circuit per file when an organised AIFF already exists
+  const keptAudio: string[] = [];
   if (addedAudio.length > 0) {
     for (const f of addedAudio) {
+      try {
+        // eslint-disable-next-line no-await-in-loop
+        const tags = await readTags(f);
+        const artistRaw = tags['artist'] || tags['album_artist'] || '';
+        const titleRaw = tags['title'] || '';
+        // eslint-disable-next-line no-await-in-loop
+        const existing = await findOrganisedAiff(artistRaw, titleRaw);
+        if (existing) {
+          if (!quiet) console.log(`  \u21BA already organised: ${existing}`);
+          try {
+            await fs.rm(f, { force: true });
+            await fs.rm(`${f}.search.txt`, { force: true });
+          } catch {
+            /* ignore */
+          }
+        } else {
+          keptAudio.push(f);
+        }
+      } catch {
+        keptAudio.push(f);
+      }
+    }
+  }
+
+  const ok = proc.code === 0 && keptAudio.length > 0;
+
+  if (keptAudio.length > 0) {
+    for (const f of keptAudio) {
       try {
         // eslint-disable-next-line no-await-in-loop
         await processDownloadedAudio(f, undefined, { quiet });
@@ -510,10 +538,11 @@ export async function runQobuzDl(
 
   return {
     ok,
-    added: addedAudio,
+    added: keptAudio,
     cmd,
     logPath,
     mismatch: null,
+    already: proc.code === 0 && keptAudio.length === 0 ? true : undefined,
     ...proc,
   } as unknown as RunQobuzResult;
 }
