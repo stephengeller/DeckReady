@@ -17,17 +17,7 @@ import { persistLastRunLogs } from '../tracklist/logs';
 
 /** Main entrypoint for processing a tracklist with qobuz-dl and organising output. */
 export async function main() {
-  const {
-    file,
-    dir,
-    dry,
-    quiet: quietArg,
-    verbose,
-    noColor,
-    summaryOnly,
-    json,
-    byGenre,
-  } = parseCliArgs(process.argv);
+  const { file, dir, dry, quiet: quietArg, verbose, noColor, byGenre } = parseCliArgs(process.argv);
   if (noColor) setColorEnabled(false);
   const quiet = quietArg && !verbose; // verbose overrides quiet
   if (!dir) throw new Error('--dir is required so we can verify files were actually written');
@@ -54,19 +44,19 @@ export async function main() {
       // in tests, module mocks may omit findOrganisedAiff; ignore
     }
     if (alreadyOrganisedPath) {
-      if (!summaryOnly) console.log(`  ${yellow('↺')} already organised: ${alreadyOrganisedPath}`);
+      console.log(`  ${yellow('↺')} already organised: ${alreadyOrganisedPath}`);
       alreadyCount += 1;
       continue;
     }
 
-    if (!summaryOnly) console.log(cyan(`>>> ${line}`));
+    console.log(cyan(`>>> ${line}`));
 
     // try each candidate; per-candidate: q=6, then q=5
     let didMatch = false;
     let hadMismatch = false;
     const seenMismatchKeys = new Set<string>();
 
-    const spinner = createSpinner(isTTY() && !verbose && !summaryOnly);
+    const spinner = createSpinner(isTTY() && !verbose);
 
     for (const candidateQuery of candidateQueries) {
       // Lossless
@@ -90,15 +80,13 @@ export async function main() {
         break; // in dry-run we stop at first planned candidate
       }
       if (losslessResult?.ok) {
-        if (!summaryOnly) console.log(`  ${green('✓')} matched (lossless) via: ${candidateQuery}`);
-        if (!summaryOnly)
-          for (const p of losslessResult?.added || []) console.log(`    ${dim('→')} ${p}`);
+        console.log(`  ${green('✓')} matched (lossless) via: ${candidateQuery}`);
+        for (const p of losslessResult?.added || []) console.log(`    ${dim('→')} ${p}`);
         didMatch = true;
         matchedCount += 1;
         break;
       } else if (losslessResult?.already) {
-        if (!summaryOnly)
-          console.log(`  ${yellow('↺')} already downloaded (lossless) via: ${candidateQuery}`);
+        console.log(`  ${yellow('↺')} already downloaded (lossless) via: ${candidateQuery}`);
         didMatch = true;
         alreadyCount += 1;
         break;
@@ -107,8 +95,7 @@ export async function main() {
         const key6 = `${losslessResult.mismatch.artistNorm}|${losslessResult.mismatch.titleNorm}`;
         seenMismatchKeys.add(key6);
         // Stop trying further candidates for this track after the first wrong match
-        if (!summaryOnly)
-          console.log(`  ${magenta('·')} wrong match (lossless); stopping search for this track.`);
+        console.log(`  ${magenta('·')} wrong match (lossless); stopping search for this track.`);
         mismatchCount += 1;
         hadMismatch = true;
         break;
@@ -128,9 +115,8 @@ export async function main() {
       // Ensure we always stop the spinner for the 320 fallback as well
       spinner.stop();
       if (bitrate320Result?.ok) {
-        if (!summaryOnly) console.log(`  ${green('✓')} matched (320) via: ${candidateQuery}`);
-        if (!summaryOnly)
-          for (const p of bitrate320Result?.added || []) console.log(`    ${dim('→')} ${p}`);
+        console.log(`  ${green('✓')} matched (320) via: ${candidateQuery}`);
+        for (const p of bitrate320Result?.added || []) console.log(`    ${dim('→')} ${p}`);
         didMatch = true;
         matchedCount += 1;
         break;
@@ -147,7 +133,7 @@ export async function main() {
           seenMismatchKeys.add(key5);
           hadMismatch = true;
         }
-        if (verbose && !summaryOnly) {
+        if (verbose) {
           // brief tail for debugging (verbose only)
           const tail = (bitrate320Result?.stderr || bitrate320Result?.stdout || '')
             .split('\n')
@@ -161,15 +147,15 @@ export async function main() {
 
     if (!didMatch) {
       if (!dry) {
-        if (!summaryOnly) console.log(`  ${red('✗')} no candidate matched.`);
+        console.log(`  ${red('✗')} no candidate matched.`);
         if (!hadMismatch) {
           const nf = path.join(dir, 'not-found.log');
           fs.appendFileSync(nf, `${line}\n`);
-          if (!summaryOnly) console.log(`  ${dim('↪')} appended to ${nf}`);
+          console.log(`  ${dim('↪')} appended to ${nf}`);
           notFoundCount += 1;
         }
       } else {
-        if (!summaryOnly) console.log(`  ${red('✗')} no candidate matched (dry-run).`);
+        console.log(`  ${red('✗')} no candidate matched (dry-run).`);
       }
     }
   }
@@ -178,26 +164,15 @@ export async function main() {
   persistLastRunLogs(dir);
 
   // Print final summary (quiet-friendly)
-  if (json) {
-    const summary = {
-      matched: matchedCount,
-      already: alreadyCount,
-      mismatched: mismatchCount,
-      notFound: notFoundCount,
-      logs: { notMatched: '<dir>/not-matched.log', notFound: '<dir>/not-found.log' },
-    };
-    console.log(JSON.stringify(summary));
-  } else {
-    console.log('');
-    console.log('Summary:');
-    console.log(`  ${green('✓')} matched: ${matchedCount}`);
-    console.log(`  ${yellow('↺')} already: ${alreadyCount}`);
-    console.log(`  ${red('✗')} mismatched: ${mismatchCount}`);
-    console.log(`  Ø not found: ${notFoundCount}`);
-    console.log('  Logs:');
-    console.log('    not-matched: <dir>/not-matched.log');
-    console.log('    not-found:   <dir>/not-found.log');
-  }
+  console.log('');
+  console.log('Summary:');
+  console.log(`  ${green('✓')} matched: ${matchedCount}`);
+  console.log(`  ${yellow('↺')} already: ${alreadyCount}`);
+  console.log(`  ${red('✗')} mismatched: ${mismatchCount}`);
+  console.log(`  Ø not found: ${notFoundCount}`);
+  console.log('  Logs:');
+  console.log('    not-matched: <dir>/not-matched.log');
+  console.log('    not-found:   <dir>/not-found.log');
 }
 
 // indent now sourced from ../tracklist/text

@@ -1,60 +1,31 @@
 # Usage
 
-## End-to-end flow
+Quickest way:
 
-- Create an output folder for qobuz-dl (where temporary downloads land):
-  - `mkdir -p out`
-- Run the wrapper:
-  - `script/run <spotify_url> --dir out [--dry] [--quality Q]`
-- Examples:
-  - Playlist (dry-run): `script/run https://open.spotify.com/playlist/... --dir out --dry`
-  - Track: `script/run https://open.spotify.com/track/... --dir out`
-  - Use your own lines file: `script/run --tracklist tracklist.txt --dir out`
+- `mkdir -p out`
+- `script/run <spotify_url|qobuz_url|tracklist_file> --dir out [--dry] [--quality Q]`
 
-`script/run` will:
+Notes:
 
-- Generate lines from the Spotify URL via `script/spotify-list` (Spotify Web API) unless `--tracklist` is supplied.
-- Call `run-lucky` to run Qobuz searches with validation.
-- Convert files to AIFF and organise them under `ORGANISED_AIFF_DIR`.
-  - Default layout: `Artist/Title.aiff`
-  - Optional `--by-genre` flag: `Genre/Artist/Title.aiff`
+- You can pass a text file of `Title - Artist` lines instead of a URL.
+- For Spotify URLs, the wrapper fetches lines via `script/spotify-list`.
+- Downloads are validated, converted to AIFF, and organised under `ORGANISED_AIFF_DIR`.
+- Default layout: `Artist/Title.aiff`; use `--by-genre` for `Genre/Artist/Title.aiff`.
 
-## Running CLIs directly
+Flags:
 
-### Generate a tracklist from Spotify
+- `--dir DIR`: where qobuz-dl downloads land (required)
+- `--quality Q`: prefer 6; 5 used as fallback when needed
+- `--dry`: preview commands without making changes
+- `--quiet` / `--verbose`: hide or show underlying qobuz-dl output
+- `--by-genre`: organise as `Genre/Artist/Title.aiff` instead of `Artist/Title.aiff`
 
-- `script/spotify-list "https://open.spotify.com/{playlist|album|track}/..."`
-- Prints: `Song Title - Artist 1, Artist 2` per line.
-- Good for building your own curated list or auditing what Spotify rendered.
+Direct CLIs:
 
-### Run lucky downloads for a tracklist
+- `script/spotify-list https://open.spotify.com/{playlist|album|track}/...`
+- `run-lucky <tracklist.txt> --dir <out> [--dry] [--quiet|--verbose] [--by-genre]`
 
-- `run-lucky <tracklist.txt> --dir <out> [--dry] [--quiet|--verbose] [--json] [--summary-only]`
-- Behaviour:
-  - Tries multiple search candidates per line, prefers `-q 6` (lossless), falls back to `-q 5` (320) if needed.
-  - Writes query logs under `<out>/.qobuz-logs/`.
-  - Validates tags in downloaded audio; removes wrong matches and reports `mismatch`.
-  - Converts to AIFF and organises to `ORGANISED_AIFF_DIR/Artist/Title.aiff` by default (`--by-genre` for `Genre/Artist/Title.aiff`).
+Environment:
 
-### Common options
-
-- `--dir DIR` (required): qobuz-dl download directory for verifying writes.
-- `--quality Q`: 5=320, 6=LOSSLESS, 7=24b≤96k, 27=>96k (default 6). `run-lucky` manages fallback.
-- `--dry`: print commands without downloading.
-- `--quiet` / `--verbose`: control streaming of qobuz-dl output.
-- `--json`: JSON summary (machine-friendly).
-- `--summary-only`: suppress per-file logs; emit summary counters at the end.
-
-## Environment
-
-Add to `.env`:
-
-- `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`: required for Spotify Web API access (client credentials).
-- `ORGANISED_AIFF_DIR`: destination base for AIFF files; default `~/Music/rekordbox/Organised_AIFF`.
-
-How to obtain Spotify credentials: see `docs/CREDENTIALS.md:1`.
-
-## Notes
-
-- You must install and configure `qobuz-dl` with your credentials. This repo does not handle Qobuz auth.
-- Install ffmpeg/ffprobe and ensure they’re in your PATH.
+- `.env` requires `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET` for the Web API.
+- `ORGANISED_AIFF_DIR` controls the organised AIFF base; default `~/Music/rekordbox/Organised_AIFF`.

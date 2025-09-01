@@ -7,9 +7,7 @@
  * - --quiet | --verbose
  * - --progress
  * - --no-color
- * - --summary-only
- * - --json
- * The first non-flag argument is treated as an optional file path (tracklist).
+ * The first non-flag argument is treated as an optional file path.
  */
 export function parseCliArgs(argv: string[]): {
   file: string | null;
@@ -19,8 +17,6 @@ export function parseCliArgs(argv: string[]): {
   verbose: boolean;
   progress: boolean;
   noColor: boolean;
-  summaryOnly: boolean;
-  json: boolean;
   byGenre: boolean;
 } {
   // Default to quiet output; enable verbose for full qobuz-dl streams
@@ -32,8 +28,6 @@ export function parseCliArgs(argv: string[]): {
     verbose: false,
     progress: false,
     noColor: false,
-    summaryOnly: false,
-    json: false,
     byGenre: false,
   };
 
@@ -57,12 +51,6 @@ export function parseCliArgs(argv: string[]): {
         break;
       case '--no-color':
         result.noColor = true;
-        break;
-      case '--summary-only':
-        result.summaryOnly = true;
-        break;
-      case '--json':
-        result.json = true;
         break;
       case '--by-genre':
       case '--organize-by-genre':

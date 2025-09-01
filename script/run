@@ -24,13 +24,12 @@ QUIET=0
 usage() {
   cat <<EOF
 Usage:
-  $(basename "$0") <spotify_url|qobuz_url> [options]
+  $(basename "$0") <spotify_url|qobuz_url|tracklist_file> [options]
 
 Options:
   --dir DIR            Output directory for downloads (default: $OUT_DIR)
   --quality Q          5=320, 6=LOSSLESS, 7=24b<=96k, 27=>96k (default: $QUALITY)
   --dry                Dry-run: print qobuz commands; no downloads
-  --tracklist FILE     Use an existing "Song - Artist" list; skip Spotify scraping
   --convert            (placeholder) enable FFmpeg→AIFF conversion
   -h, --help           Show this help
 
@@ -53,18 +52,24 @@ while [[ $# -gt 0 ]]; do
     --dir) OUT_DIR="$2"; shift 2 ;;
     --quality) QUALITY="$2"; shift 2 ;;
     --dry) DRY_RUN=1; shift ;;
-    --tracklist) TRACKLIST_FILE="$2"; shift 2 ;;
     --convert) DO_CONVERT=1; shift ;;
     --verbose) VERBOSE=1; shift ;;
     --quiet) QUIET=1; shift ;;
     http*spotify.com*) SPOTIFY_URL="$1"; shift ;;
     http*qobuz.com*) QOBUZ_URL="$1"; shift ;;
-    *) echo "Unknown arg: $1"; usage; exit 1 ;;
+    *)
+      if [[ -z "$TRACKLIST_FILE" && -f "$1" ]]; then
+        TRACKLIST_FILE="$1"; shift;
+      else
+        echo "Unknown arg: $1"; usage; exit 1;
+      fi
+      ;;
   esac
 done
 
 if [[ -z "$SPOTIFY_URL" && -z "$QOBUZ_URL" && -z "$TRACKLIST_FILE" ]]; then
-  echo "Provide a Spotify or Qobuz URL, or --tracklist <file>."
+  echo "Provide a Spotify or Qobuz URL, or a tracklist file path."
+  usage
   exit 1
 fi
 

@@ -13,7 +13,7 @@
 
 ## Private playlists/albums
 
-- Headless scraping can’t access private content. Make playlists public or export a tracklist manually and use `--tracklist`.
+- Headless scraping can’t access private content. Make playlists public or export a tracklist manually and pass the file to `script/run`.
 
 ## FFmpeg/ffprobe missing
 
