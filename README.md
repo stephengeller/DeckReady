@@ -1,4 +1,4 @@
-# Spotify/Qobuz → AIFF Library
+# DeckReady — Spotify/Qobuz → AIFF Library
 
 Turn Spotify or Qobuz links into clean, tagged AIFF files organised on disk. Great for DJs who want tracks in a consistent, import‑ready format for software like Rekordbox, without manual cleanup.
 

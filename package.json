@@ -1,5 +1,6 @@
 {
-  "name": "spotify-to-rekordbox",
+  "name": "deckready",
+  "description": "Turn Spotify or Qobuz links into clean, tagged AIFFs, organised for DJs.",
   "version": "0.1.0",
   "private": true,
   "license": "MIT",
