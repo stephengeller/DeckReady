@@ -22,11 +22,13 @@ async function main() {
   if (!dry) console.log(cyan(`Starting Qobuz downloads for: ${url}`));
 
   spinner.start('downloading');
+  const userQuiet = process.argv.includes('--quiet');
   const res = await runQobuzDl(url, {
     directory: dir,
     quality,
     dryRun: dry,
-    quiet: !verbose,
+    // Show our own runner logs (like "↺ already organised") unless the user explicitly asks for --quiet.
+    quiet: userQuiet,
     progress: useSpinner || progress,
     onProgress: ({ raw, percent }) => {
       // Total items in queue
