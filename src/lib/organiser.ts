@@ -7,12 +7,13 @@ import { readTags, Runner } from './tags';
 
 /**
  * Convert a downloaded audio file to AIFF (if needed), copy metadata, and move
- * it into the organised AIFF folder tree under ORGANISED_AIFF_DIR/Genre/Artist/Title.aiff.
+ * it into the organised AIFF folder tree under ORGANISED_AIFF_DIR/Artist/Title.aiff by default
+ * (or ORGANISED_AIFF_DIR/Genre/Artist/Title.aiff when opts.byGenre is true).
  */
 export async function processDownloadedAudio(
   inputPath: string,
   runner?: Runner,
-  opts?: { quiet?: boolean; verbose?: boolean },
+  opts?: { quiet?: boolean; verbose?: boolean; byGenre?: boolean },
 ) {
   const ORG_BASE = process.env.ORGANISED_AIFF_DIR || ORGANISED_AIFF_DIR;
   try {
@@ -34,7 +35,10 @@ export async function processDownloadedAudio(
     const artist = sanitizeName(artistRaw);
     const title = sanitizeName(titleRaw);
 
-    const destDir = path.join(ORG_BASE, genre, artist);
+    // Default layout: <Artist>/<Title>.aiff; optional by-genre: <Genre>/<Artist>/<Title>.aiff
+    const destDir = opts?.byGenre
+      ? path.join(ORG_BASE, genre, artist)
+      : path.join(ORG_BASE, artist);
     await fs.mkdir(destDir, { recursive: true });
 
     let destPath = path.join(destDir, `${title}.aiff`);
@@ -265,38 +269,57 @@ export function sanitizeName(s: string) {
  * Locate an already-organised AIFF under ORGANISED_AIFF_DIR matching artist/title.
  * Checks each genre subdirectory for an artist folder and title-matching file.
  */
-export async function findOrganisedAiff(artist: string, title: string): Promise<string | null> {
+export async function findOrganisedAiff(
+  artist: string,
+  title: string,
+  opts?: { byGenre?: boolean },
+): Promise<string | null> {
   try {
     const baseDir = process.env.ORGANISED_AIFF_DIR || ORGANISED_AIFF_DIR;
     const artistDirName = sanitizeName(artist || '');
     const titleBase = sanitizeName(title || '');
-
-    // Only consider actual genre directories (ignore files like .DS_Store)
-    const genreDirents = await fs
-      .readdir(baseDir, { withFileTypes: true })
-      .catch(() => [] as Array<{ name: string; isDirectory: () => boolean }>);
-
-    const genres = genreDirents
-      .filter((d) => d && typeof d.isDirectory === 'function' && d.isDirectory())
-      .map((d) => d.name);
 
     const titleRegex = new RegExp(
       `^${titleBase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?: \\((?:\\d+)\\))?\\.aiff$`,
       'i',
     );
 
-    for (const g of genres) {
-      const artistDir = path.join(baseDir, g, artistDirName);
-      try {
-        const entries = await fs.readdir(artistDir, { withFileTypes: true });
-        for (const e of entries) {
-          if (!e.isFile()) continue;
-          if (titleRegex.test(e.name)) return path.join(artistDir, e.name);
-        }
-      } catch (err) {
-        // Missing artist directory under a genre is normal; only warn on unexpected errors
-        if (err?.code !== 'ENOENT') {
-          console.warn(`Warning: could not access artist dir ${artistDir}`);
+    // First, check new default layout: <base>/<Artist>/<Title>.aiff
+    const artistDirDefault = path.join(baseDir, artistDirName);
+    try {
+      const entries = await fs.readdir(artistDirDefault, { withFileTypes: true });
+      for (const e of entries) {
+        if (!e.isFile()) continue;
+        if (titleRegex.test(e.name)) return path.join(artistDirDefault, e.name);
+      }
+    } catch (err) {
+      if (err?.code !== 'ENOENT')
+        console.warn(`Warning: could not access artist dir ${artistDirDefault}`);
+    }
+
+    // If specifically requested (or for backward-compat search), scan genre subfolders
+    if (opts?.byGenre !== false) {
+      // Only consider actual genre directories (ignore files like .DS_Store)
+      const genreDirents = await fs
+        .readdir(baseDir, { withFileTypes: true })
+        .catch(() => [] as Array<{ name: string; isDirectory: () => boolean }>);
+
+      const genres = genreDirents
+        .filter((d) => d && typeof d.isDirectory === 'function' && d.isDirectory())
+        .map((d) => d.name);
+
+      for (const g of genres) {
+        const artistDir = path.join(baseDir, g, artistDirName);
+        try {
+          const entries = await fs.readdir(artistDir, { withFileTypes: true });
+          for (const e of entries) {
+            if (!e.isFile()) continue;
+            if (titleRegex.test(e.name)) return path.join(artistDir, e.name);
+          }
+        } catch (err) {
+          if (err?.code !== 'ENOENT') {
+            console.warn(`Warning: could not access artist dir ${artistDir}`);
+          }
         }
       }
     }

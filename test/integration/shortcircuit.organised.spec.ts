@@ -20,11 +20,10 @@ describe('short-circuit when AIFF already organised', () => {
   });
 
   test('skips qobuz when matching AIFF exists', async () => {
-    // Create pre-existing organised file: <ORG>/<genre>/<artist>/<title>.aiff
-    const genre = 'Dance';
+    // Create pre-existing organised file: default layout <ORG>/<artist>/<title>.aiff
     const artist = 'Cesco';
     const title = 'Big Fi Dem';
-    const artistDir = path.join(process.env.ORGANISED_AIFF_DIR, genre, artist);
+    const artistDir = path.join(process.env.ORGANISED_AIFF_DIR, artist);
     await fs.mkdir(artistDir, { recursive: true });
     const aiff = path.join(artistDir, `${title}.aiff`);
     await fs.writeFile(aiff, 'AIFF');
