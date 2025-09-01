@@ -1,6 +1,5 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import readline from 'node:readline';
 import { parseCliArgs } from './parseCliArgs';
 import { setColorEnabled, green, yellow, red, magenta, cyan, isTTY, dim } from './ui/colors';
 // Load environment variables from .env
@@ -12,23 +11,9 @@ import { makeBaseParts } from './normalize';
 import { buildQueries } from './queryBuilders';
 import { runQobuzLuckyStrict, findOrganisedAiff } from './qobuzRunner';
 import { createSpinner } from './ui/spinner';
-
-/**
- * Stream input lines from a file path (if provided) or stdin.
- */
-async function* lineStream(file: string | null) {
-  if (file) {
-    const abs = path.resolve(file);
-    const rl = readline.createInterface({ input: fs.createReadStream(abs), crlfDelay: Infinity });
-    for await (const line of rl) yield line;
-  } else {
-    const rl = readline.createInterface({ input: process.stdin, crlfDelay: Infinity });
-    for await (const line of rl) yield line;
-  }
-}
-
-/** Accept only "Title - Artist" style lines (simple guard). */
-const isTrackLine = (line: string) => /\s-\s/.test(line.trim());
+import { lineStream, isTrackLine } from '../tracklist/io';
+import { indent } from '../tracklist/text';
+import { persistLastRunLogs } from '../tracklist/logs';
 
 /** Main entrypoint for processing a tracklist with qobuz-dl and organising output. */
 export async function main() {
@@ -190,19 +175,7 @@ export async function main() {
   }
 
   // Convenience: persist last run dir and copy summary logs into repo-local logs/last-run
-  try {
-    const repoLogsBase = path.join(process.cwd(), 'logs', 'last-run');
-    fs.mkdirSync(repoLogsBase, { recursive: true });
-    if (dir) {
-      fs.writeFileSync(path.join(repoLogsBase, 'last-run-dir.txt'), dir);
-      const nmSrc = path.join(dir, 'not-matched.log');
-      const nfSrc = path.join(dir, 'not-found.log');
-      if (fs.existsSync(nmSrc)) fs.copyFileSync(nmSrc, path.join(repoLogsBase, 'not-matched.log'));
-      if (fs.existsSync(nfSrc)) fs.copyFileSync(nfSrc, path.join(repoLogsBase, 'not-found.log'));
-    }
-  } catch {
-    // best-effort only
-  }
+  persistLastRunLogs(dir);
 
   // Print final summary (quiet-friendly)
   if (json) {
@@ -227,13 +200,6 @@ export async function main() {
   }
 }
 
-/** Indent a multi-line string by `n` spaces per line. */
-function indent(s: string | undefined | null, n = 2) {
-  const pad = ' '.repeat(n);
-  return (s || '')
-    .split('\n')
-    .map((l) => pad + l)
-    .join('\n');
-}
+// indent now sourced from ../tracklist/text
 
 export default main;
