@@ -181,3 +181,7 @@ For a deeper dive into the flow and decisions, see [docs/ARCHITECTURE.md](./docs
 ## Legal
 
 Use responsibly and in accordance with Qobuz/Spotify terms. This tool automates search and download via your `qobuz-dl` configuration; ensure you have rights to obtain and use downloaded content.
+
+## License
+
+Released under the MIT License. See `LICENSE` for details.

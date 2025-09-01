@@ -2,7 +2,7 @@
   "name": "spotify-to-rekordbox",
   "version": "0.1.0",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "MIT",
   "scripts": {
     "setup": "script/setup",
     "typecheck": "tsc --noEmit",
