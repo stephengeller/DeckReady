@@ -1,16 +1,12 @@
 import fs from 'node:fs/promises';
-import path from 'node:path';
 import { spawnStreaming } from './lib/proc';
-import { readTags, normaliseTag, normaliseTitleBase } from './lib/tags';
-import {
-  walkFiles,
-  snapshot,
-  diffNew,
-  diffNewAudio,
-  rmIfOldTmp,
-  pruneEmptyDirs,
-} from './lib/fsWalk';
+import { readTags } from './lib/tags';
+import { walkFiles, snapshot, diffNewAudio } from './lib/fsWalk';
 import { processDownloadedAudio, findOrganisedAiff } from './lib/organiser';
+import { makeProgressHandler } from './qobuz/progress';
+import { cleanupOnNoAudio } from './qobuz/fsOps';
+import { writeRunLog, writeSidecarText } from './qobuz/logging';
+import { validateAddedAudioAgainstExpectation } from './qobuz/validation';
 
 export type RunQobuzResult = {
   /** True if qobuz-dl returned success and at least one new audio file was detected. */
@@ -118,20 +114,11 @@ export async function runQobuzLuckyStrict(
   // Optional progress parser
   let bytes = 0;
   let total = 0;
-  const onStdout = progress
-    ? (chunk: string) => {
-        const m = chunk.match(/(\d+(?:\.\d+)?)([kM])\/(\d+(?:\.\d+)?)([kM])/);
-        let percent: number | undefined;
-        if (m) {
-          const v = (n: string, u: string) => Number(n) * (u === 'M' ? 1_000_000 : 1_000);
-          bytes = v(m[1], m[2]);
-          total = v(m[3], m[4]);
-          percent =
-            total > 0 ? Math.max(0, Math.min(100, Math.round((bytes / total) * 100))) : undefined;
-        }
-        if (onProgress) onProgress({ raw: chunk, percent, bytes, total });
-      }
-    : undefined;
+  const onStdout = makeProgressHandler(progress, (info) => {
+    bytes = info.bytes ?? bytes;
+    total = info.total ?? total;
+    if (onProgress) onProgress(info);
+  });
 
   const proc = await spawnStreaming('qobuz-dl', args, { quiet, onStdout, onStderr: onStdout });
   const after = await snapshot(directory || '.');
@@ -139,33 +126,11 @@ export async function runQobuzLuckyStrict(
   const addedAudio = diffNewAudio(before.files, after.files);
 
   // Write the original search term next to each downloaded audio file for debugging
-  if (addedAudio.length > 0) {
-    await Promise.all(
-      addedAudio.map(async (p) => {
-        try {
-          await fs.writeFile(`${p}.search.txt`, query, 'utf8');
-        } catch (err) {
-          console.error('Failed to write search term file:', err);
-        }
-      }),
-    );
-  }
+  if (addedAudio.length > 0) await writeSidecarText(addedAudio, query);
 
   // If no audio landed, remove any new .tmp files and prune empty dirs we just created
   if (addedAudio.length === 0) {
-    const newFiles = diffNew(before.files, after.files);
-    await Promise.all(newFiles.map((p) => rmIfOldTmp(p, 0))); // remove freshly created *.tmp
-    const newDirs = diffNew(before.dirs, after.dirs);
-    // Best-effort purge of just-created empty dirs
-    for (const d of newDirs) {
-      try {
-        const left = await fs.readdir(d);
-        if (left.length === 0) await fs.rmdir(d);
-      } catch (err) {
-        void err;
-      }
-    }
-    await pruneEmptyDirs(directory || '.');
+    await cleanupOnNoAudio(before, after, directory);
   }
 
   // If the tool reported files were already downloaded, treat as success to avoid falling back to 320.
@@ -183,151 +148,23 @@ export async function runQobuzLuckyStrict(
   }
 
   // Write full qobuz-dl output to a per-run log file so we always have the complete output available
-  let logPath: string | null = null;
-  try {
-    if (directory) {
-      const logDir = path.join(directory, '.qobuz-logs');
-      await fs.mkdir(logDir, { recursive: true });
-      const safeQuery = query.replace(/[^a-z0-9_\-.]/gi, '_').slice(0, 120);
-      const fname = `${Date.now()}_${quality}_${safeQuery}.log`;
-      logPath = path.join(logDir, fname);
-      const content = `CMD: ${cmd}\n\nSTDOUT:\n${proc.stdout}\n\nSTDERR:\n${proc.stderr}\n`;
-      await fs.writeFile(logPath, content, 'utf8');
-    }
-  } catch (e) {
-    console.error('Failed to write qobuz-dl log:', e);
-    // best-effort only; don't fail the whole operation
-  }
+  const safeQuery = query.replace(/[^a-z0-9_\-.]/gi, '_').slice(0, 120);
+  const logPath = await writeRunLog(
+    directory,
+    `${Date.now()}_${quality}_${safeQuery}`,
+    cmd,
+    proc.stdout,
+    proc.stderr,
+  );
 
   if (addedAudio.length > 0 && (artist || title)) {
-    const expectedArtist = normaliseTag(artist);
-    const expectedTitle = normaliseTag(title);
-    const expectedTitleBase = normaliseTitleBase(title);
-    let tagsMatch = true;
-    let firstMismatch: {
-      file: string;
-      artist: string;
-      title: string;
-    } | null = null;
-    for (const f of addedAudio) {
-      // eslint-disable-next-line no-await-in-loop
-      const tags = await readTags(f);
-      const fileArtistRaw = tags['artist'] || tags['album_artist'] || '';
-      const fileTitleRaw = tags['title'] || '';
-      const fileArtist = normaliseTag(fileArtistRaw);
-      const fileTitle = normaliseTag(fileTitleRaw);
-
-      // Relaxed artist match rules:
-      // - exact normalized match
-      // - OR expected artist appears in the split artist list from the tag
-      // - OR (if title indicates remix/edit/mix/version), expected artist (or its core without mix/remix tokens)
-      //   appears in ANY parentheses content
-      let artistOk = true;
-      if (artist) {
-        artistOk = false;
-        if (fileArtist === expectedArtist) artistOk = true;
-        if (!artistOk) {
-          const parts = (fileArtistRaw || '')
-            .split(/\s*,\s*|\s*&\s*|\s+x\s+|\s*×\s*|\s+\band\s+/gi)
-            .map((s) => normaliseTag(s))
-            .filter(Boolean);
-          if (parts.includes(expectedArtist)) artistOk = true;
-        }
-        if (!artistOk && /\(([^)]*)\)/.test(fileTitleRaw)) {
-          const parens = Array.from(fileTitleRaw.matchAll(/\(([^)]*)\)/g)).map((m) => m[1] || '');
-          const expectedCore = normaliseTag(
-            (artist || '').replace(/\b(remix|vip|edit|mix|version)\b/gi, '').trim(),
-          );
-          for (const p of parens) {
-            const normParen = normaliseTag(p);
-            const remixLike = /\b(remix|vip|edit|mix|version)\b/i.test(p);
-            if (
-              remixLike &&
-              (normParen.includes(expectedArtist) ||
-                (!!expectedCore && normParen.includes(expectedCore)))
-            ) {
-              artistOk = true;
-              break;
-            }
-          }
-        }
-      }
-
-      // Relaxed title match rules: base title (without remix/edit parentheses) may match
-      let titleOk = true;
-      if (title) {
-        titleOk = false;
-        const fileTitleBase = normaliseTitleBase(fileTitleRaw);
-        if (fileTitle === expectedTitle) titleOk = true;
-        else if (fileTitleBase && expectedTitleBase && fileTitleBase === expectedTitleBase)
-          titleOk = true;
-      }
-
-      if (!artistOk || !titleOk) {
-        tagsMatch = false;
-        firstMismatch = {
-          file: f,
-          artist: fileArtistRaw,
-          title: fileTitleRaw,
-        };
-        break;
-      }
-    }
-    if (!tagsMatch) {
-      // Append a simple line to not-matched.log to allow later spot checks
-      try {
-        const logFile = path.join(directory || '.', 'not-matched.log');
-        const expectedStr = `${artist || ''} - ${title || ''}`.trim();
-        const foundStr = firstMismatch
-          ? `${firstMismatch.artist} - ${firstMismatch.title}`.trim()
-          : 'unknown';
-        // Keep log concise: no timestamp and no file path (file was removed)
-        const line = `query="${query}" expected="${expectedStr}" found="${foundStr}"\n`;
-        await fs.appendFile(logFile, line, 'utf8');
-      } catch (e) {
-        // best effort logging only
-        void e;
-      }
-      await Promise.all(
-        addedAudio.map(async (p) => {
-          try {
-            await fs.rm(p, { force: true });
-            await fs.rm(`${p}.search.txt`, { force: true });
-          } catch (err) {
-            void err;
-          }
-        }),
-      );
-      // Best-effort: remove parent album folder(s) entirely
-      try {
-        const parents = Array.from(
-          new Set(
-            addedAudio
-              .map((p) => path.dirname(p))
-              .filter((d) => !directory || path.resolve(d) !== path.resolve(directory)),
-          ),
-        );
-        await Promise.all(
-          parents.map(async (d) => {
-            try {
-              await fs.rm(d, { recursive: true, force: true });
-            } catch (e) {
-              void e;
-            }
-          }),
-        );
-      } catch (e) {
-        void e;
-      }
-      await pruneEmptyDirs(directory || '.');
-      const mismatch = firstMismatch
-        ? {
-            artistNorm: normaliseTag(firstMismatch.artist),
-            titleNorm: normaliseTag(firstMismatch.title),
-            artistRaw: firstMismatch.artist,
-            titleRaw: firstMismatch.title,
-          }
-        : null;
+    const mismatch = await validateAddedAudioAgainstExpectation(addedAudio, {
+      directory,
+      query,
+      artist,
+      title,
+    });
+    if (mismatch) {
       return { ok: false, added: [], cmd, logPath, mismatch, ...proc } as unknown as RunQobuzResult;
     }
   }
@@ -421,20 +258,11 @@ export async function runQobuzDl(
   const before = await snapshot(directory || '.');
   let bytes = 0;
   let total = 0;
-  const onStdout = progress
-    ? (chunk: string) => {
-        const m = chunk.match(/(\d+(?:\.\d+)?)([kM])\/(\d+(?:\.\d+)?)([kM])/);
-        let percent: number | undefined;
-        if (m) {
-          const v = (n: string, u: string) => Number(n) * (u === 'M' ? 1_000_000 : 1_000);
-          bytes = v(m[1], m[2]);
-          total = v(m[3], m[4]);
-          percent =
-            total > 0 ? Math.max(0, Math.min(100, Math.round((bytes / total) * 100))) : undefined;
-        }
-        if (onProgress) onProgress({ raw: chunk, percent, bytes, total });
-      }
-    : undefined;
+  const onStdout = makeProgressHandler(progress, (info) => {
+    bytes = info.bytes ?? bytes;
+    total = info.total ?? total;
+    if (onProgress) onProgress(info);
+  });
 
   const proc = await spawnStreaming('qobuz-dl', args, { quiet, onStdout, onStderr: onStdout });
   const after = await snapshot(directory || '.');
@@ -442,33 +270,10 @@ export async function runQobuzDl(
   const addedAudio = diffNewAudio(before.files, after.files);
 
   // Write the original URL next to each downloaded audio file for debugging
-  if (addedAudio.length > 0) {
-    await Promise.all(
-      addedAudio.map(async (p) => {
-        try {
-          await fs.writeFile(`${p}.search.txt`, url, 'utf8');
-        } catch (err) {
-          console.error('Failed to write URL sidecar:', err);
-        }
-      }),
-    );
-  }
+  if (addedAudio.length > 0) await writeSidecarText(addedAudio, url);
 
   // If no audio landed, cleanup fresh tmp files/dirs
-  if (addedAudio.length === 0) {
-    const newFiles = diffNew(before.files, after.files);
-    await Promise.all(newFiles.map((p) => rmIfOldTmp(p, 0)));
-    const newDirs = diffNew(before.dirs, after.dirs);
-    for (const d of newDirs) {
-      try {
-        const left = await fs.readdir(d);
-        if (left.length === 0) await fs.rmdir(d);
-      } catch (err) {
-        void err;
-      }
-    }
-    await pruneEmptyDirs(directory || '.');
-  }
+  if (addedAudio.length === 0) await cleanupOnNoAudio(before, after, directory);
 
   const alreadyDownloaded = proc.code === 0 && addedAudio.length === 0;
   if (alreadyDownloaded) {
@@ -484,20 +289,14 @@ export async function runQobuzDl(
   }
 
   // Log full output per run (best-effort)
-  let logPath: string | null = null;
-  try {
-    if (directory) {
-      const logDir = path.join(directory, '.qobuz-logs');
-      await fs.mkdir(logDir, { recursive: true });
-      const safeUrl = url.replace(/[^a-z0-9_\-.]/gi, '_').slice(0, 120);
-      const fname = `${Date.now()}_${quality}_${safeUrl}.log`;
-      logPath = path.join(logDir, fname);
-      const content = `CMD: ${cmd}\n\nSTDOUT:\n${proc.stdout}\n\nSTDERR:\n${proc.stderr}\n`;
-      await fs.writeFile(logPath, content, 'utf8');
-    }
-  } catch (e) {
-    console.error('Failed to write qobuz-dl log:', e);
-  }
+  const safeUrl = url.replace(/[^a-z0-9_\-.]/gi, '_').slice(0, 120);
+  const logPath = await writeRunLog(
+    directory,
+    `${Date.now()}_${quality}_${safeUrl}`,
+    cmd,
+    proc.stdout,
+    proc.stderr,
+  );
 
   // Short-circuit per file when an organised AIFF already exists
   const keptAudio: string[] = [];
