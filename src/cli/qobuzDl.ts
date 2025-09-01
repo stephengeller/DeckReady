@@ -5,7 +5,7 @@ import { createSpinner } from '../lib/ui/spinner';
 import { isTTY, cyan, green, yellow, dim } from '../lib/ui/colors';
 
 async function main() {
-  const { file, dir, dry, verbose, progress } = parseCliArgs(process.argv);
+  const { file, dir, dry, verbose, progress, byGenre } = parseCliArgs(process.argv);
   const url = file;
   if (!url) throw new Error('Usage: qobuzDl <qobuz_url> --dir <output> [--dry]');
   if (!/qobuz\.com\//i.test(url)) throw new Error('Not a Qobuz URL');
@@ -30,6 +30,7 @@ async function main() {
     // Show our own runner logs (like "↺ already organised") unless the user explicitly asks for --quiet.
     quiet: userQuiet,
     progress: useSpinner || progress,
+    byGenre,
     onProgress: ({ raw, percent }) => {
       // Total items in queue
       const q = /([0-9]+)\s+downloads? in queue/i.exec(raw);

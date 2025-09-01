@@ -21,6 +21,7 @@ export function parseCliArgs(argv: string[]): {
   noColor: boolean;
   summaryOnly: boolean;
   json: boolean;
+  byGenre: boolean;
 } {
   // Default to quiet output; enable verbose for full qobuz-dl streams
   const result = {
@@ -33,6 +34,7 @@ export function parseCliArgs(argv: string[]): {
     noColor: false,
     summaryOnly: false,
     json: false,
+    byGenre: false,
   };
 
   // Skip node and script path
@@ -61,6 +63,11 @@ export function parseCliArgs(argv: string[]): {
         break;
       case '--json':
         result.json = true;
+        break;
+      case '--by-genre':
+      case '--organize-by-genre':
+      case '--organise-by-genre':
+        result.byGenre = true;
         break;
       case '--dir':
         result.dir = argv[++i] || null;

@@ -41,6 +41,7 @@ export async function main() {
     noColor,
     summaryOnly,
     json,
+    byGenre,
   } = parseCliArgs(process.argv);
   if (noColor) setColorEnabled(false);
   const quiet = quietArg && !verbose; // verbose overrides quiet
@@ -62,7 +63,7 @@ export async function main() {
     let alreadyOrganisedPath: string | null = null;
     try {
       if (typeof findOrganisedAiff === 'function') {
-        alreadyOrganisedPath = await findOrganisedAiff(parts.primArtist, parts.title);
+        alreadyOrganisedPath = await findOrganisedAiff(parts.primArtist, parts.title, { byGenre });
       }
     } catch {
       // in tests, module mocks may omit findOrganisedAiff; ignore
@@ -94,6 +95,7 @@ export async function main() {
         title: parts.title,
         progress: false,
         onProgress: undefined,
+        byGenre,
       });
       spinner.stop();
       if (dry) {
@@ -136,6 +138,7 @@ export async function main() {
         quiet,
         artist: parts.primArtist,
         title: parts.title,
+        byGenre,
       });
       // Ensure we always stop the spinner for the 320 fallback as well
       spinner.stop();

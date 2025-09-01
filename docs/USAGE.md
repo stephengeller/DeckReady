@@ -16,6 +16,8 @@
 - Generate lines from the Spotify URL via `script/spotify-list` (Spotify Web API) unless `--tracklist` is supplied.
 - Call `run-lucky` to run Qobuz searches with validation.
 - Convert files to AIFF and organise them under `ORGANISED_AIFF_DIR`.
+  - Default layout: `Artist/Title.aiff`
+  - Optional `--by-genre` flag: `Genre/Artist/Title.aiff`
 
 ## Running CLIs directly
 
@@ -32,7 +34,7 @@
   - Tries multiple search candidates per line, prefers `-q 6` (lossless), falls back to `-q 5` (320) if needed.
   - Writes query logs under `<out>/.qobuz-logs/`.
   - Validates tags in downloaded audio; removes wrong matches and reports `mismatch`.
-  - Converts to AIFF and organises to `ORGANISED_AIFF_DIR/Genre/Artist/Title.aiff`.
+  - Converts to AIFF and organises to `ORGANISED_AIFF_DIR/Artist/Title.aiff` by default (`--by-genre` for `Genre/Artist/Title.aiff`).
 
 ### Common options
 

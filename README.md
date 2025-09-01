@@ -4,7 +4,7 @@
 
 - Fetch track lines from the Spotify Web API (Title - Artist 1, Artist 2)
 - Search and download matches from Qobuz via `qobuz-dl` (lossless preferred; 320 fallback)
-- Convert to AIFF and organise into `ORGANISED_AIFF_DIR/Genre/Artist/Title.aiff`
+- Convert to AIFF and organise into `ORGANISED_AIFF_DIR/Artist/Title.aiff` (default; use `--by-genre` for `Genre/Artist/Title.aiff`)
 
 Works entirely from the CLI and does not require a Spotify login for public content.
 
@@ -142,6 +142,7 @@ Title - Artist 1, Artist 2
 - `--quiet` / `--verbose`: control streaming output
 - `--summary-only`: suppress per‑file logs; emit summary at the end
 - `--json`: JSON summary output
+- `--by-genre`: organise AIFFs into `Genre/Artist/Title.aiff` instead of the default `Artist/Title.aiff`
 
 ## Qobuz URLs
 
@@ -159,13 +160,13 @@ Behavior:
 
 - Uses `qobuz-dl dl <URL>` under the hood
 - Shows a tidy spinner with the active track and percent; use `--verbose` for raw `qobuz-dl` output
-- Converts downloaded audio to AIFF and organises into `ORGANISED_AIFF_DIR/Genre/Artist/Title.aiff`
+- Converts downloaded audio to AIFF and organises into `ORGANISED_AIFF_DIR/Artist/Title.aiff` (default; `--by-genre` for `Genre/Artist/Title.aiff`)
 - Skips duplicates: if an organised AIFF already exists for the detected artist/title, the new file is removed and a message is printed (suppressed with `--quiet`)
 - Writes per-run logs under `<dir>/.qobuz-logs`
 
 ## Output & Logs
 
-- Organised AIFF files land under `ORGANISED_AIFF_DIR/Genre/Artist/Title.aiff`
+- Organised AIFF files land under `ORGANISED_AIFF_DIR/Artist/Title.aiff` by default
 - Detailed qobuz‑dl logs: `<dir>/.qobuz-logs/`
 - Unmatched lines: appended to `<dir>/not-found.log`
 - Wrong matches: files removed and mismatch noted in summary

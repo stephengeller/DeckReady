@@ -26,7 +26,7 @@ describe('processDownloadedAudio (unit, mocked ffmpeg/ffprobe)', () => {
     }
   });
 
-  test('uses next genre when "Electronique, Drum & Bass" and preserves artist/title', async () => {
+  test('organises to Artist/Title by default; genre parsed but not used', async () => {
     // now import the module (after setting env)
 
     // create a fake downloaded file
@@ -68,13 +68,8 @@ describe('processDownloadedAudio (unit, mocked ffmpeg/ffprobe)', () => {
 
     await processDownloadedAudio(src, fakeRunner);
 
-    // Expect organised file at Organised_AIFF/"Drum & Bass"/blkout./brainDED.aiff
-    const expected = path.join(
-      process.env.ORGANISED_AIFF_DIR,
-      'Drum & Bass',
-      'blkout.',
-      'brainDED.aiff',
-    );
+    // Expect organised file at Organised_AIFF/blkout./brainDED.aiff (no genre by default)
+    const expected = path.join(process.env.ORGANISED_AIFF_DIR, 'blkout.', 'brainDED.aiff');
     const exists = await fs
       .stat(expected)
       .then(() => true)

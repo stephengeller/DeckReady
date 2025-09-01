@@ -94,7 +94,6 @@ describe('audio metadata integration', () => {
     expect(res.ok).toBe(true);
     const dest = path.join(
       process.env.ORGANISED_AIFF_DIR,
-      probeMeta.genre,
       probeMeta.artist,
       `${probeMeta.title}.aiff`,
     );

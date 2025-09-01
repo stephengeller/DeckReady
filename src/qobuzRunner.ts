@@ -59,6 +59,7 @@ export async function runQobuzLuckyStrict(
     title,
     progress = false,
     onProgress,
+    byGenre = false,
   }: {
     directory?: string;
     quality?: number;
@@ -70,6 +71,7 @@ export async function runQobuzLuckyStrict(
     title?: string;
     progress?: boolean;
     onProgress?: (info: { raw: string; percent?: number; bytes?: number; total?: number }) => void;
+    byGenre?: boolean;
   } = {},
 ): Promise<RunQobuzResult> {
   const args = [
@@ -341,7 +343,7 @@ export async function runQobuzLuckyStrict(
         // If you prefer to fail the whole command when organising fails, remove the try/catch.
         // Here we keep best-effort behaviour but synchronously.
         // eslint-disable-next-line no-await-in-loop
-        await processDownloadedAudio(f, undefined, { quiet });
+        await processDownloadedAudio(f, undefined, { quiet, byGenre });
       } catch (e) {
         console.error('processDownloadedAudio failed for', f, e);
       }
@@ -372,6 +374,7 @@ export async function runQobuzDl(
     quiet = false,
     progress = false,
     onProgress,
+    byGenre = false,
   }: {
     directory?: string;
     quality?: number;
@@ -379,6 +382,7 @@ export async function runQobuzDl(
     quiet?: boolean;
     progress?: boolean;
     onProgress?: (info: { raw: string; percent?: number; bytes?: number; total?: number }) => void;
+    byGenre?: boolean;
   } = {},
 ): Promise<RunQobuzResult> {
   const args = [
@@ -505,7 +509,7 @@ export async function runQobuzDl(
         const artistRaw = tags['artist'] || tags['album_artist'] || '';
         const titleRaw = tags['title'] || '';
         // eslint-disable-next-line no-await-in-loop
-        const existing = await findOrganisedAiff(artistRaw, titleRaw);
+        const existing = await findOrganisedAiff(artistRaw, titleRaw, { byGenre });
         if (existing) {
           if (!quiet) console.log(`  \u21BA already organised: ${existing}`);
           try {
@@ -529,7 +533,7 @@ export async function runQobuzDl(
     for (const f of keptAudio) {
       try {
         // eslint-disable-next-line no-await-in-loop
-        await processDownloadedAudio(f, undefined, { quiet });
+        await processDownloadedAudio(f, undefined, { quiet, byGenre });
       } catch (e) {
         console.error('processDownloadedAudio failed for', f, e);
       }
