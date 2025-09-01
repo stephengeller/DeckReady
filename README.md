@@ -1,12 +1,16 @@
-# Spotify → Rekordbox
+# Spotify/Qobuz → AIFF Library
 
-> Turn Spotify playlists/albums/tracks into an organised, Rekordbox‑ready AIFF library.
+Turn Spotify or Qobuz links into clean, tagged AIFF files organised on disk. Great for DJs who want tracks in a consistent, import‑ready format for software like Rekordbox, without manual cleanup.
 
-- Fetch track lines from the Spotify Web API (Title - Artist 1, Artist 2)
-- Search and download matches from Qobuz via `qobuz-dl` (lossless preferred; 320 fallback)
-- Convert to AIFF and organise into `ORGANISED_AIFF_DIR/Artist/Title.aiff` (default; use `--by-genre` for `Genre/Artist/Title.aiff`)
+What it does:
 
-Works entirely from the CLI and does not require a Spotify login for public content.
+- Gets tracks from either a Spotify or Qobuz URL (or a text file of `Title - Artist` lines).
+- Downloads the source audio (via `qobuz-dl`) — typically FLAC when available; falls back to 320 when needed.
+- Converts to AIFF and preserves metadata (title/artist/album/genre/cover, etc.).
+- Organises files into a neat folder layout: `ORGANISED_AIFF_DIR/Artist/Title.aiff` (or `Genre/Artist/Title.aiff` with `--by-genre`).
+- Avoids duplicates: detects “already downloaded” runs and short‑circuits if an organised AIFF already exists.
+
+Works entirely from the CLI. No Spotify login is required for public content. Qobuz access uses your local `qobuz-dl` configuration/credentials.
 
 ---
 
@@ -72,8 +76,8 @@ script/run <spotify_url|qobuz_url|tracklist_file> --dir out [--dry] [--quality Q
 
 Notes:
 
-- Supports playlist, album, and track URLs from `open.spotify.com`
-- Use `--dry` to preview qobuz‑dl commands without downloading
+- Supports playlist, album, and track URLs from `open.spotify.com` and `open.qobuz.com`.
+- Use `--dry` to preview qobuz‑dl commands without downloading.
 
 Examples:
 
@@ -84,7 +88,7 @@ script/run https://open.spotify.com/playlist/... --dir out --dry
 # Single track
 script/run https://open.spotify.com/track/... --dir out
 
-# Use a pre-made "Title - Artist" file, skip Spotify
+# Use a pre-made "Title - Artist" file (skip scraping)
 script/run path/to/tracklist.txt --dir out
 
 # Qobuz direct URL (playlist, track, album)
