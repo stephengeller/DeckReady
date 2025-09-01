@@ -15,14 +15,10 @@ Works entirely from the CLI and does not require a Spotify login for public cont
 - [Getting Started](#getting-started)
 - [Configuration](#configuration)
 - [Quick Start](#quick-start)
-- [CLI Reference](#cli-reference)
-- [Qobuz URLs](#qobuz-urls)
+- [Usage](#usage)
 - [Output & Logs](#output--logs)
 - [Troubleshooting](#troubleshooting)
 - [Development](#development)
-- [Repository Map](#repository-map)
-- [Architecture](#architecture)
-- [Legal](#legal)
 
 ---
 
@@ -71,7 +67,7 @@ mkdir -p out
 2. Run the end‑to‑end helper:
 
 ```bash
-script/run <spotify_url|qobuz_url> --dir out [--dry] [--quality Q]
+script/run <spotify_url|qobuz_url|tracklist_file> --dir out [--dry] [--quality Q]
 ```
 
 Notes:
@@ -89,7 +85,7 @@ script/run https://open.spotify.com/playlist/... --dir out --dry
 script/run https://open.spotify.com/track/... --dir out
 
 # Use a pre-made "Title - Artist" file, skip Spotify
-script/run --tracklist path/to/tracklist.txt --dir out
+script/run path/to/tracklist.txt --dir out
 
 # Qobuz direct URL (playlist, track, album)
 script/run https://open.qobuz.com/playlist/35590683 --dir out
@@ -97,72 +93,39 @@ script/run https://open.qobuz.com/track/349546995 --dir out
 script/run https://open.qobuz.com/album/... --dir out
 ```
 
-## CLI Reference
+## Usage
 
-### script/run (wrapper)
+### script/run (recommended)
 
-- Scrapes Spotify into lines via `script/spotify-list` unless `--tracklist` is provided
-- Calls `run-lucky` to run qobuz‑dl with validation and logging
-- Optional `--convert` flag exists as a placeholder; conversion/organisation already happens automatically
+- Pass a Spotify or Qobuz URL, or a local text file of `Title - Artist` lines.
+- Under the hood: scrapes Spotify (when given a Spotify URL), then calls the qobuz runner and organises output.
 
-### run-lucky (bin) / script/run-lucky (ts-node shim)
-
-Usage:
-
-```bash
-run-lucky <tracklist.txt> --dir <out> [--dry] [--quiet|--verbose] [--summary-only] [--json]
-```
-
-Behavior:
-
-- Writes logs for each query under `<out>/.qobuz-logs/`
-- Detects “already downloaded” and skips redundant fallbacks
-- Validates downloaded files via tags; deletes wrong matches and logs a mismatch
-
-### script/spotify-list
-
-Usage:
-
-```bash
-script/spotify-list "https://open.spotify.com/{playlist|album|track}/..."
-```
-
-Prints:
-
-```
-Title - Artist 1, Artist 2
-```
-
-### Common options
+Options:
 
 - `--dir DIR`: output directory for qobuz-dl downloads (required)
 - `--quality Q`: 5=320, 6=LOSSLESS, 7=24b≤96k, 27=>96k (default 6)
 - `--dry`: print commands without downloading
-- `--tracklist FILE`: use a pre‑made "Title - Artist" file; skip Spotify scraping
 - `--quiet` / `--verbose`: control streaming output
-- `--summary-only`: suppress per‑file logs; emit summary at the end
-- `--json`: JSON summary output
-- `--by-genre`: organise AIFFs into `Genre/Artist/Title.aiff` instead of the default `Artist/Title.aiff`
+- `--by-genre`: organise AIFFs into `Genre/Artist/Title.aiff` instead of `Artist/Title.aiff`
 
-## Qobuz URLs
+#### Flags
 
-You can skip Spotify entirely and download directly from Qobuz links using the same wrapper:
+- `--dir DIR`: where qobuz-dl downloads land (required)
+- `--quality Q`: prefer 6; 5 used as fallback when needed
+- `--dry`: preview commands without making changes
+- `--quiet` / `--verbose`: hide or show underlying qobuz-dl output
+- `--by-genre`: organise as `Genre/Artist/Title.aiff` instead of `Artist/Title.aiff`
 
-- Supported: playlist, album, track (and artist/label pages supported by `qobuz-dl dl`)
+### Qobuz URLs
 
-Usage:
+You can skip Spotify entirely and download directly from Qobuz links using the same wrapper.
+Supported: playlist, album, track (and other pages supported by `qobuz-dl dl`).
+
+Example:
 
 ```bash
 script/run https://open.qobuz.com/{playlist|album|track}/... --dir out [--dry] [--quality Q] [--quiet|--verbose]
 ```
-
-Behavior:
-
-- Uses `qobuz-dl dl <URL>` under the hood
-- Shows a tidy spinner with the active track and percent; use `--verbose` for raw `qobuz-dl` output
-- Converts downloaded audio to AIFF and organises into `ORGANISED_AIFF_DIR/Artist/Title.aiff` (default; `--by-genre` for `Genre/Artist/Title.aiff`)
-- Skips duplicates: if an organised AIFF already exists for the detected artist/title, the new file is removed and a message is printed (suppressed with `--quiet`)
-- Writes per-run logs under `<dir>/.qobuz-logs`
 
 ## Output & Logs
 
@@ -189,13 +152,11 @@ More: [docs/TROUBLESHOOTING.md](./docs/TROUBLESHOOTING.md)
 
 See: [docs/DEVELOPMENT.md](./docs/DEVELOPMENT.md)
 
-## Repository Map
+## Repository Map (short)
 
-- `script/run`, `script/run-lucky`, `script/spotify-list`: shims to run CLIs via ts-node
-- `src/cli/runLucky.ts`: CLI entry for qobuz-dl flow
-- `script/qobuz-dl-url`, `src/cli/qobuzDl.ts`: direct Qobuz URL CLI
-- `src/lib/runLuckyForTracklist.ts`: orchestration (queries, matching, validation, summary)
-- `src/lib/normalize.ts`, `src/lib/queryBuilders.ts`: normalisation and query generation
+- `script/run`: unified entrypoint for Spotify/Qobuz/file input
+- `script/spotify-list`: fetches `Title - Artist` lines from Spotify
+- `script/qobuz-dl-url`: download from Qobuz URLs
 - `src/qobuzRunner.ts`: qobuz‑dl integration (spawning, validation, logging)
 - `src/lib/organiser.ts`: AIFF conversion and organised library placement
 - `src/lib/tags.ts`: ffprobe tag helpers
