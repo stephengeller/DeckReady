@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Idempotent local setup for spotify-to-rekordbox
+# Idempotent local setup for DeckReady
 # - Installs Node deps (yarn or npm)
 # - Ensures .env exists with required keys
 # - Creates default organised AIFF folder if missing
@@ -83,4 +83,3 @@ echo "==> Setup complete"
 echo "Next:"
 echo "  1) Open .env and set SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET"
 echo "  2) Try: script/run https://open.spotify.com/playlist/... --dir out --dry"
-
