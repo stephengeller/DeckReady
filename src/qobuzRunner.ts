@@ -119,18 +119,19 @@ export async function runQobuzLuckyStrict(
   const onStdout = progress
     ? (chunk: string) => {
         const m = chunk.match(/(\d+(?:\.\d+)?)([kM])\/(\d+(?:\.\d+)?)([kM])/);
+        let percent: number | undefined;
         if (m) {
           const v = (n: string, u: string) => Number(n) * (u === 'M' ? 1_000_000 : 1_000);
           bytes = v(m[1], m[2]);
           total = v(m[3], m[4]);
-          const percent =
+          percent =
             total > 0 ? Math.max(0, Math.min(100, Math.round((bytes / total) * 100))) : undefined;
-          if (onProgress) onProgress({ raw: chunk, percent, bytes, total });
         }
+        if (onProgress) onProgress({ raw: chunk, percent, bytes, total });
       }
     : undefined;
 
-  const proc = await spawnStreaming('qobuz-dl', args, { quiet, onStdout });
+  const proc = await spawnStreaming('qobuz-dl', args, { quiet, onStdout, onStderr: onStdout });
   const after = await snapshot(directory || '.');
 
   const addedAudio = diffNewAudio(before.files, after.files);
@@ -419,18 +420,19 @@ export async function runQobuzDl(
   const onStdout = progress
     ? (chunk: string) => {
         const m = chunk.match(/(\d+(?:\.\d+)?)([kM])\/(\d+(?:\.\d+)?)([kM])/);
+        let percent: number | undefined;
         if (m) {
           const v = (n: string, u: string) => Number(n) * (u === 'M' ? 1_000_000 : 1_000);
           bytes = v(m[1], m[2]);
           total = v(m[3], m[4]);
-          const percent =
+          percent =
             total > 0 ? Math.max(0, Math.min(100, Math.round((bytes / total) * 100))) : undefined;
-          if (onProgress) onProgress({ raw: chunk, percent, bytes, total });
         }
+        if (onProgress) onProgress({ raw: chunk, percent, bytes, total });
       }
     : undefined;
 
-  const proc = await spawnStreaming('qobuz-dl', args, { quiet, onStdout });
+  const proc = await spawnStreaming('qobuz-dl', args, { quiet, onStdout, onStderr: onStdout });
   const after = await snapshot(directory || '.');
 
   const addedAudio = diffNewAudio(before.files, after.files);
