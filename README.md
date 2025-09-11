@@ -23,6 +23,7 @@ Works entirely from the CLI. No Spotify login is required for public content. Qo
 - [Output & Logs](#output--logs)
 - [Troubleshooting](#troubleshooting)
 - [Development](#development)
+- [Utility Scripts](#utility-scripts)
 
 ---
 
@@ -155,6 +156,11 @@ More: [docs/TROUBLESHOOTING.md](./docs/TROUBLESHOOTING.md)
 - Format: `yarn format` / `yarn format:check`
 
 See: [docs/DEVELOPMENT.md](./docs/DEVELOPMENT.md)
+
+## Utility Scripts
+
+- Python helpers for organizing/cleaning an existing library live in `scripts/`.
+- Overview and usage: see `scripts/README.md`.
 
 ## Repository Map (short)
 
