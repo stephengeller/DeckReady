@@ -38,7 +38,7 @@ if [[ ! -f "$ENV_FILE" ]]; then
 SPOTIFY_CLIENT_ID=
 SPOTIFY_CLIENT_SECRET=
 
-# Where organised AIFF files are stored (defaults to ~/Music/rekordbox/Organised_AIFF)
+# Where organised AIFF files are stored (defaults to ~/Music/rekordbox/DROP_NEW_SONGS_HERE)
 # ORGANISED_AIFF_DIR=
 EOF
     echo "    created minimal $ENV_FILE"
@@ -55,7 +55,7 @@ else
 fi
 
 echo "==> Creating default organised AIFF folder if missing"
-DEFAULT_ORG="$HOME/Music/rekordbox/Organised_AIFF"
+DEFAULT_ORG="$HOME/Music/rekordbox/DROP_NEW_SONGS_HERE"
 mkdir -p "$DEFAULT_ORG" || true
 echo "    ensured: $DEFAULT_ORG"
 

@@ -46,7 +46,7 @@ The setup script:
 
 - Installs Node dependencies
 - Ensures `.env` exists (copied from `.env.example` if missing)
-- Creates `~/Music/rekordbox/Organised_AIFF` by default
+- Creates `~/Music/rekordbox/DROP_NEW_SONGS_HERE` by default
 - Checks for external tools: `qobuz-dl`, `ffmpeg`, `ffprobe`
 
 ## Configuration
@@ -54,7 +54,7 @@ The setup script:
 Edit `.env` in the repo root:
 
 - `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET` for Spotify Web API access
-- `ORGANISED_AIFF_DIR` base folder for organised AIFF files (defaults to `~/Music/rekordbox/Organised_AIFF`)
+- `ORGANISED_AIFF_DIR` base folder for organised AIFF files (defaults to `~/Music/rekordbox/DROP_NEW_SONGS_HERE`)
 
 See the example: [.env.example](./.env.example)
 
