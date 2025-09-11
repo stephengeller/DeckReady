@@ -28,4 +28,4 @@ Direct CLIs:
 Environment:
 
 - `.env` requires `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET` for the Web API.
-- `ORGANISED_AIFF_DIR` controls the organised AIFF base; default `~/Music/rekordbox/Organised_AIFF`.
+- `ORGANISED_AIFF_DIR` controls the organised AIFF base; default `~/Music/rekordbox/DROP_NEW_SONGS_HERE`.
