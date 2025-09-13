@@ -5,12 +5,24 @@ import { createSpinner } from '../lib/ui/spinner';
 import { isTTY, cyan, green, yellow, dim } from '../lib/ui/colors';
 
 async function main() {
-  const { file, dir, dry, verbose, progress, byGenre } = parseCliArgs(process.argv);
+  const {
+    file,
+    dir,
+    dry,
+    verbose,
+    progress,
+    byGenre,
+    flacOnly,
+    quality: qualityArg,
+  } = parseCliArgs(process.argv);
   const url = file;
   if (!url) throw new Error('Usage: qobuzDl <qobuz_url> --dir <output> [--dry]');
   if (!/qobuz\.com\//i.test(url)) throw new Error('Not a Qobuz URL');
   if (!dir) throw new Error('--dir is required');
-  const quality = Number(process.env.QUALITY || 6) || 6;
+  const quality =
+    typeof qualityArg === 'number' && qualityArg > 0
+      ? qualityArg
+      : Number(process.env.QUALITY || 6) || 6;
 
   const useSpinner = isTTY() && !verbose;
   const spinner = createSpinner(useSpinner);
@@ -31,6 +43,7 @@ async function main() {
     quiet: userQuiet,
     progress: useSpinner || progress,
     byGenre,
+    flacOnly,
     onProgress: ({ raw, percent }) => {
       // Total items in queue
       const q = /([0-9]+)\s+downloads? in queue/i.exec(raw);

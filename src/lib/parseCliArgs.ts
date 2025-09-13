@@ -18,6 +18,8 @@ export function parseCliArgs(argv: string[]): {
   progress: boolean;
   noColor: boolean;
   byGenre: boolean;
+  flacOnly: boolean;
+  quality: number | null;
 } {
   // Default to quiet output; enable verbose for full qobuz-dl streams
   const result = {
@@ -29,6 +31,8 @@ export function parseCliArgs(argv: string[]): {
     progress: false,
     noColor: false,
     byGenre: false,
+    flacOnly: false,
+    quality: null as number | null,
   };
 
   // Skip node and script path
@@ -57,6 +61,23 @@ export function parseCliArgs(argv: string[]): {
       case '--organise-by-genre':
         result.byGenre = true;
         break;
+      case '--flac-only':
+        result.flacOnly = true;
+        break;
+      case '--quality':
+      case '-q': {
+        const val = (argv[++i] || '').toLowerCase();
+        if (!val) break;
+        // Accept common aliases
+        if (val === 'mp3' || val === '320') result.quality = 5;
+        else if (val === 'flac' || val === 'lossless' || val === '6' || val === 'hires')
+          result.quality = 6;
+        else {
+          const n = Number(val);
+          if (!Number.isNaN(n) && n > 0) result.quality = n;
+        }
+        break;
+      }
       case '--dir':
         result.dir = argv[++i] || null;
         break;

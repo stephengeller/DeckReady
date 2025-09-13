@@ -17,7 +17,17 @@ import { persistLastRunLogs } from '../tracklist/logs';
 
 /** Main entrypoint for processing a tracklist with qobuz-dl and organising output. */
 export async function main() {
-  const { file, dir, dry, quiet: quietArg, verbose, noColor, byGenre } = parseCliArgs(process.argv);
+  const {
+    file,
+    dir,
+    dry,
+    quiet: quietArg,
+    verbose,
+    noColor,
+    byGenre,
+    flacOnly,
+    quality: qualityArg,
+  } = parseCliArgs(process.argv);
   if (noColor) setColorEnabled(false);
   const quiet = quietArg && !verbose; // verbose overrides quiet
   if (!dir) throw new Error('--dir is required so we can verify files were actually written');
@@ -34,19 +44,23 @@ export async function main() {
     const parts = makeBaseParts(line);
     const candidateQueries = buildQueries(parts);
 
-    // Short-circuit: if a matching AIFF already exists under ORGANISED_AIFF_DIR, skip qobuz-dl
-    let alreadyOrganisedPath: string | null = null;
-    try {
-      if (typeof findOrganisedAiff === 'function') {
-        alreadyOrganisedPath = await findOrganisedAiff(parts.primArtist, parts.title, { byGenre });
+    // Short-circuit: if a matching AIFF already exists, skip qobuz-dl (unless --flac-only)
+    if (!flacOnly) {
+      let alreadyOrganisedPath: string | null = null;
+      try {
+        if (typeof findOrganisedAiff === 'function') {
+          alreadyOrganisedPath = await findOrganisedAiff(parts.primArtist, parts.title, {
+            byGenre,
+          });
+        }
+      } catch {
+        // in tests, module mocks may omit findOrganisedAiff; ignore
       }
-    } catch {
-      // in tests, module mocks may omit findOrganisedAiff; ignore
-    }
-    if (alreadyOrganisedPath) {
-      console.log(`  ${yellow('↺')} already organised: ${alreadyOrganisedPath}`);
-      alreadyCount += 1;
-      continue;
+      if (alreadyOrganisedPath) {
+        console.log(`  ${yellow('↺')} already organised: ${alreadyOrganisedPath}`);
+        alreadyCount += 1;
+        continue;
+      }
     }
 
     console.log(cyan(`>>> ${line}`));
@@ -59,11 +73,12 @@ export async function main() {
     const spinner = createSpinner(isTTY() && !verbose);
 
     for (const candidateQuery of candidateQueries) {
-      // Lossless
+      // Primary attempt (default q=6 unless overridden by --quality)
       spinner.start('downloading');
+      const primaryQuality = typeof qualityArg === 'number' && qualityArg > 0 ? qualityArg : 6;
       const losslessResult = await runQobuzLuckyStrict(candidateQuery, {
         directory: dir,
-        quality: 6,
+        quality: primaryQuality,
         dryRun: dry,
         quiet,
         artist: parts.primArtist,
@@ -71,6 +86,7 @@ export async function main() {
         progress: false,
         onProgress: undefined,
         byGenre,
+        flacOnly,
       });
       spinner.stop();
       if (dry) {
@@ -80,13 +96,15 @@ export async function main() {
         break; // in dry-run we stop at first planned candidate
       }
       if (losslessResult?.ok) {
-        console.log(`  ${green('✓')} matched (lossless) via: ${candidateQuery}`);
+        const label = primaryQuality === 6 ? 'lossless' : `q=${primaryQuality}`;
+        console.log(`  ${green('✓')} matched (${label}) via: ${candidateQuery}`);
         for (const p of losslessResult?.added || []) console.log(`    ${dim('→')} ${p}`);
         didMatch = true;
         matchedCount += 1;
         break;
       } else if (losslessResult?.already) {
-        console.log(`  ${yellow('↺')} already downloaded (lossless) via: ${candidateQuery}`);
+        const label = primaryQuality === 6 ? 'lossless' : `q=${primaryQuality}`;
+        console.log(`  ${yellow('↺')} already downloaded (${label}) via: ${candidateQuery}`);
         didMatch = true;
         alreadyCount += 1;
         break;
@@ -101,6 +119,8 @@ export async function main() {
         break;
       }
 
+      // 320 fallback only if no explicit quality provided
+      if (typeof qualityArg === 'number' && qualityArg > 0) continue;
       // 320 fallback
       spinner.start('downloading');
       const bitrate320Result = await runQobuzLuckyStrict(candidateQuery, {
@@ -111,6 +131,7 @@ export async function main() {
         artist: parts.primArtist,
         title: parts.title,
         byGenre,
+        flacOnly,
       });
       // Ensure we always stop the spinner for the 320 fallback as well
       spinner.stop();

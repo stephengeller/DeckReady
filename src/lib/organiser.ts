@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { ORGANISED_AIFF_DIR } from './env';
+import { ORGANISED_AIFF_DIR, ORGANISED_FLAT } from './env';
 import { spawnStreaming } from './proc';
 import { readTags, Runner } from './tags';
 import { pickGenre, sanitizeName } from '../organiser/names';
@@ -38,10 +38,15 @@ export async function processDownloadedAudio(
     const artist = sanitizeName(artistRaw);
     const title = sanitizeName(titleRaw);
 
-    // Default layout: <Artist>/<Title>.aiff; optional by-genre: <Genre>/<Artist>/<Title>.aiff
+    // Layout selection priority:
+    // 1) By-genre flag: <Genre>/<Artist>/<Title>.aiff
+    // 2) Flat (default): <Title>.aiff directly under ORG_BASE
+    // 3) Artist/Title (legacy default): <Artist>/<Title>.aiff
     const destDir = opts?.byGenre
       ? path.join(ORG_BASE, genre, artist)
-      : path.join(ORG_BASE, artist);
+      : ORGANISED_FLAT
+        ? ORG_BASE
+        : path.join(ORG_BASE, artist);
     await fs.mkdir(destDir, { recursive: true });
 
     const destPath = await ensureUniqueAiffPath(destDir, title);
@@ -112,6 +117,45 @@ export async function findOrganisedAiff(
       'i',
     );
 
+    // Search order based on user intent and defaults:
+    // 1) If by-genre requested, prefer <Genre>/<Artist>/<Title>.aiff
+    if (opts?.byGenre) {
+      const genreDirents = await fs
+        .readdir(baseDir, { withFileTypes: true })
+        .catch(() => [] as Array<{ name: string; isDirectory: () => boolean }>);
+      const genres = genreDirents
+        .filter((d) => d && typeof d.isDirectory === 'function' && d.isDirectory())
+        .map((d) => d.name);
+      for (const g of genres) {
+        const artistDir = path.join(baseDir, g, artistDirName);
+        try {
+          const entries = await fs.readdir(artistDir, { withFileTypes: true });
+          for (const e of entries) {
+            if (!e.isFile()) continue;
+            if (titleRegex.test(e.name)) return path.join(artistDir, e.name);
+          }
+        } catch (err) {
+          if (err?.code !== 'ENOENT') {
+            console.warn(`Warning: could not access artist dir ${artistDir}`);
+          }
+        }
+      }
+    }
+
+    // 2) Flat layout (now default): <base>/<Title>.aiff
+    if (ORGANISED_FLAT) {
+      try {
+        const entries = await fs.readdir(baseDir, { withFileTypes: true });
+        for (const e of entries) {
+          if (!e.isFile()) continue;
+          if (titleRegex.test(e.name)) return path.join(baseDir, e.name);
+        }
+      } catch (err) {
+        if (err?.code !== 'ENOENT')
+          console.warn(`Warning: could not access organised base dir ${baseDir}`);
+      }
+    }
+
     // First, check new default layout: <base>/<Artist>/<Title>.aiff
     const artistDirDefault = path.join(baseDir, artistDirName);
     try {
@@ -125,17 +169,14 @@ export async function findOrganisedAiff(
         console.warn(`Warning: could not access artist dir ${artistDirDefault}`);
     }
 
-    // If specifically requested (or for backward-compat search), scan genre subfolders
-    if (opts?.byGenre !== false) {
-      // Only consider actual genre directories (ignore files like .DS_Store)
+    // 3) By-genre (fallback scan) if not explicitly disabled, for backward-compat
+    if (!opts?.byGenre) {
       const genreDirents = await fs
         .readdir(baseDir, { withFileTypes: true })
         .catch(() => [] as Array<{ name: string; isDirectory: () => boolean }>);
-
       const genres = genreDirents
         .filter((d) => d && typeof d.isDirectory === 'function' && d.isDirectory())
         .map((d) => d.name);
-
       for (const g of genres) {
         const artistDir = path.join(baseDir, g, artistDirName);
         try {
