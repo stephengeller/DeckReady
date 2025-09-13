@@ -56,6 +56,7 @@ export async function runQobuzLuckyStrict(
     progress = false,
     onProgress,
     byGenre = false,
+    flacOnly = false,
   }: {
     directory?: string;
     quality?: number;
@@ -68,6 +69,7 @@ export async function runQobuzLuckyStrict(
     progress?: boolean;
     onProgress?: (info: { raw: string; percent?: number; bytes?: number; total?: number }) => void;
     byGenre?: boolean;
+    flacOnly?: boolean;
   } = {},
 ): Promise<RunQobuzResult> {
   const args = [
@@ -172,6 +174,17 @@ export async function runQobuzLuckyStrict(
   const ok = proc.code === 0 && addedAudio.length > 0;
 
   // After each successful download, convert to AIFF and organise by genre/artist/title
+  if (flacOnly) {
+    return {
+      ok,
+      added: addedAudio,
+      cmd,
+      logPath,
+      mismatch: null,
+      ...proc,
+    } as unknown as RunQobuzResult;
+  }
+
   if (addedAudio.length > 0) {
     for (const f of addedAudio) {
       // Run synchronously (await) so nothing happens in background. Log errors but continue with next file.
@@ -212,6 +225,7 @@ export async function runQobuzDl(
     progress = false,
     onProgress,
     byGenre = false,
+    flacOnly = false,
   }: {
     directory?: string;
     quality?: number;
@@ -220,6 +234,7 @@ export async function runQobuzDl(
     progress?: boolean;
     onProgress?: (info: { raw: string; percent?: number; bytes?: number; total?: number }) => void;
     byGenre?: boolean;
+    flacOnly?: boolean;
   } = {},
 ): Promise<RunQobuzResult> {
   const args = [
@@ -298,35 +313,51 @@ export async function runQobuzDl(
     proc.stderr,
   );
 
-  // Short-circuit per file when an organised AIFF already exists
+  // Short-circuit per file when an organised AIFF already exists (unless flacOnly)
   const keptAudio: string[] = [];
   if (addedAudio.length > 0) {
-    for (const f of addedAudio) {
-      try {
-        // eslint-disable-next-line no-await-in-loop
-        const tags = await readTags(f);
-        const artistRaw = tags['artist'] || tags['album_artist'] || '';
-        const titleRaw = tags['title'] || '';
-        // eslint-disable-next-line no-await-in-loop
-        const existing = await findOrganisedAiff(artistRaw, titleRaw, { byGenre });
-        if (existing) {
-          if (!quiet) console.log(`  \u21BA already organised: ${existing}`);
-          try {
-            await fs.rm(f, { force: true });
-            await fs.rm(`${f}.search.txt`, { force: true });
-          } catch {
-            /* ignore */
+    if (flacOnly) {
+      keptAudio.push(...addedAudio);
+    } else {
+      for (const f of addedAudio) {
+        try {
+          // eslint-disable-next-line no-await-in-loop
+          const tags = await readTags(f);
+          const artistRaw = tags['artist'] || tags['album_artist'] || '';
+          const titleRaw = tags['title'] || '';
+          // eslint-disable-next-line no-await-in-loop
+          const existing = await findOrganisedAiff(artistRaw, titleRaw, { byGenre });
+          if (existing) {
+            if (!quiet) console.log(`  \u21BA already organised: ${existing}`);
+            try {
+              await fs.rm(f, { force: true });
+              await fs.rm(`${f}.search.txt`, { force: true });
+            } catch {
+              /* ignore */
+            }
+          } else {
+            keptAudio.push(f);
           }
-        } else {
+        } catch {
           keptAudio.push(f);
         }
-      } catch {
-        keptAudio.push(f);
       }
     }
   }
 
   const ok = proc.code === 0 && keptAudio.length > 0;
+
+  if (flacOnly) {
+    return {
+      ok,
+      added: keptAudio,
+      cmd,
+      logPath,
+      mismatch: null,
+      already: proc.code === 0 && keptAudio.length === 0 ? true : undefined,
+      ...proc,
+    } as unknown as RunQobuzResult;
+  }
 
   if (keptAudio.length > 0) {
     for (const f of keptAudio) {
