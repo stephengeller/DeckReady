@@ -18,6 +18,7 @@ QUALITY="${QUALITY:-6}"
 DRY_RUN="${DRY_RUN:-0}"
 TRACKLIST_FILE=""
 DO_CONVERT=0
+FLAC_ONLY=0
 VERBOSE=0
 QUIET=0
 
@@ -31,6 +32,7 @@ Options:
   --quality Q          5=320, 6=LOSSLESS, 7=24b<=96k, 27=>96k (default: $QUALITY)
   --dry                Dry-run: print qobuz commands; no downloads
   --convert            (placeholder) enable FFmpeg→AIFF conversion
+  --flac-only          Skip AIFF conversion/organising; keep downloaded files
   -h, --help           Show this help
 
 Env overrides:
@@ -53,6 +55,7 @@ while [[ $# -gt 0 ]]; do
     --quality) QUALITY="$2"; shift 2 ;;
     --dry) DRY_RUN=1; shift ;;
     --convert) DO_CONVERT=1; shift ;;
+    --flac-only) FLAC_ONLY=1; shift ;;
     --verbose) VERBOSE=1; shift ;;
     --quiet) QUIET=1; shift ;;
     http*spotify.com*) SPOTIFY_URL="$1"; shift ;;
@@ -99,6 +102,7 @@ if [[ -n "$QOBUZ_URL" ]]; then
   [[ "$DRY_RUN" -eq 1 ]] && ARGS+=(--dry)
   [[ "$VERBOSE" -eq 1 ]] && ARGS+=(--verbose)
   [[ "$QUIET" -eq 1 ]] && ARGS+=(--quiet)
+  [[ "$FLAC_ONLY" -eq 1 ]] && ARGS+=(--flac-only)
   QUALITY="$QUALITY" "${ARGS[@]}"
   echo "Done."
   exit 0
@@ -126,6 +130,7 @@ ARGS=("$RUN_LUCKY_JS" "$TRACKS_TXT" --dir "$OUT_DIR" --quality "$QUALITY")
 [[ "$DRY_RUN" -eq 1 ]] && ARGS+=(--dry)
 [[ "$VERBOSE" -eq 1 ]] && ARGS+=(--verbose)
 [[ "$QUIET" -eq 1 ]] && ARGS+=(--quiet)
+[[ "$FLAC_ONLY" -eq 1 ]] && ARGS+=(--flac-only)
 "${ARGS[@]}"
 
 # -----------------------
