@@ -24,6 +24,7 @@ export async function main() {
     quiet: quietArg,
     verbose,
     noColor,
+    progress,
     byGenre,
     flacOnly,
     quality: qualityArg,
@@ -70,7 +71,12 @@ export async function main() {
     let hadMismatch = false;
     const seenMismatchKeys = new Set<string>();
 
-    const spinner = createSpinner(isTTY() && !verbose);
+    const useSpinner = isTTY() && !verbose;
+    const spinner = createSpinner(useSpinner);
+    let currentLabel = '';
+    let lastLabel = '';
+    let totalInQueue: number | null = null;
+    let indexInQueue = 0;
 
     for (const candidateQuery of candidateQueries) {
       // Primary attempt (default q=6 unless overridden by --quality)
@@ -83,8 +89,24 @@ export async function main() {
         quiet,
         artist: parts.primArtist,
         title: parts.title,
-        progress: false,
-        onProgress: undefined,
+        progress: useSpinner || progress,
+        onProgress: ({ raw, percent }) => {
+          const q = /([0-9]+)\s+downloads? in queue/i.exec(raw);
+          if (q) totalInQueue = Number(q[1]);
+          const m = /^Downloading:\s+(.+)$/m.exec(raw);
+          if (m && m[1]) {
+            currentLabel = m[1];
+            if (currentLabel && currentLabel !== lastLabel) {
+              indexInQueue += 1;
+              lastLabel = currentLabel;
+            }
+          }
+          const left = totalInQueue ? `${indexInQueue}/${totalInQueue} ` : '';
+          const pct = typeof percent === 'number' ? ` ${percent}%` : '';
+          const main = currentLabel ? `${currentLabel}${pct}` : `downloading${pct}`;
+          const txt = `${left}${main}`;
+          spinner.setText(dim(txt));
+        },
         byGenre,
         flacOnly,
       });
@@ -128,6 +150,24 @@ export async function main() {
         quality: 5,
         dryRun: false,
         quiet,
+        progress: useSpinner || progress,
+        onProgress: ({ raw, percent }) => {
+          const q = /([0-9]+)\s+downloads? in queue/i.exec(raw);
+          if (q) totalInQueue = Number(q[1]);
+          const m = /^Downloading:\s+(.+)$/m.exec(raw);
+          if (m && m[1]) {
+            currentLabel = m[1];
+            if (currentLabel && currentLabel !== lastLabel) {
+              indexInQueue += 1;
+              lastLabel = currentLabel;
+            }
+          }
+          const left = totalInQueue ? `${indexInQueue}/${totalInQueue} ` : '';
+          const pct = typeof percent === 'number' ? ` ${percent}%` : '';
+          const main = currentLabel ? `${currentLabel}${pct}` : `downloading${pct}`;
+          const txt = `${left}${main}`;
+          spinner.setText(dim(txt));
+        },
         artist: parts.primArtist,
         title: parts.title,
         byGenre,
