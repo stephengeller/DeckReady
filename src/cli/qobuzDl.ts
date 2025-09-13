@@ -2,7 +2,7 @@
 import { parseCliArgs } from '../parseCliArgs';
 import { runQobuzDl } from '../qobuzRunner';
 import { createSpinner } from '../lib/ui/spinner';
-import { isTTY, cyan, green, yellow, dim } from '../lib/ui/colors';
+import { isTTY, cyan, green, yellow, dim, setColorEnabled } from '../lib/ui/colors';
 
 async function main() {
   const {
@@ -10,11 +10,14 @@ async function main() {
     dir,
     dry,
     verbose,
+    quiet: quietArg,
     progress,
     byGenre,
     flacOnly,
     quality: qualityArg,
+    noColor,
   } = parseCliArgs(process.argv);
+  if (noColor) setColorEnabled(false);
   const url = file;
   if (!url) throw new Error('Usage: qobuzDl <qobuz_url> --dir <output> [--dry]');
   if (!/qobuz\.com\//i.test(url)) throw new Error('Not a Qobuz URL');
@@ -31,16 +34,18 @@ async function main() {
   let totalInQueue: number | null = null;
   let indexInQueue = 0;
 
-  if (!dry) console.log(cyan(`Starting Qobuz downloads for: ${url}`));
+  // Quiet by default unless verbose provided (consistent with run-lucky path)
+  const quiet = quietArg && !verbose;
+
+  if (!dry && !quiet) console.log(cyan(`Starting Qobuz downloads for: ${url}`));
 
   spinner.start('downloading');
-  const userQuiet = process.argv.includes('--quiet');
   const res = await runQobuzDl(url, {
     directory: dir,
     quality,
     dryRun: dry,
-    // Show our own runner logs (like "↺ already organised") unless the user explicitly asks for --quiet.
-    quiet: userQuiet,
+    // Show our own runner logs (like "↺ already organised") unless quiet is requested.
+    quiet,
     progress: useSpinner || progress,
     byGenre,
     flacOnly,
