@@ -17,7 +17,8 @@
     "husky:init": "husky"
   },
   "bin": {
-    "run-lucky": "script/run-lucky"
+    "run-lucky": "script/run-lucky",
+    "deckready": "script/run"
   },
   "dependencies": {
     "dotenv": "^16.4.5"
