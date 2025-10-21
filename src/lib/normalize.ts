@@ -76,14 +76,79 @@ export function normaliseForSearch(s: string): string {
 /**
  * Parse a "Title - Artist 1, Artist 2" line into base parts for query building.
  */
-export function makeBaseParts(line: string): {
+export function makeBaseParts(
+  line: string,
+  options: { preferredOrder?: 'auto' | 'title-first' | 'artist-first' } = {},
+): {
   title: string;
   artists: string;
   primArtist: string;
 } {
-  const [rawTitle, rawArtists] = line.split(' - ');
-  const title = (stripDecorations(stripFeat(rawTitle || '')) || '').toString();
-  const artists = (rawArtists || '').trim();
-  const primArtist = (primaryArtist(artists) || '').toString();
-  return { title, artists, primArtist };
+  const trimmed = line.trim();
+  if (!trimmed) return { title: '', artists: '', primArtist: '' };
+
+  const segments = trimmed.split(' - ');
+  const preferredOrder = options?.preferredOrder ?? 'auto';
+  if (segments.length >= 2) {
+    const left = (segments[0] || '').trim();
+    const right = segments.slice(1).join(' - ').trim();
+
+    const leftArtistScore = scoreAsArtist(left);
+    const rightArtistScore = scoreAsArtist(right);
+    const leftTitleScore = scoreAsTitle(left);
+    const rightTitleScore = scoreAsTitle(right);
+
+    const keepScore = leftTitleScore + rightArtistScore;
+    const swapScore = leftArtistScore + rightTitleScore;
+
+    let shouldSwap = swapScore > keepScore;
+    if (preferredOrder === 'artist-first') shouldSwap = true;
+    else if (preferredOrder === 'title-first') shouldSwap = false;
+    else if (swapScore === keepScore && leftArtistScore > rightArtistScore) shouldSwap = true;
+
+    const artistText = shouldSwap ? left : right;
+    const titleText = shouldSwap ? right : left;
+
+    const title = (stripDecorations(stripFeat(titleText || '')) || '').toString();
+    const artists = (artistText || '').trim();
+    const primArtist = (primaryArtist(artists) || '').toString();
+    return { title, artists, primArtist };
+  }
+
+  const title = (stripDecorations(stripFeat(trimmed)) || '').toString();
+  return { title, artists: '', primArtist: '' };
+}
+
+function scoreAsArtist(input: string): number {
+  if (!input) return 0;
+  let score = 0;
+  if (/,|\s&\s|\sx\s|\s×\s|\sand\s|\sft\.?|\sfeat\.?|\svs\s|\spres\.?/i.test(input)) {
+    score += 2;
+  }
+  const words = input
+    .split(/\s+/)
+    .map((w) => w.trim())
+    .filter(Boolean);
+  if (words.length > 0 && words.length <= 4) {
+    const capitalised = words.filter((w) => /^[A-Z][\w'.-]*$/.test(w));
+    if (capitalised.length === words.length) score += 1;
+  }
+  if (/^(dj|mc|mr|mrs|ms)\b/i.test(input.trim())) score += 1;
+  return score;
+}
+
+function scoreAsTitle(input: string): number {
+  if (!input) return 0;
+  let score = 0;
+  if (/\d/.test(input)) score += 1;
+  if (/[([]/.test(input)) score += 1;
+  if (
+    /(remix|edit|mix|dub|version|vip|bootleg|refix|rework|instrumental|original|extended|intro|outro)/i.test(
+      input,
+    )
+  ) {
+    score += 2;
+  }
+  if (/\b(part|pt\.?|vol\.?|chapter|episode)\b/i.test(input)) score += 1;
+  return score;
 }

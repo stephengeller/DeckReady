@@ -1,0 +1,19 @@
+CMD: qobuz-dl lucky -t track -n 1 -q 6 -d . --no-db --no-m3u --no-fallback -ff {artist} - {album} ({year}) [{bit_depth}B-{sampling_rate}kHz] -tf {tracktitle} FERRAND "RWTB"
+
+STDOUT:
+
+
+STDERR:
+Logging...
+Logged: OK
+Membership: Studio
+Set max quality: 6 - 16 bit, 44.1kHz
+
+Searching tracks for "FERRAND "RWTB"".
+qobuz-dl will attempt to download the first 1 results.
+
+Downloading: Ferrand Lamar - Starfall
+0.00/61.7k /// cover.jpg61.7k/61.7k /// cover.jpg
+0.00/8.42M /// ./Ferrand Lamar - Starfall (2024) [16B-44.1kHz]/.01.tmp17.0k/8.42M /// ./Ferrand Lamar - Starfall (2024) [16B-44.1kHz]/.01.tmp39.0k/8.42M /// ./Ferrand Lamar - Starfall (2024) [16B-44.1kHz]/.01.tmp71.0k/8.42M /// ./Ferrand Lamar - Starfall (2024) [16B-44.1kHz]/.01.tmp95.0k/8.42M /// ./Ferrand Lamar - Starfall (2024) [16B-44.1kHz]/.01.tmp134k/8.42M /// ./Ferrand Lamar - Starfall (2024) [16B-44.1kHz]/.01.tmp 198k/8.42M /// ./Ferrand Lamar - Starfall (2024) [16B-44.1kHz]/.01.tmp277k/8.42M /// ./Ferrand Lamar - Starfall (2024) [16B-44.1kHz]/.01.tmp373k/8.42M /// ./Ferrand Lamar - Starfall (2024) [16B-44.1kHz]/.01.tmp513k/8.42M /// ./Ferrand Lamar - Starfall (2024) [16B-44.1kHz]/.01.tmp711k/8.42M /// ./Ferrand Lamar - Starfall (2024) [16B-44.1kHz]/.01.tmp949k/8.42M /// ./Ferrand Lamar - Starfall (2024) [16B-44.1kHz]/.01.tmp1.23M/8.42M /// ./Ferrand Lamar - Starfall (2024) [16B-44.1kHz]/.01.tmp1.67M/8.42M /// ./Ferrand Lamar - Starfall (2024) [16B-44.1kHz]/.01.tmp2.24M/8.42M /// ./Ferrand Lamar - Starfall (2024) [16B-44.1kHz]/.01.tmp2.99M/8.42M /// ./Ferrand Lamar - Starfall (2024) [16B-44.1kHz]/.01.tmp4.01M/8.42M /// ./Ferrand Lamar - Starfall (2024) [16B-44.1kHz]/.01.tmp5.08M/8.42M /// ./Ferrand Lamar - Starfall (2024) [16B-44.1kHz]/.01.tmp6.10M/8.42M /// ./Ferrand Lamar - Starfall (2024) [16B-44.1kHz]/.01.tmp6.98M/8.42M /// ./Ferrand Lamar - Starfall (2024) [16B-44.1kHz]/.01.tmp7.78M/8.42M /// ./Ferrand Lamar - Starfall (2024) [16B-44.1kHz]/.01.tmp8.42M/8.42M /// ./Ferrand Lamar - Starfall (2024) [16B-44.1kHz]/.01.tmp
+Completed
+

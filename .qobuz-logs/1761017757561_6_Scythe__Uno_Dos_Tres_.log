@@ -1,0 +1,19 @@
+CMD: qobuz-dl lucky -t track -n 1 -q 6 -d . --no-db --no-m3u --no-fallback -ff {artist} - {album} ({year}) [{bit_depth}B-{sampling_rate}kHz] -tf {tracktitle} Scythe "Uno Dos Tres"
+
+STDOUT:
+
+
+STDERR:
+Logging...
+Logged: OK
+Membership: Studio
+Set max quality: 6 - 16 bit, 44.1kHz
+
+Searching tracks for "Scythe "Uno Dos Tres"".
+qobuz-dl will attempt to download the first 1 results.
+
+Downloading: Willie Bobo - Fried Neck Bones And Some Home Fries
+0.00/123k /// cover.jpg123k/123k /// cover.jpg
+0.00/17.3M /// ./Willie Bobo - Uno Dos Tres 1-2-3 (1966) [16B-44.1kHz]/.01.tmp32.0k/17.3M /// ./Willie Bobo - Uno Dos Tres 1-2-3 (1966) [16B-44.1kHz]/.01.tmp56.0k/17.3M /// ./Willie Bobo - Uno Dos Tres 1-2-3 (1966) [16B-44.1kHz]/.01.tmp75.0k/17.3M /// ./Willie Bobo - Uno Dos Tres 1-2-3 (1966) [16B-44.1kHz]/.01.tmp115k/17.3M /// ./Willie Bobo - Uno Dos Tres 1-2-3 (1966) [16B-44.1kHz]/.01.tmp 155k/17.3M /// ./Willie Bobo - Uno Dos Tres 1-2-3 (1966) [16B-44.1kHz]/.01.tmp210k/17.3M /// ./Willie Bobo - Uno Dos Tres 1-2-3 (1966) [16B-44.1kHz]/.01.tmp290k/17.3M /// ./Willie Bobo - Uno Dos Tres 1-2-3 (1966) [16B-44.1kHz]/.01.tmp393k/17.3M /// ./Willie Bobo - Uno Dos Tres 1-2-3 (1966) [16B-44.1kHz]/.01.tmp528k/17.3M /// ./Willie Bobo - Uno Dos Tres 1-2-3 (1966) [16B-44.1kHz]/.01.tmp711k/17.3M /// ./Willie Bobo - Uno Dos Tres 1-2-3 (1966) [16B-44.1kHz]/.01.tmp950k/17.3M /// ./Willie Bobo - Uno Dos Tres 1-2-3 (1966) [16B-44.1kHz]/.01.tmp1.23M/17.3M /// ./Willie Bobo - Uno Dos Tres 1-2-3 (1966) [16B-44.1kHz]/.01.tmp1.63M/17.3M /// ./Willie Bobo - Uno Dos Tres 1-2-3 (1966) [16B-44.1kHz]/.01.tmp2.21M/17.3M /// ./Willie Bobo - Uno Dos Tres 1-2-3 (1966) [16B-44.1kHz]/.01.tmp2.95M/17.3M /// ./Willie Bobo - Uno Dos Tres 1-2-3 (1966) [16B-44.1kHz]/.01.tmp3.86M/17.3M /// ./Willie Bobo - Uno Dos Tres 1-2-3 (1966) [16B-44.1kHz]/.01.tmp4.82M/17.3M /// ./Willie Bobo - Uno Dos Tres 1-2-3 (1966) [16B-44.1kHz]/.01.tmp5.63M/17.3M /// ./Willie Bobo - Uno Dos Tres 1-2-3 (1966) [16B-44.1kHz]/.01.tmp6.51M/17.3M /// ./Willie Bobo - Uno Dos Tres 1-2-3 (1966) [16B-44.1kHz]/.01.tmp7.65M/17.3M /// ./Willie Bobo - Uno Dos Tres 1-2-3 (1966) [16B-44.1kHz]/.01.tmp8.52M/17.3M /// ./Willie Bobo - Uno Dos Tres 1-2-3 (1966) [16B-44.1kHz]/.01.tmp9.61M/17.3M /// ./Willie Bobo - Uno Dos Tres 1-2-3 (1966) [16B-44.1kHz]/.01.tmp10.5M/17.3M /// ./Willie Bobo - Uno Dos Tres 1-2-3 (1966) [16B-44.1kHz]/.01.tmp11.5M/17.3M /// ./Willie Bobo - Uno Dos Tres 1-2-3 (1966) [16B-44.1kHz]/.01.tmp12.9M/17.3M /// ./Willie Bobo - Uno Dos Tres 1-2-3 (1966) [16B-44.1kHz]/.01.tmp14.0M/17.3M /// ./Willie Bobo - Uno Dos Tres 1-2-3 (1966) [16B-44.1kHz]/.01.tmp14.9M/17.3M /// ./Willie Bobo - Uno Dos Tres 1-2-3 (1966) [16B-44.1kHz]/.01.tmp15.8M/17.3M /// ./Willie Bobo - Uno Dos Tres 1-2-3 (1966) [16B-44.1kHz]/.01.tmp16.6M/17.3M /// ./Willie Bobo - Uno Dos Tres 1-2-3 (1966) [16B-44.1kHz]/.01.tmp17.3M/17.3M /// ./Willie Bobo - Uno Dos Tres 1-2-3 (1966) [16B-44.1kHz]/.01.tmp
+Completed
+

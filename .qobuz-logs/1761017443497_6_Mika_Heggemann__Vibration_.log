@@ -1,0 +1,19 @@
+CMD: qobuz-dl lucky -t track -n 1 -q 6 -d . --no-db --no-m3u --no-fallback -ff {artist} - {album} ({year}) [{bit_depth}B-{sampling_rate}kHz] -tf {tracktitle} Mika Heggemann "Vibration"
+
+STDOUT:
+
+
+STDERR:
+Logging...
+Logged: OK
+Membership: Studio
+Set max quality: 6 - 16 bit, 44.1kHz
+
+Searching tracks for "Mika Heggemann "Vibration"".
+qobuz-dl will attempt to download the first 1 results.
+
+Downloading: Mika Heggemann - Vibration
+0.00/48.7k /// cover.jpg13.0k/48.7k /// cover.jpg42.0k/48.7k /// cover.jpg48.7k/48.7k /// cover.jpg
+0.00/15.7M /// ./Mika Heggemann - Vibration (2024) [16B-44.1kHz]/.01.tmp16.0k/15.7M /// ./Mika Heggemann - Vibration (2024) [16B-44.1kHz]/.01.tmp34.0k/15.7M /// ./Mika Heggemann - Vibration (2024) [16B-44.1kHz]/.01.tmp50.0k/15.7M /// ./Mika Heggemann - Vibration (2024) [16B-44.1kHz]/.01.tmp74.0k/15.7M /// ./Mika Heggemann - Vibration (2024) [16B-44.1kHz]/.01.tmp114k/15.7M /// ./Mika Heggemann - Vibration (2024) [16B-44.1kHz]/.01.tmp 153k/15.7M /// ./Mika Heggemann - Vibration (2024) [16B-44.1kHz]/.01.tmp209k/15.7M /// ./Mika Heggemann - Vibration (2024) [16B-44.1kHz]/.01.tmp289k/15.7M /// ./Mika Heggemann - Vibration (2024) [16B-44.1kHz]/.01.tmp392k/15.7M /// ./Mika Heggemann - Vibration (2024) [16B-44.1kHz]/.01.tmp531k/15.7M /// ./Mika Heggemann - Vibration (2024) [16B-44.1kHz]/.01.tmp730k/15.7M /// ./Mika Heggemann - Vibration (2024) [16B-44.1kHz]/.01.tmp0.98M/15.7M /// ./Mika Heggemann - Vibration (2024) [16B-44.1kHz]/.01.tmp1.35M/15.7M /// ./Mika Heggemann - Vibration (2024) [16B-44.1kHz]/.01.tmp1.83M/15.7M /// ./Mika Heggemann - Vibration (2024) [16B-44.1kHz]/.01.tmp2.47M/15.7M /// ./Mika Heggemann - Vibration (2024) [16B-44.1kHz]/.01.tmp3.36M/15.7M /// ./Mika Heggemann - Vibration (2024) [16B-44.1kHz]/.01.tmp4.42M/15.7M /// ./Mika Heggemann - Vibration (2024) [16B-44.1kHz]/.01.tmp5.11M/15.7M /// ./Mika Heggemann - Vibration (2024) [16B-44.1kHz]/.01.tmp6.58M/15.7M /// ./Mika Heggemann - Vibration (2024) [16B-44.1kHz]/.01.tmp7.82M/15.7M /// ./Mika Heggemann - Vibration (2024) [16B-44.1kHz]/.01.tmp9.04M/15.7M /// ./Mika Heggemann - Vibration (2024) [16B-44.1kHz]/.01.tmp10.1M/15.7M /// ./Mika Heggemann - Vibration (2024) [16B-44.1kHz]/.01.tmp11.1M/15.7M /// ./Mika Heggemann - Vibration (2024) [16B-44.1kHz]/.01.tmp12.2M/15.7M /// ./Mika Heggemann - Vibration (2024) [16B-44.1kHz]/.01.tmp13.4M/15.7M /// ./Mika Heggemann - Vibration (2024) [16B-44.1kHz]/.01.tmp14.5M/15.7M /// ./Mika Heggemann - Vibration (2024) [16B-44.1kHz]/.01.tmp15.5M/15.7M /// ./Mika Heggemann - Vibration (2024) [16B-44.1kHz]/.01.tmp15.7M/15.7M /// ./Mika Heggemann - Vibration (2024) [16B-44.1kHz]/.01.tmp
+Completed
+

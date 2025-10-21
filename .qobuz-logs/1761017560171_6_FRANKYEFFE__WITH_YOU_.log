@@ -1,0 +1,19 @@
+CMD: qobuz-dl lucky -t track -n 1 -q 6 -d . --no-db --no-m3u --no-fallback -ff {artist} - {album} ({year}) [{bit_depth}B-{sampling_rate}kHz] -tf {tracktitle} FRANKYEFFE "WITH YOU"
+
+STDOUT:
+
+
+STDERR:
+Logging...
+Logged: OK
+Membership: Studio
+Set max quality: 6 - 16 bit, 44.1kHz
+
+Searching tracks for "FRANKYEFFE "WITH YOU"".
+qobuz-dl will attempt to download the first 1 results.
+
+Downloading: Michael Jackson - Rock with You (Single Version)
+0.00/70.6k /// cover.jpg70.6k/70.6k /// cover.jpg
+0.00/24.2M /// ./Michael Jackson - Off The Wall (1979) [16B-44.1kHz]/.01.tmp16.0k/24.2M /// ./Michael Jackson - Off The Wall (1979) [16B-44.1kHz]/.01.tmp50.0k/24.2M /// ./Michael Jackson - Off The Wall (1979) [16B-44.1kHz]/.01.tmp81.0k/24.2M /// ./Michael Jackson - Off The Wall (1979) [16B-44.1kHz]/.01.tmp106k/24.2M /// ./Michael Jackson - Off The Wall (1979) [16B-44.1kHz]/.01.tmp 146k/24.2M /// ./Michael Jackson - Off The Wall (1979) [16B-44.1kHz]/.01.tmp193k/24.2M /// ./Michael Jackson - Off The Wall (1979) [16B-44.1kHz]/.01.tmp265k/24.2M /// ./Michael Jackson - Off The Wall (1979) [16B-44.1kHz]/.01.tmp352k/24.2M /// ./Michael Jackson - Off The Wall (1979) [16B-44.1kHz]/.01.tmp472k/24.2M /// ./Michael Jackson - Off The Wall (1979) [16B-44.1kHz]/.01.tmp647k/24.2M /// ./Michael Jackson - Off The Wall (1979) [16B-44.1kHz]/.01.tmp846k/24.2M /// ./Michael Jackson - Off The Wall (1979) [16B-44.1kHz]/.01.tmp1.13M/24.2M /// ./Michael Jackson - Off The Wall (1979) [16B-44.1kHz]/.01.tmp1.52M/24.2M /// ./Michael Jackson - Off The Wall (1979) [16B-44.1kHz]/.01.tmp2.06M/24.2M /// ./Michael Jackson - Off The Wall (1979) [16B-44.1kHz]/.01.tmp2.71M/24.2M /// ./Michael Jackson - Off The Wall (1979) [16B-44.1kHz]/.01.tmp3.69M/24.2M /// ./Michael Jackson - Off The Wall (1979) [16B-44.1kHz]/.01.tmp4.74M/24.2M /// ./Michael Jackson - Off The Wall (1979) [16B-44.1kHz]/.01.tmp5.80M/24.2M /// ./Michael Jackson - Off The Wall (1979) [16B-44.1kHz]/.01.tmp6.62M/24.2M /// ./Michael Jackson - Off The Wall (1979) [16B-44.1kHz]/.01.tmp8.36M/24.2M /// ./Michael Jackson - Off The Wall (1979) [16B-44.1kHz]/.01.tmp9.38M/24.2M /// ./Michael Jackson - Off The Wall (1979) [16B-44.1kHz]/.01.tmp11.1M/24.2M /// ./Michael Jackson - Off The Wall (1979) [16B-44.1kHz]/.01.tmp12.2M/24.2M /// ./Michael Jackson - Off The Wall (1979) [16B-44.1kHz]/.01.tmp13.3M/24.2M /// ./Michael Jackson - Off The Wall (1979) [16B-44.1kHz]/.01.tmp14.6M/24.2M /// ./Michael Jackson - Off The Wall (1979) [16B-44.1kHz]/.01.tmp15.8M/24.2M /// ./Michael Jackson - Off The Wall (1979) [16B-44.1kHz]/.01.tmp16.9M/24.2M /// ./Michael Jackson - Off The Wall (1979) [16B-44.1kHz]/.01.tmp18.0M/24.2M /// ./Michael Jackson - Off The Wall (1979) [16B-44.1kHz]/.01.tmp19.0M/24.2M /// ./Michael Jackson - Off The Wall (1979) [16B-44.1kHz]/.01.tmp20.2M/24.2M /// ./Michael Jackson - Off The Wall (1979) [16B-44.1kHz]/.01.tmp21.3M/24.2M /// ./Michael Jackson - Off The Wall (1979) [16B-44.1kHz]/.01.tmp22.3M/24.2M /// ./Michael Jackson - Off The Wall (1979) [16B-44.1kHz]/.01.tmp23.3M/24.2M /// ./Michael Jackson - Off The Wall (1979) [16B-44.1kHz]/.01.tmp24.2M/24.2M /// ./Michael Jackson - Off The Wall (1979) [16B-44.1kHz]/.01.tmp
+Completed
+

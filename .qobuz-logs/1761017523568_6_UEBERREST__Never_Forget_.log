@@ -1,0 +1,19 @@
+CMD: qobuz-dl lucky -t track -n 1 -q 6 -d . --no-db --no-m3u --no-fallback -ff {artist} - {album} ({year}) [{bit_depth}B-{sampling_rate}kHz] -tf {tracktitle} UEBERREST "Never Forget"
+
+STDOUT:
+
+
+STDERR:
+Logging...
+Logged: OK
+Membership: Studio
+Set max quality: 6 - 16 bit, 44.1kHz
+
+Searching tracks for "UEBERREST "Never Forget"".
+qobuz-dl will attempt to download the first 1 results.
+
+Downloading: Ueberrest - Never Forget
+0.00/119k /// cover.jpg119k/119k /// cover.jpg
+0.00/24.7M /// ./Ueberrest - 44014 (2025) [16B-44.1kHz]/.01.tmp16.0k/24.7M /// ./Ueberrest - 44014 (2025) [16B-44.1kHz]/.01.tmp35.0k/24.7M /// ./Ueberrest - 44014 (2025) [16B-44.1kHz]/.01.tmp51.0k/24.7M /// ./Ueberrest - 44014 (2025) [16B-44.1kHz]/.01.tmp75.0k/24.7M /// ./Ueberrest - 44014 (2025) [16B-44.1kHz]/.01.tmp107k/24.7M /// ./Ueberrest - 44014 (2025) [16B-44.1kHz]/.01.tmp 130k/24.7M /// ./Ueberrest - 44014 (2025) [16B-44.1kHz]/.01.tmp170k/24.7M /// ./Ueberrest - 44014 (2025) [16B-44.1kHz]/.01.tmp234k/24.7M /// ./Ueberrest - 44014 (2025) [16B-44.1kHz]/.01.tmp313k/24.7M /// ./Ueberrest - 44014 (2025) [16B-44.1kHz]/.01.tmp409k/24.7M /// ./Ueberrest - 44014 (2025) [16B-44.1kHz]/.01.tmp548k/24.7M /// ./Ueberrest - 44014 (2025) [16B-44.1kHz]/.01.tmp715k/24.7M /// ./Ueberrest - 44014 (2025) [16B-44.1kHz]/.01.tmp930k/24.7M /// ./Ueberrest - 44014 (2025) [16B-44.1kHz]/.01.tmp1.20M/24.7M /// ./Ueberrest - 44014 (2025) [16B-44.1kHz]/.01.tmp1.58M/24.7M /// ./Ueberrest - 44014 (2025) [16B-44.1kHz]/.01.tmp2.05M/24.7M /// ./Ueberrest - 44014 (2025) [16B-44.1kHz]/.01.tmp2.72M/24.7M /// ./Ueberrest - 44014 (2025) [16B-44.1kHz]/.01.tmp3.54M/24.7M /// ./Ueberrest - 44014 (2025) [16B-44.1kHz]/.01.tmp4.57M/24.7M /// ./Ueberrest - 44014 (2025) [16B-44.1kHz]/.01.tmp5.53M/24.7M /// ./Ueberrest - 44014 (2025) [16B-44.1kHz]/.01.tmp6.48M/24.7M /// ./Ueberrest - 44014 (2025) [16B-44.1kHz]/.01.tmp7.49M/24.7M /// ./Ueberrest - 44014 (2025) [16B-44.1kHz]/.01.tmp8.47M/24.7M /// ./Ueberrest - 44014 (2025) [16B-44.1kHz]/.01.tmp9.43M/24.7M /// ./Ueberrest - 44014 (2025) [16B-44.1kHz]/.01.tmp10.3M/24.7M /// ./Ueberrest - 44014 (2025) [16B-44.1kHz]/.01.tmp12.2M/24.7M /// ./Ueberrest - 44014 (2025) [16B-44.1kHz]/.01.tmp13.1M/24.7M /// ./Ueberrest - 44014 (2025) [16B-44.1kHz]/.01.tmp14.7M/24.7M /// ./Ueberrest - 44014 (2025) [16B-44.1kHz]/.01.tmp15.9M/24.7M /// ./Ueberrest - 44014 (2025) [16B-44.1kHz]/.01.tmp17.6M/24.7M /// ./Ueberrest - 44014 (2025) [16B-44.1kHz]/.01.tmp18.8M/24.7M /// ./Ueberrest - 44014 (2025) [16B-44.1kHz]/.01.tmp20.4M/24.7M /// ./Ueberrest - 44014 (2025) [16B-44.1kHz]/.01.tmp21.7M/24.7M /// ./Ueberrest - 44014 (2025) [16B-44.1kHz]/.01.tmp22.8M/24.7M /// ./Ueberrest - 44014 (2025) [16B-44.1kHz]/.01.tmp23.9M/24.7M /// ./Ueberrest - 44014 (2025) [16B-44.1kHz]/.01.tmp24.7M/24.7M /// ./Ueberrest - 44014 (2025) [16B-44.1kHz]/.01.tmp
+Completed
+

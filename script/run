@@ -4,11 +4,31 @@ set -euo pipefail
 # -----------------------
 # Resolve repo paths (no npm link needed)
 # -----------------------
-SCRIPT_DIR="$(cd -- "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
-# Use our ts-node shims by default so the CLI runs TypeScript entrypoints directly
-RUN_LUCKY_JS="${RUN_LUCKY_JS:-"$SCRIPT_DIR/run-lucky"}"
-SPOTIFY_LIST_JS="${SPOTIFY_LIST_JS:-"$SCRIPT_DIR/spotify-list"}"
-QOBUZ_DL_URL_JS="${QOBUZ_DL_URL_JS:-"$SCRIPT_DIR/qobuz-dl-url"}"
+# Resolve the real location of this script (follow symlinks)
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+  DIR="$(cd -P "$(dirname "$SOURCE")" >/dev/null 2>&1 && pwd)"
+  TARGET="$(readlink "$SOURCE")"
+  if [[ "$TARGET" == /* ]]; then
+    SOURCE="$TARGET"
+  else
+    SOURCE="$DIR/$TARGET"
+  fi
+done
+SCRIPT_DIR="$(cd -P "$(dirname "$SOURCE")" >/dev/null 2>&1 && pwd)"
+# Prefer globally linked bins (via npm link) so this works from anywhere.
+# Fallback to local sibling scripts when running from the repo directly.
+RUN_LUCKY_BIN="${RUN_LUCKY_BIN:-run-lucky}"
+SPOTIFY_LIST_BIN="${SPOTIFY_LIST_BIN:-spotify-list}"
+QOBUZ_DL_URL_BIN="${QOBUZ_DL_URL_BIN:-qobuz-dl-url}"
+RUN_LUCKY_LOCAL="$SCRIPT_DIR/run-lucky"
+SPOTIFY_LIST_LOCAL="$SCRIPT_DIR/spotify-list"
+QOBUZ_DL_URL_LOCAL="$SCRIPT_DIR/qobuz-dl-url"
+if [[ -x "$RUN_LUCKY_LOCAL" && -x "$SPOTIFY_LIST_LOCAL" && -x "$QOBUZ_DL_URL_LOCAL" ]]; then
+  RUN_LUCKY_BIN="$RUN_LUCKY_LOCAL"
+  SPOTIFY_LIST_BIN="$SPOTIFY_LIST_LOCAL"
+  QOBUZ_DL_URL_BIN="$QOBUZ_DL_URL_LOCAL"
+fi
 
 # -----------------------
 # Config defaults
@@ -82,10 +102,10 @@ fi
 need() { command -v "$1" >/dev/null 2>&1 || { echo "Missing: $1"; exit 1; }; }
 need node
 need qobuz-dl
-[[ -f "$RUN_LUCKY_JS" ]] || { echo "runLucky script not found at: $RUN_LUCKY_JS"; exit 1; }
-[[ -f "$QOBUZ_DL_URL_JS" ]] || { echo "qobuzDl script not found at: $QOBUZ_DL_URL_JS"; exit 1; }
+need "$RUN_LUCKY_BIN"
+need "$QOBUZ_DL_URL_BIN"
 if [[ -z "$TRACKLIST_FILE" && -n "$SPOTIFY_URL" ]]; then
-  [[ -f "$SPOTIFY_LIST_JS" ]] || { echo "spotify_list.js not found at: $SPOTIFY_LIST_JS"; exit 1; }
+  need "$SPOTIFY_LIST_BIN"
 fi
 
 mkdir -p "$OUT_DIR"
@@ -98,7 +118,7 @@ trap 'rm -rf "$TMP_ROOT"' EXIT
 
 if [[ -n "$QOBUZ_URL" ]]; then
   echo "Downloading from Qobuz URL via qobuz-dl dl..."
-  ARGS=("$QOBUZ_DL_URL_JS" "$QOBUZ_URL" --dir "$OUT_DIR")
+  ARGS=("$QOBUZ_DL_URL_BIN" "$QOBUZ_URL" --dir "$OUT_DIR")
   [[ "$DRY_RUN" -eq 1 ]] && ARGS+=(--dry)
   [[ "$VERBOSE" -eq 1 ]] && ARGS+=(--verbose)
   [[ "$QUIET" -eq 1 ]] && ARGS+=(--quiet)
@@ -112,7 +132,7 @@ TRACKS_TXT="$TRACKLIST_FILE"
 if [[ -z "$TRACKLIST_FILE" ]]; then
   TRACKS_TXT="$TMP_ROOT/tracklist.txt"
   echo "Scraping Spotify → tracklist..."
-  "$SPOTIFY_LIST_JS" "$SPOTIFY_URL" > "$TRACKS_TXT"
+  "$SPOTIFY_LIST_BIN" "$SPOTIFY_URL" > "$TRACKS_TXT"
 fi
 
 LINES=$(grep -c ' - ' "$TRACKS_TXT" || true)
@@ -126,7 +146,7 @@ echo "Found $LINES tracks."
 # Step 2: run qobuz-dl lucky via local JS
 # -----------------------
 echo "Starting qobuz downloads…"
-ARGS=("$RUN_LUCKY_JS" "$TRACKS_TXT" --dir "$OUT_DIR" --quality "$QUALITY")
+ARGS=("$RUN_LUCKY_BIN" "$TRACKS_TXT" --dir "$OUT_DIR" --quality "$QUALITY")
 [[ "$DRY_RUN" -eq 1 ]] && ARGS+=(--dry)
 [[ "$VERBOSE" -eq 1 ]] && ARGS+=(--verbose)
 [[ "$QUIET" -eq 1 ]] && ARGS+=(--quiet)

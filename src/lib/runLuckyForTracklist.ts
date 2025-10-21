@@ -27,6 +27,7 @@ export async function main() {
     byGenre,
     flacOnly,
     quality: qualityArg,
+    inputOrder,
   } = parseCliArgs(process.argv);
   if (noColor) setColorEnabled(false);
   const quiet = quietArg && !verbose; // verbose overrides quiet
@@ -41,7 +42,7 @@ export async function main() {
     const line = raw.trim();
     if (!line || !isTrackLine(line)) continue;
 
-    const parts = makeBaseParts(line);
+    const parts = makeBaseParts(line, { preferredOrder: inputOrder });
     const candidateQueries = buildQueries(parts);
 
     // Short-circuit: if a matching AIFF already exists, skip qobuz-dl (unless --flac-only)

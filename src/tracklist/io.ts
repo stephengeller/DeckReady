@@ -13,4 +13,9 @@ export async function* lineStream(file: string | null) {
   }
 }
 
-export const isTrackLine = (line: string) => /\s-\s/.test(line.trim());
+export const isTrackLine = (line: string) => {
+  const trimmed = line.trim();
+  if (!trimmed) return false;
+  if (trimmed.startsWith('#') || trimmed.startsWith('//')) return false;
+  return true;
+};

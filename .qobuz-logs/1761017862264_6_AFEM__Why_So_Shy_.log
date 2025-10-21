@@ -1,0 +1,19 @@
+CMD: qobuz-dl lucky -t track -n 1 -q 6 -d . --no-db --no-m3u --no-fallback -ff {artist} - {album} ({year}) [{bit_depth}B-{sampling_rate}kHz] -tf {tracktitle} AFEM "Why So Shy"
+
+STDOUT:
+
+
+STDERR:
+Logging...
+Logged: OK
+Membership: Studio
+Set max quality: 6 - 16 bit, 44.1kHz
+
+Searching tracks for "AFEM "Why So Shy"".
+qobuz-dl will attempt to download the first 1 results.
+
+Downloading: El Camino Acid - Why So Shy
+0.00/106k /// cover.jpg50.0k/106k /// cover.jpg106k/106k /// cover.jpg 
+0.00/20.4M /// ./El Camino Acid - Sunset Motel (2022) [16B-44.1kHz]/.01.tmp16.0k/20.4M /// ./El Camino Acid - Sunset Motel (2022) [16B-44.1kHz]/.01.tmp50.0k/20.4M /// ./El Camino Acid - Sunset Motel (2022) [16B-44.1kHz]/.01.tmp74.0k/20.4M /// ./El Camino Acid - Sunset Motel (2022) [16B-44.1kHz]/.01.tmp114k/20.4M /// ./El Camino Acid - Sunset Motel (2022) [16B-44.1kHz]/.01.tmp 170k/20.4M /// ./El Camino Acid - Sunset Motel (2022) [16B-44.1kHz]/.01.tmp233k/20.4M /// ./El Camino Acid - Sunset Motel (2022) [16B-44.1kHz]/.01.tmp329k/20.4M /// ./El Camino Acid - Sunset Motel (2022) [16B-44.1kHz]/.01.tmp449k/20.4M /// ./El Camino Acid - Sunset Motel (2022) [16B-44.1kHz]/.01.tmp591k/20.4M /// ./El Camino Acid - Sunset Motel (2022) [16B-44.1kHz]/.01.tmp790k/20.4M /// ./El Camino Acid - Sunset Motel (2022) [16B-44.1kHz]/.01.tmp1.03M/20.4M /// ./El Camino Acid - Sunset Motel (2022) [16B-44.1kHz]/.01.tmp1.37M/20.4M /// ./El Camino Acid - Sunset Motel (2022) [16B-44.1kHz]/.01.tmp1.81M/20.4M /// ./El Camino Acid - Sunset Motel (2022) [16B-44.1kHz]/.01.tmp2.43M/20.4M /// ./El Camino Acid - Sunset Motel (2022) [16B-44.1kHz]/.01.tmp3.20M/20.4M /// ./El Camino Acid - Sunset Motel (2022) [16B-44.1kHz]/.01.tmp4.19M/20.4M /// ./El Camino Acid - Sunset Motel (2022) [16B-44.1kHz]/.01.tmp5.28M/20.4M /// ./El Camino Acid - Sunset Motel (2022) [16B-44.1kHz]/.01.tmp6.28M/20.4M /// ./El Camino Acid - Sunset Motel (2022) [16B-44.1kHz]/.01.tmp7.33M/20.4M /// ./El Camino Acid - Sunset Motel (2022) [16B-44.1kHz]/.01.tmp8.23M/20.4M /// ./El Camino Acid - Sunset Motel (2022) [16B-44.1kHz]/.01.tmp9.35M/20.4M /// ./El Camino Acid - Sunset Motel (2022) [16B-44.1kHz]/.01.tmp10.6M/20.4M /// ./El Camino Acid - Sunset Motel (2022) [16B-44.1kHz]/.01.tmp11.6M/20.4M /// ./El Camino Acid - Sunset Motel (2022) [16B-44.1kHz]/.01.tmp13.1M/20.4M /// ./El Camino Acid - Sunset Motel (2022) [16B-44.1kHz]/.01.tmp14.1M/20.4M /// ./El Camino Acid - Sunset Motel (2022) [16B-44.1kHz]/.01.tmp15.5M/20.4M /// ./El Camino Acid - Sunset Motel (2022) [16B-44.1kHz]/.01.tmp16.9M/20.4M /// ./El Camino Acid - Sunset Motel (2022) [16B-44.1kHz]/.01.tmp18.0M/20.4M /// ./El Camino Acid - Sunset Motel (2022) [16B-44.1kHz]/.01.tmp19.1M/20.4M /// ./El Camino Acid - Sunset Motel (2022) [16B-44.1kHz]/.01.tmp20.4M/20.4M /// ./El Camino Acid - Sunset Motel (2022) [16B-44.1kHz]/.01.tmp20.4M/20.4M /// ./El Camino Acid - Sunset Motel (2022) [16B-44.1kHz]/.01.tmp
+Completed
+

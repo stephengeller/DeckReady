@@ -3,6 +3,9 @@
   "description": "Turn Spotify or Qobuz links into clean, tagged AIFFs, organised for DJs.",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=24"
+  },
   "license": "MIT",
   "scripts": {
     "setup": "script/setup",
@@ -18,6 +21,8 @@
   },
   "bin": {
     "run-lucky": "script/run-lucky",
+    "spotify-list": "script/spotify-list",
+    "qobuz-dl-url": "script/qobuz-dl-url",
     "deckready": "script/run"
   },
   "dependencies": {
@@ -25,7 +30,7 @@
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
-    "@types/node": "18",
+    "@types/node": "^22",
     "@typescript-eslint/eslint-plugin": "^8.40.0",
     "@typescript-eslint/parser": "^8.40.0",
     "husky": "^9.1.6",

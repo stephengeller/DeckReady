@@ -1,0 +1,19 @@
+CMD: qobuz-dl lucky -t track -n 1 -q 6 -d . --no-db --no-m3u --no-fallback -ff {artist} - {album} ({year}) [{bit_depth}B-{sampling_rate}kHz] -tf {tracktitle} CIS "New Phone"
+
+STDOUT:
+
+
+STDERR:
+Logging...
+Logged: OK
+Membership: Studio
+Set max quality: 6 - 16 bit, 44.1kHz
+
+Searching tracks for "CIS "New Phone"".
+qobuz-dl will attempt to download the first 1 results.
+
+Downloading: cis - New Phone
+0.00/93.7k /// cover.jpg31.0k/93.7k /// cover.jpg93.0k/93.7k /// cover.jpg93.7k/93.7k /// cover.jpg
+0.00/21.3M /// ./cis - club slash 005 - New Phone (2025) [16B-44.1kHz]/.01.tmp16.0k/21.3M /// ./cis - club slash 005 - New Phone (2025) [16B-44.1kHz]/.01.tmp35.0k/21.3M /// ./cis - club slash 005 - New Phone (2025) [16B-44.1kHz]/.01.tmp67.0k/21.3M /// ./cis - club slash 005 - New Phone (2025) [16B-44.1kHz]/.01.tmp91.0k/21.3M /// ./cis - club slash 005 - New Phone (2025) [16B-44.1kHz]/.01.tmp131k/21.3M /// ./cis - club slash 005 - New Phone (2025) [16B-44.1kHz]/.01.tmp 170k/21.3M /// ./cis - club slash 005 - New Phone (2025) [16B-44.1kHz]/.01.tmp234k/21.3M /// ./cis - club slash 005 - New Phone (2025) [16B-44.1kHz]/.01.tmp313k/21.3M /// ./cis - club slash 005 - New Phone (2025) [16B-44.1kHz]/.01.tmp425k/21.3M /// ./cis - club slash 005 - New Phone (2025) [16B-44.1kHz]/.01.tmp572k/21.3M /// ./cis - club slash 005 - New Phone (2025) [16B-44.1kHz]/.01.tmp771k/21.3M /// ./cis - club slash 005 - New Phone (2025) [16B-44.1kHz]/.01.tmp1.00M/21.3M /// ./cis - club slash 005 - New Phone (2025) [16B-44.1kHz]/.01.tmp1.33M/21.3M /// ./cis - club slash 005 - New Phone (2025) [16B-44.1kHz]/.01.tmp1.78M/21.3M /// ./cis - club slash 005 - New Phone (2025) [16B-44.1kHz]/.01.tmp2.37M/21.3M /// ./cis - club slash 005 - New Phone (2025) [16B-44.1kHz]/.01.tmp3.14M/21.3M /// ./cis - club slash 005 - New Phone (2025) [16B-44.1kHz]/.01.tmp4.16M/21.3M /// ./cis - club slash 005 - New Phone (2025) [16B-44.1kHz]/.01.tmp5.03M/21.3M /// ./cis - club slash 005 - New Phone (2025) [16B-44.1kHz]/.01.tmp5.92M/21.3M /// ./cis - club slash 005 - New Phone (2025) [16B-44.1kHz]/.01.tmp7.00M/21.3M /// ./cis - club slash 005 - New Phone (2025) [16B-44.1kHz]/.01.tmp7.83M/21.3M /// ./cis - club slash 005 - New Phone (2025) [16B-44.1kHz]/.01.tmp8.88M/21.3M /// ./cis - club slash 005 - New Phone (2025) [16B-44.1kHz]/.01.tmp9.77M/21.3M /// ./cis - club slash 005 - New Phone (2025) [16B-44.1kHz]/.01.tmp10.7M/21.3M /// ./cis - club slash 005 - New Phone (2025) [16B-44.1kHz]/.01.tmp11.7M/21.3M /// ./cis - club slash 005 - New Phone (2025) [16B-44.1kHz]/.01.tmp12.6M/21.3M /// ./cis - club slash 005 - New Phone (2025) [16B-44.1kHz]/.01.tmp13.7M/21.3M /// ./cis - club slash 005 - New Phone (2025) [16B-44.1kHz]/.01.tmp14.7M/21.3M /// ./cis - club slash 005 - New Phone (2025) [16B-44.1kHz]/.01.tmp15.7M/21.3M /// ./cis - club slash 005 - New Phone (2025) [16B-44.1kHz]/.01.tmp16.6M/21.3M /// ./cis - club slash 005 - New Phone (2025) [16B-44.1kHz]/.01.tmp17.6M/21.3M /// ./cis - club slash 005 - New Phone (2025) [16B-44.1kHz]/.01.tmp18.6M/21.3M /// ./cis - club slash 005 - New Phone (2025) [16B-44.1kHz]/.01.tmp19.5M/21.3M /// ./cis - club slash 005 - New Phone (2025) [16B-44.1kHz]/.01.tmp20.6M/21.3M /// ./cis - club slash 005 - New Phone (2025) [16B-44.1kHz]/.01.tmp21.3M/21.3M /// ./cis - club slash 005 - New Phone (2025) [16B-44.1kHz]/.01.tmp
+Completed
+

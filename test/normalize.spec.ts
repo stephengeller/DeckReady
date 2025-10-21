@@ -39,4 +39,22 @@ describe('normalize', () => {
     expect(r.title).toBe('Title');
     expect(r.primArtist).toBe('A');
   });
+
+  test('makeBaseParts handles artist-first format', () => {
+    const r = makeBaseParts('Prauze - Velizy 2019');
+    expect(r.title).toBe('Velizy 2019');
+    expect(r.primArtist).toBe('Prauze');
+  });
+
+  test('makeBaseParts handles lines without hyphen', () => {
+    const r = makeBaseParts('Losing control x 5 mins (5 HOURS INTRO EDIT)');
+    expect(r.title).toBe('Losing control x 5 mins (5 HOURS INTRO EDIT)');
+    expect(r.primArtist).toBe('');
+  });
+
+  test('makeBaseParts respects artist-first preference', () => {
+    const r = makeBaseParts('Artist Name - Song Title', { preferredOrder: 'artist-first' });
+    expect(r.title).toBe('Song Title');
+    expect(r.primArtist).toBe('Artist Name');
+  });
 });

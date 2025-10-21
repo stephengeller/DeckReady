@@ -1,0 +1,19 @@
+CMD: qobuz-dl lucky -t track -n 1 -q 6 -d . --no-db --no-m3u --no-fallback -ff {artist} - {album} ({year}) [{bit_depth}B-{sampling_rate}kHz] -tf {tracktitle} Hammer House "The Jumper (Mass Medium Extended Remix) –"
+
+STDOUT:
+
+
+STDERR:
+Logging...
+Logged: OK
+Membership: Studio
+Set max quality: 6 - 16 bit, 44.1kHz
+
+Searching tracks for "Hammer House "The Jumper (Mass Medium Extended Remix) –"".
+qobuz-dl will attempt to download the first 1 results.
+
+Downloading: Marko Simsa - Lied:"pa-Pa-Pa-Pa-Pa …"- Duett Papageno und Papagena aus "Die Zauberflöte", KV 620
+0.00/80.9k /// cover.jpg13.0k/80.9k /// cover.jpg42.0k/80.9k /// cover.jpg80.9k/80.9k /// cover.jpg
+0.00/12.0M /// ./Marko Simsa - Simsa-La-Bim  (2014) [16B-44.1kHz]/.01.tmp17.0k/12.0M /// ./Marko Simsa - Simsa-La-Bim  (2014) [16B-44.1kHz]/.01.tmp38.0k/12.0M /// ./Marko Simsa - Simsa-La-Bim  (2014) [16B-44.1kHz]/.01.tmp70.0k/12.0M /// ./Marko Simsa - Simsa-La-Bim  (2014) [16B-44.1kHz]/.01.tmp94.0k/12.0M /// ./Marko Simsa - Simsa-La-Bim  (2014) [16B-44.1kHz]/.01.tmp133k/12.0M /// ./Marko Simsa - Simsa-La-Bim  (2014) [16B-44.1kHz]/.01.tmp 197k/12.0M /// ./Marko Simsa - Simsa-La-Bim  (2014) [16B-44.1kHz]/.01.tmp276k/12.0M /// ./Marko Simsa - Simsa-La-Bim  (2014) [16B-44.1kHz]/.01.tmp372k/12.0M /// ./Marko Simsa - Simsa-La-Bim  (2014) [16B-44.1kHz]/.01.tmp513k/12.0M /// ./Marko Simsa - Simsa-La-Bim  (2014) [16B-44.1kHz]/.01.tmp710k/12.0M /// ./Marko Simsa - Simsa-La-Bim  (2014) [16B-44.1kHz]/.01.tmp988k/12.0M /// ./Marko Simsa - Simsa-La-Bim  (2014) [16B-44.1kHz]/.01.tmp1.31M/12.0M /// ./Marko Simsa - Simsa-La-Bim  (2014) [16B-44.1kHz]/.01.tmp1.79M/12.0M /// ./Marko Simsa - Simsa-La-Bim  (2014) [16B-44.1kHz]/.01.tmp2.47M/12.0M /// ./Marko Simsa - Simsa-La-Bim  (2014) [16B-44.1kHz]/.01.tmp3.32M/12.0M /// ./Marko Simsa - Simsa-La-Bim  (2014) [16B-44.1kHz]/.01.tmp3.99M/12.0M /// ./Marko Simsa - Simsa-La-Bim  (2014) [16B-44.1kHz]/.01.tmp5.30M/12.0M /// ./Marko Simsa - Simsa-La-Bim  (2014) [16B-44.1kHz]/.01.tmp6.72M/12.0M /// ./Marko Simsa - Simsa-La-Bim  (2014) [16B-44.1kHz]/.01.tmp7.60M/12.0M /// ./Marko Simsa - Simsa-La-Bim  (2014) [16B-44.1kHz]/.01.tmp8.90M/12.0M /// ./Marko Simsa - Simsa-La-Bim  (2014) [16B-44.1kHz]/.01.tmp9.99M/12.0M /// ./Marko Simsa - Simsa-La-Bim  (2014) [16B-44.1kHz]/.01.tmp11.1M/12.0M /// ./Marko Simsa - Simsa-La-Bim  (2014) [16B-44.1kHz]/.01.tmp12.0M/12.0M /// ./Marko Simsa - Simsa-La-Bim  (2014) [16B-44.1kHz]/.01.tmp
+Completed
+

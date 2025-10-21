@@ -1,0 +1,19 @@
+CMD: qobuz-dl lucky -t track -n 1 -q 6 -d . --no-db --no-m3u --no-fallback -ff {artist} - {album} ({year}) [{bit_depth}B-{sampling_rate}kHz] -tf {tracktitle} Fenrick "Silly Boi"
+
+STDOUT:
+
+
+STDERR:
+Logging...
+Logged: OK
+Membership: Studio
+Set max quality: 6 - 16 bit, 44.1kHz
+
+Searching tracks for "Fenrick "Silly Boi"".
+qobuz-dl will attempt to download the first 1 results.
+
+Downloading: The Jellyfish Brothers - Silly Boi
+0.00/93.1k /// cover.jpg13.0k/93.1k /// cover.jpg42.0k/93.1k /// cover.jpg93.1k/93.1k /// cover.jpg
+0.00/21.7M /// ./The Jellyfish Brothers - Hyper Light Drifter (2015) [16B-44.1kHz]/.01.tmp16.0k/21.7M /// ./The Jellyfish Brothers - Hyper Light Drifter (2015) [16B-44.1kHz]/.01.tmp34.0k/21.7M /// ./The Jellyfish Brothers - Hyper Light Drifter (2015) [16B-44.1kHz]/.01.tmp50.0k/21.7M /// ./The Jellyfish Brothers - Hyper Light Drifter (2015) [16B-44.1kHz]/.01.tmp74.0k/21.7M /// ./The Jellyfish Brothers - Hyper Light Drifter (2015) [16B-44.1kHz]/.01.tmp114k/21.7M /// ./The Jellyfish Brothers - Hyper Light Drifter (2015) [16B-44.1kHz]/.01.tmp 154k/21.7M /// ./The Jellyfish Brothers - Hyper Light Drifter (2015) [16B-44.1kHz]/.01.tmp210k/21.7M /// ./The Jellyfish Brothers - Hyper Light Drifter (2015) [16B-44.1kHz]/.01.tmp289k/21.7M /// ./The Jellyfish Brothers - Hyper Light Drifter (2015) [16B-44.1kHz]/.01.tmp392k/21.7M /// ./The Jellyfish Brothers - Hyper Light Drifter (2015) [16B-44.1kHz]/.01.tmp532k/21.7M /// ./The Jellyfish Brothers - Hyper Light Drifter (2015) [16B-44.1kHz]/.01.tmp714k/21.7M /// ./The Jellyfish Brothers - Hyper Light Drifter (2015) [16B-44.1kHz]/.01.tmp969k/21.7M /// ./The Jellyfish Brothers - Hyper Light Drifter (2015) [16B-44.1kHz]/.01.tmp1.28M/21.7M /// ./The Jellyfish Brothers - Hyper Light Drifter (2015) [16B-44.1kHz]/.01.tmp1.74M/21.7M /// ./The Jellyfish Brothers - Hyper Light Drifter (2015) [16B-44.1kHz]/.01.tmp2.32M/21.7M /// ./The Jellyfish Brothers - Hyper Light Drifter (2015) [16B-44.1kHz]/.01.tmp3.08M/21.7M /// ./The Jellyfish Brothers - Hyper Light Drifter (2015) [16B-44.1kHz]/.01.tmp4.00M/21.7M /// ./The Jellyfish Brothers - Hyper Light Drifter (2015) [16B-44.1kHz]/.01.tmp4.63M/21.7M /// ./The Jellyfish Brothers - Hyper Light Drifter (2015) [16B-44.1kHz]/.01.tmp5.57M/21.7M /// ./The Jellyfish Brothers - Hyper Light Drifter (2015) [16B-44.1kHz]/.01.tmp6.27M/21.7M /// ./The Jellyfish Brothers - Hyper Light Drifter (2015) [16B-44.1kHz]/.01.tmp7.37M/21.7M /// ./The Jellyfish Brothers - Hyper Light Drifter (2015) [16B-44.1kHz]/.01.tmp8.51M/21.7M /// ./The Jellyfish Brothers - Hyper Light Drifter (2015) [16B-44.1kHz]/.01.tmp9.81M/21.7M /// ./The Jellyfish Brothers - Hyper Light Drifter (2015) [16B-44.1kHz]/.01.tmp10.7M/21.7M /// ./The Jellyfish Brothers - Hyper Light Drifter (2015) [16B-44.1kHz]/.01.tmp11.6M/21.7M /// ./The Jellyfish Brothers - Hyper Light Drifter (2015) [16B-44.1kHz]/.01.tmp13.0M/21.7M /// ./The Jellyfish Brothers - Hyper Light Drifter (2015) [16B-44.1kHz]/.01.tmp14.0M/21.7M /// ./The Jellyfish Brothers - Hyper Light Drifter (2015) [16B-44.1kHz]/.01.tmp15.0M/21.7M /// ./The Jellyfish Brothers - Hyper Light Drifter (2015) [16B-44.1kHz]/.01.tmp16.0M/21.7M /// ./The Jellyfish Brothers - Hyper Light Drifter (2015) [16B-44.1kHz]/.01.tmp17.1M/21.7M /// ./The Jellyfish Brothers - Hyper Light Drifter (2015) [16B-44.1kHz]/.01.tmp18.0M/21.7M /// ./The Jellyfish Brothers - Hyper Light Drifter (2015) [16B-44.1kHz]/.01.tmp19.0M/21.7M /// ./The Jellyfish Brothers - Hyper Light Drifter (2015) [16B-44.1kHz]/.01.tmp20.0M/21.7M /// ./The Jellyfish Brothers - Hyper Light Drifter (2015) [16B-44.1kHz]/.01.tmp20.9M/21.7M /// ./The Jellyfish Brothers - Hyper Light Drifter (2015) [16B-44.1kHz]/.01.tmp21.7M/21.7M /// ./The Jellyfish Brothers - Hyper Light Drifter (2015) [16B-44.1kHz]/.01.tmp
+Completed
+

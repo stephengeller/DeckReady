@@ -4,4 +4,6 @@ SCRIPT_DIR="$(cd -- "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 # Resolve ts-node from local node_modules if not provided
 ROOT_DIR="$(cd -- "$SCRIPT_DIR/.." >/dev/null 2>&1 && pwd)"
 TS_NODE="${TS_NODE:-$ROOT_DIR/node_modules/.bin/ts-node}"
+# Ensure asdf picks up project .tool-versions by running from ROOT_DIR
+cd "$ROOT_DIR"
 exec env TS_NODE_TRANSPILE_ONLY=1 "$TS_NODE" "$ROOT_DIR/src/cli/spotifyList.ts" "$@"

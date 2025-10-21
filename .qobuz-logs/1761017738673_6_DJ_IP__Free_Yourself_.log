@@ -1,0 +1,19 @@
+CMD: qobuz-dl lucky -t track -n 1 -q 6 -d . --no-db --no-m3u --no-fallback -ff {artist} - {album} ({year}) [{bit_depth}B-{sampling_rate}kHz] -tf {tracktitle} DJ IP "Free Yourself"
+
+STDOUT:
+
+
+STDERR:
+Logging...
+Logged: OK
+Membership: Studio
+Set max quality: 6 - 16 bit, 44.1kHz
+
+Searching tracks for "DJ IP "Free Yourself"".
+qobuz-dl will attempt to download the first 1 results.
+
+Downloading: DJ IP - Free Yourself
+0.00/49.9k /// cover.jpg14.0k/49.9k /// cover.jpg42.0k/49.9k /// cover.jpg49.9k/49.9k /// cover.jpg
+0.00/19.7M /// ./DJ IP - Free Yourself (2025) [16B-44.1kHz]/.01.tmp16.0k/19.7M /// ./DJ IP - Free Yourself (2025) [16B-44.1kHz]/.01.tmp34.0k/19.7M /// ./DJ IP - Free Yourself (2025) [16B-44.1kHz]/.01.tmp50.0k/19.7M /// ./DJ IP - Free Yourself (2025) [16B-44.1kHz]/.01.tmp74.0k/19.7M /// ./DJ IP - Free Yourself (2025) [16B-44.1kHz]/.01.tmp114k/19.7M /// ./DJ IP - Free Yourself (2025) [16B-44.1kHz]/.01.tmp 169k/19.7M /// ./DJ IP - Free Yourself (2025) [16B-44.1kHz]/.01.tmp233k/19.7M /// ./DJ IP - Free Yourself (2025) [16B-44.1kHz]/.01.tmp329k/19.7M /// ./DJ IP - Free Yourself (2025) [16B-44.1kHz]/.01.tmp448k/19.7M /// ./DJ IP - Free Yourself (2025) [16B-44.1kHz]/.01.tmp607k/19.7M /// ./DJ IP - Free Yourself (2025) [16B-44.1kHz]/.01.tmp829k/19.7M /// ./DJ IP - Free Yourself (2025) [16B-44.1kHz]/.01.tmp1.09M/19.7M /// ./DJ IP - Free Yourself (2025) [16B-44.1kHz]/.01.tmp1.48M/19.7M /// ./DJ IP - Free Yourself (2025) [16B-44.1kHz]/.01.tmp2.00M/19.7M /// ./DJ IP - Free Yourself (2025) [16B-44.1kHz]/.01.tmp2.67M/19.7M /// ./DJ IP - Free Yourself (2025) [16B-44.1kHz]/.01.tmp3.51M/19.7M /// ./DJ IP - Free Yourself (2025) [16B-44.1kHz]/.01.tmp4.33M/19.7M /// ./DJ IP - Free Yourself (2025) [16B-44.1kHz]/.01.tmp4.94M/19.7M /// ./DJ IP - Free Yourself (2025) [16B-44.1kHz]/.01.tmp5.93M/19.7M /// ./DJ IP - Free Yourself (2025) [16B-44.1kHz]/.01.tmp7.22M/19.7M /// ./DJ IP - Free Yourself (2025) [16B-44.1kHz]/.01.tmp8.06M/19.7M /// ./DJ IP - Free Yourself (2025) [16B-44.1kHz]/.01.tmp9.34M/19.7M /// ./DJ IP - Free Yourself (2025) [16B-44.1kHz]/.01.tmp10.3M/19.7M /// ./DJ IP - Free Yourself (2025) [16B-44.1kHz]/.01.tmp11.2M/19.7M /// ./DJ IP - Free Yourself (2025) [16B-44.1kHz]/.01.tmp12.1M/19.7M /// ./DJ IP - Free Yourself (2025) [16B-44.1kHz]/.01.tmp13.1M/19.7M /// ./DJ IP - Free Yourself (2025) [16B-44.1kHz]/.01.tmp14.0M/19.7M /// ./DJ IP - Free Yourself (2025) [16B-44.1kHz]/.01.tmp14.8M/19.7M /// ./DJ IP - Free Yourself (2025) [16B-44.1kHz]/.01.tmp15.9M/19.7M /// ./DJ IP - Free Yourself (2025) [16B-44.1kHz]/.01.tmp16.8M/19.7M /// ./DJ IP - Free Yourself (2025) [16B-44.1kHz]/.01.tmp18.1M/19.7M /// ./DJ IP - Free Yourself (2025) [16B-44.1kHz]/.01.tmp19.0M/19.7M /// ./DJ IP - Free Yourself (2025) [16B-44.1kHz]/.01.tmp19.7M/19.7M /// ./DJ IP - Free Yourself (2025) [16B-44.1kHz]/.01.tmp
+Completed
+

@@ -20,6 +20,7 @@ export function parseCliArgs(argv: string[]): {
   byGenre: boolean;
   flacOnly: boolean;
   quality: number | null;
+  inputOrder: 'auto' | 'title-first' | 'artist-first';
 } {
   // Default to quiet output; enable verbose for full qobuz-dl streams
   const result = {
@@ -33,6 +34,7 @@ export function parseCliArgs(argv: string[]): {
     byGenre: false,
     flacOnly: false,
     quality: null as number | null,
+    inputOrder: 'auto' as 'auto' | 'title-first' | 'artist-first',
   };
 
   // Skip node and script path
@@ -60,6 +62,12 @@ export function parseCliArgs(argv: string[]): {
       case '--organize-by-genre':
       case '--organise-by-genre':
         result.byGenre = true;
+        break;
+      case '--artist-first':
+        result.inputOrder = 'artist-first';
+        break;
+      case '--title-first':
+        result.inputOrder = 'title-first';
         break;
       case '--flac-only':
         result.flacOnly = true;
