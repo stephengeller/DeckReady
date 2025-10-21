@@ -3,3 +3,7 @@ coverage
 logs/
 .env
 yarn.error.log
+*.wav
+*.mp3
+*.flac
+.DS_Store

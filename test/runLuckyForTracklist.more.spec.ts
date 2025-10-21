@@ -150,5 +150,172 @@ describe('runLuckyForTracklist main workflow (various match outcomes)', () => {
     expect(out).toMatch(/no candidate matched/i);
     expect(runQobuzLuckyStrict).toHaveBeenCalled();
   });
+
+  test('expands tilde paths for --dir before running', async () => {
+    const tl = path.join(tmp, 'tracks-tilde.txt');
+    await fs.writeFile(tl, 'Tilde Track - Artist\n');
+
+    const fakeHome = await fs.mkdtemp(path.join(tmp, 'home-'));
+    const downloadDir = path.join(fakeHome, 'Music', 'qobuz-dl');
+    await fs.mkdir(downloadDir, { recursive: true });
+
+    let receivedDir: string | undefined;
+    jest.doMock('../src/qobuzRunner.ts', () => ({
+      runQobuzLuckyStrict: jest.fn(async (_q: string, opts: any) => {
+        receivedDir = opts.directory;
+        return {
+          ok: true,
+          added: [path.join(opts.directory || '', 'tilde.flac')],
+          cmd: 'cmd',
+          logPath: null,
+        };
+      }),
+    }));
+
+    const os = require('node:os');
+    const homeSpy = jest.spyOn(os, 'homedir').mockReturnValue(fakeHome);
+    const { runQobuzLuckyStrict } = require('../src/qobuzRunner.ts');
+    const runScript = require('../src/runLuckyForTracklist.ts').default;
+    const oldHome = process.env.HOME;
+    process.env.HOME = fakeHome;
+
+    const logs: string[] = [];
+    const logSpy = jest
+      .spyOn(console, 'log')
+      .mockImplementation((...args: any[]) => logs.push(args.join(' ')));
+
+    const oldArgv = process.argv;
+    process.argv = ['node', 'src/runLuckyForTracklist.ts', tl, '--dir', '~/Music/qobuz-dl'];
+
+    try {
+      await runScript();
+    } finally {
+      process.argv = oldArgv;
+      process.env.HOME = oldHome;
+      logSpy.mockRestore();
+      homeSpy.mockRestore();
+    }
+
+    expect(runQobuzLuckyStrict).toHaveBeenCalled();
+    expect(receivedDir).toBe(downloadDir);
+  });
+
+  test('organises an existing download when qobuz reports already downloaded', async () => {
+    const tl = path.join(tmp, 'tracks-existing.txt');
+    await fs.writeFile(tl, 'Existing Track - Existing Artist\n');
+
+    const downloadDir = path.join(tmp, 'existing-dl');
+    await fs.mkdir(downloadDir, { recursive: true });
+    const flacPath = path.join(downloadDir, 'Existing Track.flac');
+    await fs.writeFile(flacPath, 'dummy');
+
+    const processDownloadedAudioMock = jest.fn(async () => {});
+    let findCallCount = 0;
+    const organisedPath = path.join(downloadDir, 'organised', 'Existing Track.aiff');
+    jest.doMock('../src/qobuzRunner.ts', () => {
+      const runMock = jest.fn(async (query: string) => {
+        await fs.writeFile(`${flacPath}.search.txt`, query);
+        return {
+          ok: false,
+          added: [],
+          cmd: 'cmd',
+          logPath: null,
+          already: true,
+        };
+      });
+      return {
+        runQobuzLuckyStrict: runMock,
+        processDownloadedAudio: processDownloadedAudioMock,
+        findOrganisedAiff: jest.fn(async () => {
+          findCallCount += 1;
+          if (findCallCount === 1) return null;
+          return organisedPath;
+        }),
+      };
+    });
+
+    const { runQobuzLuckyStrict, processDownloadedAudio } = require('../src/qobuzRunner.ts');
+    const runScript = require('../src/runLuckyForTracklist.ts').default;
+
+    const logs: string[] = [];
+    const logSpy = jest
+      .spyOn(console, 'log')
+      .mockImplementation((...args: any[]) => logs.push(args.join(' ')));
+
+    const oldArgv = process.argv;
+    process.argv = ['node', 'src/runLuckyForTracklist.ts', tl, '--dir', downloadDir];
+
+    try {
+      await runScript();
+    } finally {
+      process.argv = oldArgv;
+      logSpy.mockRestore();
+    }
+
+    expect(runQobuzLuckyStrict).toHaveBeenCalled();
+    expect(processDownloadedAudio).toHaveBeenCalledWith(
+      flacPath,
+      undefined,
+      expect.objectContaining({ byGenre: false }),
+    );
+    const output = logs.join('\n');
+    expect(output).toMatch(/cached download located/);
+    expect(output).toMatch(/organised to/);
+  });
+
+  test('continues searching when qobuz reports already but nothing is found locally', async () => {
+    const tl = path.join(tmp, 'tracks-missing.txt');
+    await fs.writeFile(tl, 'Missing Track - Artist\n');
+
+    const downloadDir = path.join(tmp, 'missing-dl');
+    await fs.mkdir(downloadDir, { recursive: true });
+
+    let call = 0;
+    jest.doMock('../src/qobuzRunner.ts', () => ({
+      runQobuzLuckyStrict: jest.fn(async (_q: string, opts: any) => {
+        call += 1;
+        if (call === 1) {
+          return {
+            ok: false,
+            added: [],
+            cmd: 'cmd',
+            logPath: null,
+            already: true,
+          };
+        }
+        return {
+          ok: true,
+          added: [path.join(opts.directory || '', 'match.flac')],
+          cmd: 'cmd',
+          logPath: null,
+        };
+      }),
+      processDownloadedAudio: jest.fn(async () => {}),
+      findOrganisedAiff: jest.fn(() => null),
+    }));
+
+    const { runQobuzLuckyStrict } = require('../src/qobuzRunner.ts');
+    const runScript = require('../src/runLuckyForTracklist.ts').default;
+
+    const logs: string[] = [];
+    const logSpy = jest
+      .spyOn(console, 'log')
+      .mockImplementation((...args: any[]) => logs.push(args.join(' ')));
+
+    const oldArgv = process.argv;
+    process.argv = ['node', 'src/runLuckyForTracklist.ts', tl, '--dir', downloadDir];
+
+    try {
+      await runScript();
+    } finally {
+      process.argv = oldArgv;
+      logSpy.mockRestore();
+    }
+
+    expect(runQobuzLuckyStrict).toHaveBeenCalledTimes(2);
+    const output = logs.join('\n');
+    expect(output).toMatch(/No cached download was found/);
+    expect(output).toMatch(/matched/);
+  });
 });
 export {};

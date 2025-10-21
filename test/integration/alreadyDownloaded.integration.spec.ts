@@ -51,6 +51,17 @@ describe('runLuckyForTracklist: respects already-downloaded and skips fallback',
     const tl = path.join(tmp, 'tracks.txt');
     await fs.writeFile(tl, 'Big Fi Dem - Cesco, Sparkz\n');
 
+    const { buildQueries } = require('../../src/lib/queryBuilders');
+    const queries = buildQueries({
+      title: 'Big Fi Dem',
+      artists: 'Cesco, Sparkz',
+      primArtist: 'Cesco',
+    });
+    const primaryQuery = queries[0];
+    const existingPath = path.join(tmp, 'Big Fi Dem (Cached).aiff');
+    await fs.writeFile(existingPath, 'aiff');
+    await fs.writeFile(`${existingPath}.search.txt`, primaryQuery);
+
     const oldArgv = process.argv;
     process.argv = ['node', 'src/runLuckyForTracklist.ts', tl, '--dir', tmp];
 

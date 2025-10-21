@@ -9,8 +9,9 @@ export async function writeRunLog(
   stderr: string,
 ): Promise<string | null> {
   try {
-    if (!directory) return null;
-    const logDir = path.join(directory, '.qobuz-logs');
+    const repoRoot = process.cwd();
+    const baseName = directory ? path.basename(directory) || 'downloads' : 'downloads';
+    const logDir = path.join(repoRoot, 'logs', 'qobuz-dl', baseName);
     await fs.mkdir(logDir, { recursive: true });
     const file = path.join(logDir, `${filenameBase}.log`);
     const content = `CMD: ${cmd}\n\nSTDOUT:\n${stdout}\n\nSTDERR:\n${stderr}\n`;

@@ -1,4 +1,6 @@
 import fs from 'node:fs';
+import * as fsp from 'node:fs/promises';
+import os from 'node:os';
 import path from 'node:path';
 import { parseCliArgs } from './parseCliArgs';
 import { setColorEnabled, green, yellow, red, magenta, cyan, isTTY, dim } from './ui/colors';
@@ -9,11 +11,12 @@ void SPOTIFY_CLIENT_SECRET;
 
 import { makeBaseParts } from './normalize';
 import { buildQueries } from './queryBuilders';
-import { runQobuzLuckyStrict, findOrganisedAiff } from './qobuzRunner';
+import { runQobuzLuckyStrict, findOrganisedAiff, processDownloadedAudio } from './qobuzRunner';
 import { createSpinner } from './ui/spinner';
 import { lineStream, isTrackLine } from '../tracklist/io';
 import { indent } from '../tracklist/text';
 import { persistLastRunLogs } from '../tracklist/logs';
+import { walkFiles } from './fsWalk';
 
 /** Main entrypoint for processing a tracklist with qobuz-dl and organising output. */
 export async function main() {
@@ -32,6 +35,113 @@ export async function main() {
   if (noColor) setColorEnabled(false);
   const quiet = quietArg && !verbose; // verbose overrides quiet
   if (!dir) throw new Error('--dir is required so we can verify files were actually written');
+  const resolveUserPath = (input: string) => {
+    if (!input) return input;
+    if (input.startsWith('~')) {
+      const home = os.homedir() || process.env.HOME || '';
+      const tail = input.slice(1);
+      return path.resolve(path.join(home, tail.startsWith('/') ? tail.slice(1) : tail));
+    }
+    return path.resolve(input);
+  };
+  const targetDir = resolveUserPath(dir);
+  type SidecarIndexEntry = { available: string[]; stale: string[] };
+  type SidecarIndex = Map<string, SidecarIndexEntry>;
+  type ExistingReuseInfo = {
+    located: string[];
+    stale: string[];
+    organisedTo: string[];
+  };
+  let cachedSidecars: SidecarIndex | null = null;
+  const loadSidecarIndex = async (): Promise<SidecarIndex> => {
+    if (!targetDir) return new Map();
+    if (cachedSidecars) return cachedSidecars;
+    const index: SidecarIndex = new Map();
+    try {
+      const files = await walkFiles(targetDir);
+      for (const f of files) {
+        if (!f.endsWith('.search.txt')) continue;
+        try {
+          const query = (await fsp.readFile(f, 'utf8')).trim();
+          if (!query) continue;
+          const audioPath = f.slice(0, -'.search.txt'.length);
+          let isFile = false;
+          try {
+            const st = await fsp.stat(audioPath);
+            isFile = st.isFile();
+          } catch {
+            isFile = false;
+          }
+          const entry = index.get(query) ?? { available: [], stale: [] };
+          if (isFile) entry.available.push(audioPath);
+          else entry.stale.push(audioPath);
+          index.set(query, entry);
+        } catch {
+          /* ignore malformed sidecar */
+        }
+      }
+    } catch {
+      /* ignore */
+    }
+    cachedSidecars = index;
+    return index;
+  };
+  const organiseExistingDownload = async (
+    query: string,
+    trackParts: { primArtist: string; title: string },
+  ): Promise<ExistingReuseInfo | null> => {
+    if (dry) return null;
+    if (!targetDir) return null;
+    const sidecars = await loadSidecarIndex();
+    const entry = sidecars.get(query);
+    if (!entry) return { located: [], stale: [], organisedTo: [] };
+    const located = [...entry.available];
+    const organisedTo = new Set<string>();
+    for (const audioPath of entry.available) {
+      if (!flacOnly) {
+        // eslint-disable-next-line no-await-in-loop
+        await processDownloadedAudio(audioPath, undefined, { quiet, byGenre });
+        try {
+          // eslint-disable-next-line no-await-in-loop
+          const organised = await findOrganisedAiff(trackParts.primArtist, trackParts.title, {
+            byGenre,
+          });
+          if (organised) organisedTo.add(organised);
+        } catch {
+          /* ignore */
+        }
+      }
+    }
+    if (!flacOnly) sidecars.delete(query);
+    return {
+      located,
+      stale: [...entry.stale],
+      organisedTo: Array.from(organisedTo),
+    };
+  };
+  const reportExistingDownload = (info: ExistingReuseInfo | null) => {
+    if (!info) return false;
+    const { located, organisedTo, stale } = info;
+    if (located.length > 0) {
+      for (const source of located) {
+        console.log(`    ${dim('↪ cached download located')}: ${source}`);
+      }
+    }
+    if (organisedTo.length > 0) {
+      const seen = new Set<string>();
+      for (const dest of organisedTo) {
+        if (seen.has(dest)) continue;
+        seen.add(dest);
+        console.log(`    ${dim('↪ organised to')}: ${dest}`);
+      }
+    }
+    if (stale.length > 0) {
+      for (const missing of stale) {
+        console.log(`    ${dim('↪ cached search without audio')}: ${missing}`);
+      }
+    }
+    return located.length > 0;
+  };
 
   let matchedCount = 0;
   let alreadyCount = 0;
@@ -86,21 +196,30 @@ export async function main() {
     let hadMismatch = false;
     const seenMismatchKeys = new Set<string>();
 
-    const spinner = createSpinner(isTTY() && !verbose);
+    const spinnerEnabled = isTTY() && !verbose;
+    const spinner = createSpinner(spinnerEnabled);
+    const updateProgress = spinnerEnabled
+      ? (info: { percent?: number }) => {
+          if (typeof info.percent === 'number') {
+            spinner.setText(`downloading ${info.percent}%`);
+          }
+        }
+      : undefined;
 
     for (const candidateQuery of candidateQueries) {
       // Primary attempt (default q=6 unless overridden by --quality)
+      spinner.setText('downloading');
       spinner.start('downloading');
       const primaryQuality = typeof qualityArg === 'number' && qualityArg > 0 ? qualityArg : 6;
       const losslessResult = await runQobuzLuckyStrict(candidateQuery, {
-        directory: dir,
+        directory: targetDir,
         quality: primaryQuality,
         dryRun: dry,
         quiet,
         artist: parts.primArtist,
         title: parts.title,
-        progress: false,
-        onProgress: undefined,
+        progress: spinnerEnabled,
+        onProgress: updateProgress,
         byGenre,
         flacOnly,
       });
@@ -113,12 +232,25 @@ export async function main() {
       }
       const primaryLabel = primaryQuality === 6 ? 'lossless' : `q=${primaryQuality}`;
       if (losslessResult?.already) {
-        console.log(`  ${yellow('↺')} already downloaded (${primaryLabel}) via: ${candidateQuery}`);
+        const reuseInfo = await organiseExistingDownload(candidateQuery, parts);
+        const reused = !!(reuseInfo && reuseInfo.located.length > 0);
+        if (reused) {
+          console.log(`  ${yellow('↺')} reused existing (${primaryLabel}) via: ${candidateQuery}`);
+          printAlreadyHint();
+          printLogHint(losslessResult?.logPath, true);
+          reportExistingDownload(reuseInfo);
+          didMatch = true;
+          alreadyCount += 1;
+          break;
+        }
+        console.log(
+          `  ${yellow('⚠')} qobuz-dl reported already-downloaded (${primaryLabel}) via: ${candidateQuery}`,
+        );
         printAlreadyHint();
+        if (reuseInfo) reportExistingDownload(reuseInfo);
         printLogHint(losslessResult?.logPath, true);
-        didMatch = true;
-        alreadyCount += 1;
-        break;
+        console.log('    ' + dim('↪ No cached download was found. Continuing with other candidates…'));
+        continue;
       }
       if (losslessResult?.ok) {
         console.log(`  ${green('✓')} matched (${primaryLabel}) via: ${candidateQuery}`);
@@ -142,26 +274,42 @@ export async function main() {
       // 320 fallback only if no explicit quality provided
       if (typeof qualityArg === 'number' && qualityArg > 0) continue;
       // 320 fallback
+      spinner.setText('downloading');
       spinner.start('downloading');
       const bitrate320Result = await runQobuzLuckyStrict(candidateQuery, {
-        directory: dir,
+        directory: targetDir,
         quality: 5,
         dryRun: false,
         quiet,
         artist: parts.primArtist,
         title: parts.title,
+        progress: spinnerEnabled,
+        onProgress: updateProgress,
         byGenre,
         flacOnly,
       });
       // Ensure we always stop the spinner for the 320 fallback as well
       spinner.stop();
       if (bitrate320Result?.already) {
-        console.log(`  ${yellow('↺')} already downloaded (320) via: ${candidateQuery}`);
+        const reuseInfo = await organiseExistingDownload(candidateQuery, parts);
+        const reused = !!(reuseInfo && reuseInfo.located.length > 0);
+        if (reused) {
+          console.log(`  ${yellow('↺')} reused existing (320) via: ${candidateQuery}`);
+          printAlreadyHint();
+          printLogHint(bitrate320Result?.logPath, true);
+          reportExistingDownload(reuseInfo);
+          didMatch = true;
+          alreadyCount += 1;
+          break;
+        }
+        console.log(
+          `  ${yellow('⚠')} qobuz-dl reported already-downloaded (320) via: ${candidateQuery}`,
+        );
         printAlreadyHint();
+        if (reuseInfo) reportExistingDownload(reuseInfo);
         printLogHint(bitrate320Result?.logPath, true);
-        didMatch = true;
-        alreadyCount += 1;
-        break;
+        console.log('    ' + dim('↪ No cached download was found. Continuing with other candidates…'));
+        continue;
       }
       if (bitrate320Result?.ok) {
         console.log(`  ${green('✓')} matched (320) via: ${candidateQuery}`);
@@ -199,7 +347,7 @@ export async function main() {
       if (!dry) {
         console.log(`  ${red('✗')} no candidate matched.`);
         if (!hadMismatch) {
-          const nf = path.join(dir, 'not-found.log');
+          const nf = path.join(targetDir, 'not-found.log');
           fs.appendFileSync(nf, `${line}\n`);
           console.log(`  ${dim('↪')} appended to ${nf}`);
           notFoundCount += 1;
@@ -211,7 +359,7 @@ export async function main() {
   }
 
   // Convenience: persist last run dir and copy summary logs into repo-local logs/last-run
-  persistLastRunLogs(dir);
+  persistLastRunLogs(targetDir);
 
   // Print final summary (quiet-friendly)
   console.log('');
