@@ -38,6 +38,21 @@ export async function main() {
   let mismatchCount = 0;
   let notFoundCount = 0;
 
+  const printLogHint = (logPath?: string | null, force = false) => {
+    if (!quiet && logPath && (verbose || force)) console.log(`    ${dim('↪ log')}: ${logPath}`);
+  };
+
+  const printAlreadyHint = () => {
+    if (!quiet) {
+      console.log(
+        `    ${dim('↪')} qobuz-dl reported success but no new audio was detected for this candidate.`,
+      );
+      console.log(
+        `    ${dim('↪')} If this is unexpected, check your organised library or rerun with --verbose.`,
+      );
+    }
+  };
+
   for await (const raw of lineStream(file)) {
     const line = raw.trim();
     if (!line || !isTrackLine(line)) continue;
@@ -96,18 +111,20 @@ export async function main() {
         didMatch = true;
         break; // in dry-run we stop at first planned candidate
       }
+      const primaryLabel = primaryQuality === 6 ? 'lossless' : `q=${primaryQuality}`;
+      if (losslessResult?.already) {
+        console.log(`  ${yellow('↺')} already downloaded (${primaryLabel}) via: ${candidateQuery}`);
+        printAlreadyHint();
+        printLogHint(losslessResult?.logPath, true);
+        didMatch = true;
+        alreadyCount += 1;
+        break;
+      }
       if (losslessResult?.ok) {
-        const label = primaryQuality === 6 ? 'lossless' : `q=${primaryQuality}`;
-        console.log(`  ${green('✓')} matched (${label}) via: ${candidateQuery}`);
+        console.log(`  ${green('✓')} matched (${primaryLabel}) via: ${candidateQuery}`);
         for (const p of losslessResult?.added || []) console.log(`    ${dim('→')} ${p}`);
         didMatch = true;
         matchedCount += 1;
-        break;
-      } else if (losslessResult?.already) {
-        const label = primaryQuality === 6 ? 'lossless' : `q=${primaryQuality}`;
-        console.log(`  ${yellow('↺')} already downloaded (${label}) via: ${candidateQuery}`);
-        didMatch = true;
-        alreadyCount += 1;
         break;
       }
       if (losslessResult?.mismatch) {
@@ -115,10 +132,12 @@ export async function main() {
         seenMismatchKeys.add(key6);
         // Stop trying further candidates for this track after the first wrong match
         console.log(`  ${magenta('·')} wrong match (lossless); stopping search for this track.`);
+        printLogHint(losslessResult?.logPath, true);
         mismatchCount += 1;
         hadMismatch = true;
         break;
       }
+      printLogHint(losslessResult?.logPath);
 
       // 320 fallback only if no explicit quality provided
       if (typeof qualityArg === 'number' && qualityArg > 0) continue;
@@ -136,6 +155,14 @@ export async function main() {
       });
       // Ensure we always stop the spinner for the 320 fallback as well
       spinner.stop();
+      if (bitrate320Result?.already) {
+        console.log(`  ${yellow('↺')} already downloaded (320) via: ${candidateQuery}`);
+        printAlreadyHint();
+        printLogHint(bitrate320Result?.logPath, true);
+        didMatch = true;
+        alreadyCount += 1;
+        break;
+      }
       if (bitrate320Result?.ok) {
         console.log(`  ${green('✓')} matched (320) via: ${candidateQuery}`);
         for (const p of bitrate320Result?.added || []) console.log(`    ${dim('→')} ${p}`);
@@ -155,6 +182,7 @@ export async function main() {
           seenMismatchKeys.add(key5);
           hadMismatch = true;
         }
+        printLogHint(bitrate320Result?.logPath, true);
         if (verbose) {
           // brief tail for debugging (verbose only)
           const tail = (bitrate320Result?.stderr || bitrate320Result?.stdout || '')
