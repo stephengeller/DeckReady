@@ -7,7 +7,7 @@ What it does:
 - Gets tracks from either a Spotify or Qobuz URL (or a text file of `Title - Artist` lines).
 - Downloads the source audio (via `qobuz-dl`) — typically FLAC when available; falls back to 320 when needed.
 - Converts to AIFF and preserves metadata (title/artist/album/genre/cover, etc.).
-- Organises files into a neat folder layout: `ORGANISED_AIFF_DIR/Title.aiff` by default (flat). Use `--by-genre` for `Genre/Artist/Title.aiff`, or set `ORGANISED_FLAT=false` for `Artist/Title.aiff`.
+- Organises files into a neat folder layout: `ORGANISED_AIFF_DIR/Artist - Title.aiff` by default (flat). Use `--by-genre` for `Genre/Artist/Title.aiff`, or set `ORGANISED_FLAT=false` for `Artist/Title.aiff`.
 - Avoids duplicates: detects “already downloaded” runs and short‑circuits if an organised AIFF already exists.
 
 Works entirely from the CLI. No Spotify login is required for public content. Qobuz access uses your local `qobuz-dl` configuration/credentials.
@@ -111,7 +111,7 @@ Options:
 - `--quality Q`: 5=320, 6=LOSSLESS, 7=24b≤96k, 27=>96k (default 6)
 - `--dry`: print commands without downloading
 - `--quiet` / `--verbose`: control streaming output
-- `--by-genre`: organise AIFFs into `Genre/Artist/Title.aiff` instead of the flat default
+- `--by-genre`: organise AIFFs into `Genre/Artist/Title.aiff` instead of the flat default (`Artist - Title.aiff`)
 
 #### Flags
 
@@ -119,7 +119,7 @@ Options:
 - `--quality Q`: prefer 6; 5 used as fallback when needed
 - `--dry`: preview commands without making changes
 - `--quiet` / `--verbose`: hide or show underlying qobuz-dl output
-- `--by-genre`: organise as `Genre/Artist/Title.aiff` instead of the flat default
+- `--by-genre`: organise as `Genre/Artist/Title.aiff` instead of the flat default (`Artist - Title.aiff`)
 
 ### Qobuz URLs
 
@@ -134,7 +134,7 @@ script/run https://open.qobuz.com/{playlist|album|track}/... --dir out [--dry] [
 
 ## Output & Logs
 
-- Organised AIFF files land under `ORGANISED_AIFF_DIR/Title.aiff` by default
+- Organised AIFF files land under `ORGANISED_AIFF_DIR/Artist - Title.aiff` by default
 - Detailed qobuz‑dl logs: `<dir>/.qobuz-logs/`
 - Unmatched lines: appended to `<dir>/not-found.log`
 - Wrong matches: files removed and mismatch noted in summary

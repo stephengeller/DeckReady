@@ -68,8 +68,8 @@ describe('processDownloadedAudio (unit, mocked ffmpeg/ffprobe)', () => {
 
     await processDownloadedAudio(src, fakeRunner);
 
-    // Expect organised file at Organised_AIFF/brainDED.aiff (flat by default)
-    const expected = path.join(process.env.ORGANISED_AIFF_DIR, 'brainDED.aiff');
+    // Expect organised file at Organised_AIFF/blkout. - brainDED.aiff (flat by default)
+    const expected = path.join(process.env.ORGANISED_AIFF_DIR, 'blkout. - brainDED.aiff');
     const exists = await fs
       .stat(expected)
       .then(() => true)

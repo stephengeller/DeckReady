@@ -6,7 +6,7 @@ The pipeline turns Spotify items into organised AIFF files:
 
 1. `spotifyList` fetches tracklines from the Spotify Web API and prints lines like `Title - Artist 1, Artist 2`.
 2. `runLuckyForTracklist` reads each line, generates search candidates, and runs `qobuz-dl lucky` with strict validation.
-3. Downloaded audio is converted to AIFF and organised to `ORGANISED_AIFF_DIR/Title.aiff` by default (flat). Use `--by-genre` for `Genre/Artist/Title.aiff` or set `ORGANISED_FLAT=false` for `Artist/Title.aiff`.
+3. Downloaded audio is converted to AIFF and organised to `ORGANISED_AIFF_DIR/Artist - Title.aiff` by default (flat). Use `--by-genre` for `Genre/Artist/Title.aiff` or set `ORGANISED_FLAT=false` for `Artist/Title.aiff`.
 
 ## Key modules
 
@@ -27,7 +27,7 @@ The pipeline turns Spotify items into organised AIFF files:
 ## Organisation
 
 - AIFF conversion via ffmpeg (`pcm_s16le`) with metadata mapped and verified.
-- Destination path is built from tags with path-safe sanitisation and deduped filenames: `Title.aiff` (flat by default). With `--by-genre`, use `Genre/Artist/Title.aiff`; with `ORGANISED_FLAT=false`, use `Artist/Title.aiff`.
+- Destination path is built from tags with path-safe sanitisation and deduped filenames: `Artist - Title.aiff` (flat by default). With `--by-genre`, use `Genre/Artist/Title.aiff`; with `ORGANISED_FLAT=false`, use `Artist/Title.aiff`.
 - If the input file is already AIFF, it’s moved without conversion.
 
 ## Configuration

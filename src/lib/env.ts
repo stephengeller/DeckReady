@@ -30,7 +30,7 @@ export const ORGANISED_AIFF_DIR =
   path.join(process.env.HOME || '', 'Music', 'rekordbox', 'DROP_NEW_SONGS_HERE');
 
 // When true, place organised AIFFs directly under ORGANISED_AIFF_DIR
-// as <Title>.aiff (no artist/genre parent folders).
+// as <Artist - Title>.aiff (no artist/genre parent folders).
 export const ORGANISED_FLAT = (() => {
   // Default: true (flat layout). Allow explicit false via env.
   const v = (process.env.ORGANISED_FLAT || '').trim().toLowerCase();

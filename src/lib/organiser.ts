@@ -10,8 +10,9 @@ import { buildConvertArgs, buildMetaArgs, verifyAndInjectAiffTags } from '../org
 
 /**
  * Convert a downloaded audio file to AIFF (if needed), copy metadata, and move
- * it into the organised AIFF folder tree under ORGANISED_AIFF_DIR/Artist/Title.aiff by default
- * (or ORGANISED_AIFF_DIR/Genre/Artist/Title.aiff when opts.byGenre is true).
+ * it into the organised AIFF folder tree under ORGANISED_AIFF_DIR as
+ * <Artist - Title>.aiff by default (flat layout), or under ORGANISED_AIFF_DIR/Genre/Artist/Title.aiff
+ * when opts.byGenre is true.
  */
 export async function processDownloadedAudio(
   inputPath: string,
@@ -40,7 +41,7 @@ export async function processDownloadedAudio(
 
     // Layout selection priority:
     // 1) By-genre flag: <Genre>/<Artist>/<Title>.aiff
-    // 2) Flat (default): <Title>.aiff directly under ORG_BASE
+    // 2) Flat (default): <Artist - Title>.aiff directly under ORG_BASE
     // 3) Artist/Title (legacy default): <Artist>/<Title>.aiff
     const destDir = opts?.byGenre
       ? path.join(ORG_BASE, genre, artist)
@@ -49,7 +50,10 @@ export async function processDownloadedAudio(
         : path.join(ORG_BASE, artist);
     await fs.mkdir(destDir, { recursive: true });
 
-    const destPath = await ensureUniqueAiffPath(destDir, title);
+    const baseName =
+      opts?.byGenre || !ORGANISED_FLAT ? title : `${artist} - ${title}`;
+
+    const destPath = await ensureUniqueAiffPath(destDir, baseName);
 
     if (isAIFF) {
       await fs.rename(inputPath, destPath);
@@ -100,7 +104,8 @@ export async function processDownloadedAudio(
 
 /**
  * Locate an already-organised AIFF under ORGANISED_AIFF_DIR matching artist/title.
- * Checks each genre subdirectory for an artist folder and title-matching file.
+ * Checks for both legacy <Title>.aiff and new flat <Artist - Title>.aiff naming,
+ * scanning genre and artist subdirectories as needed.
  */
 export async function findOrganisedAiff(
   artist: string,
@@ -112,10 +117,13 @@ export async function findOrganisedAiff(
     const artistDirName = sanitizeName(artist || '');
     const titleBase = sanitizeName(title || '');
 
-    const titleRegex = new RegExp(
-      `^${titleBase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?: \\((?:\\d+)\\))?\\.aiff$`,
-      'i',
-    );
+    const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const fileRegex = (base: string) =>
+      new RegExp(`^${escapeRegex(base)}(?: \\((?:\\d+)\\))?\\.aiff$`, 'i');
+    const titleRegex = fileRegex(titleBase);
+    const artistTitleRegex = fileRegex(`${artistDirName} - ${titleBase}`);
+    const matchesFilename = (name: string) =>
+      titleRegex.test(name) || artistTitleRegex.test(name);
 
     // Search order based on user intent and defaults:
     // 1) If by-genre requested, prefer <Genre>/<Artist>/<Title>.aiff
@@ -132,7 +140,7 @@ export async function findOrganisedAiff(
           const entries = await fs.readdir(artistDir, { withFileTypes: true });
           for (const e of entries) {
             if (!e.isFile()) continue;
-            if (titleRegex.test(e.name)) return path.join(artistDir, e.name);
+            if (matchesFilename(e.name)) return path.join(artistDir, e.name);
           }
         } catch (err) {
           if (err?.code !== 'ENOENT') {
@@ -148,7 +156,7 @@ export async function findOrganisedAiff(
         const entries = await fs.readdir(baseDir, { withFileTypes: true });
         for (const e of entries) {
           if (!e.isFile()) continue;
-          if (titleRegex.test(e.name)) return path.join(baseDir, e.name);
+          if (matchesFilename(e.name)) return path.join(baseDir, e.name);
         }
       } catch (err) {
         if (err?.code !== 'ENOENT')
@@ -162,7 +170,7 @@ export async function findOrganisedAiff(
       const entries = await fs.readdir(artistDirDefault, { withFileTypes: true });
       for (const e of entries) {
         if (!e.isFile()) continue;
-        if (titleRegex.test(e.name)) return path.join(artistDirDefault, e.name);
+        if (matchesFilename(e.name)) return path.join(artistDirDefault, e.name);
       }
     } catch (err) {
       if (err?.code !== 'ENOENT')
@@ -183,7 +191,7 @@ export async function findOrganisedAiff(
           const entries = await fs.readdir(artistDir, { withFileTypes: true });
           for (const e of entries) {
             if (!e.isFile()) continue;
-            if (titleRegex.test(e.name)) return path.join(artistDir, e.name);
+            if (matchesFilename(e.name)) return path.join(artistDir, e.name);
           }
         } catch (err) {
           if (err?.code !== 'ENOENT') {
