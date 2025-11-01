@@ -9,6 +9,11 @@ export type Runner = (
   args: string[],
 ) => Promise<{ code: number; stdout: string; stderr: string }>;
 
+function tidyTagValue(value: string): string {
+  // Collapse consecutive whitespace so tags don't keep double spaces (e.g. before parentheses)
+  return value.replace(/\s+/g, ' ').trim();
+}
+
 /**
  * Read tags from an audio file via ffprobe.
  * Returns a lowercased key map (e.g. artist, album, title, genre, ...).
@@ -36,7 +41,7 @@ export async function readTags(
     const eq = pref.indexOf('=');
     if (eq > -1) {
       const k = pref.slice(0, eq).trim();
-      const v = pref.slice(eq + 1).trim();
+      const v = tidyTagValue(pref.slice(eq + 1));
       tags[k.toLowerCase()] = v;
     }
   }
