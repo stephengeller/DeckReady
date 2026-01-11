@@ -2,17 +2,67 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
 import { spawnStreaming } from './lib/proc';
-import { readTags } from './lib/tags';
 import { snapshot, diffNewAudio } from './lib/fsWalk';
 import { processDownloadedAudio, findOrganisedAiff } from './lib/organiser';
-import { searchTidalTracks } from './lib/tidalSearch';
+import { searchTidalTracks, type TidalSearchTrack } from './lib/tidalSearch';
 import { makeProgressHandler } from './provider/progress';
 import { cleanupOnNoAudio } from './provider/fsOps';
 import { writeRunLog, writeSidecarText } from './provider/logging';
-import { validateAddedAudioAgainstExpectation } from './provider/validation';
+import { normaliseTag, normaliseTitleBase } from './lib/tags';
 
 // Helper functions to manage tidal-dl-ng config
 const TIDAL_CONFIG_PATH = path.join(os.homedir(), '.config', 'tidal_dl_ng', 'settings.json');
+
+/**
+ * Pre-filter TIDAL candidates based on expected artist/title to reduce unnecessary downloads.
+ * Uses the same normalization logic as validation, but filters BEFORE downloading.
+ */
+function filterCandidates(
+  candidates: TidalSearchTrack[],
+  expectedArtist?: string,
+  expectedTitle?: string,
+): TidalSearchTrack[] {
+  if (!expectedArtist && !expectedTitle) {
+    // No filtering criteria, return all
+    return candidates;
+  }
+
+  const normExpectedArtist = expectedArtist ? normaliseTag(expectedArtist) : '';
+  const normExpectedTitle = expectedTitle ? normaliseTitleBase(expectedTitle) : '';
+
+  return candidates.filter((candidate) => {
+    // Normalize candidate metadata
+    const normCandidateTitle = normaliseTitleBase(candidate.title);
+    const normCandidateArtist = normaliseTag(candidate.artist);
+
+    // Check title match (if provided)
+    if (expectedTitle && normCandidateTitle !== normExpectedTitle) {
+      // Allow partial match for remixes/versions
+      if (!normCandidateTitle.includes(normExpectedTitle)) {
+        return false;
+      }
+    }
+
+    // Check artist match (if provided)
+    if (expectedArtist) {
+      // Primary artist match
+      if (normCandidateArtist === normExpectedArtist) {
+        return true;
+      }
+
+      // Check all artists
+      const allArtists = candidate.artists.map((a) => normaliseTag(a));
+      if (allArtists.some((a) => a === normExpectedArtist)) {
+        return true;
+      }
+
+      // No artist match found
+      return false;
+    }
+
+    return true;
+  });
+}
 
 async function getTidalConfig(): Promise<any> {
   try {
@@ -27,7 +77,7 @@ async function getTidalConfig(): Promise<any> {
 
 async function setTidalConfig(
   quality: string,
-  directory?: string,
+  directory: string,
 ): Promise<{
   quality: string;
   basePath: string;
@@ -49,16 +99,14 @@ async function setTidalConfig(
   };
 
   config.quality_audio = quality;
-  if (directory) {
-    // Set tidal-dl-ng to download to our target directory with flat format
-    config.download_base_path = path.resolve(directory);
-    // Use flat format so files land directly in target directory
-    config.format_track = '{artist_name} - {track_title}';
-    config.format_album = '{album_artist} - {album_title}/{artist_name} - {track_title}';
-    config.format_playlist = '{playlist_name}/{artist_name} - {track_title}';
-    config.format_mix = '{mix_name}/{artist_name} - {track_title}';
-    config.format_video = '{artist_name} - {track_title}';
-  }
+  // Set tidal-dl-ng to download to our target directory with flat format
+  config.download_base_path = path.resolve(directory);
+  // Use flat format so files land directly in target directory
+  config.format_track = '{artist_name} - {track_title}';
+  config.format_album = '{album_artist} - {album_title}/{artist_name} - {track_title}';
+  config.format_playlist = '{playlist_name}/{artist_name} - {track_title}';
+  config.format_mix = '{mix_name}/{artist_name} - {track_title}';
+  config.format_video = '{artist_name} - {track_title}';
 
   await fs.writeFile(TIDAL_CONFIG_PATH, JSON.stringify(config, null, 4));
   return original;
@@ -113,17 +161,18 @@ export type RunTidalResult = {
 };
 
 /**
- * Run tidal-dl-ng with TIDAL search for a single query, with strict validation and logging.
+ * Run tidal-dl-ng with TIDAL search for a single query.
  *
- * Unlike qobuz-dl's "lucky" mode, this function:
- * 1. Searches TIDAL API for candidate tracks
- * 2. For each candidate, downloads via tidal-dl-ng
- * 3. Validates tags against expected artist/title
- * 4. Returns on first successful match or validation mismatch
+ * Simplified approach leveraging TIDAL API metadata:
+ * 1. Check if track already exists in organized library (short-circuit)
+ * 2. Search TIDAL API for candidate tracks
+ * 3. Pre-filter candidates using TIDAL metadata (no download needed)
+ * 4. For first matching candidate, download via tidal-dl-ng
+ * 5. Use TIDAL metadata directly (no tag validation needed - we know the track ID)
  *
  * - Detects new files by snapshotting the target directory before/after.
  * - Writes per-run logs and search-term sidecar files.
- * - Validates tags against expected artist/title; deletes wrong matches and reports a mismatch.
+ * - Much faster than qobuz-dl approach (no ffprobe validation, pre-filtering)
  */
 export async function runTidalDlStrict(
   query: string,
@@ -153,9 +202,28 @@ export async function runTidalDlStrict(
     candidateLimit?: number;
   } = {},
 ): Promise<RunTidalResult> {
-  const dir = directory || '.';
+  const dir = directory || '.downloads';
 
-  // First, search TIDAL for candidate tracks
+  // Short-circuit: Check if track already exists in organized library (unless --flac-only)
+  if (!flacOnly && artist && title) {
+    const existing = await findOrganisedAiff(artist, title, { byGenre });
+    if (existing) {
+      if (!quiet) console.log(`✓ Already in organized library: ${existing}`);
+      return {
+        ok: true,
+        added: [],
+        cmd: 'tidal-dl-ng dl <already organized>',
+        stdout: '',
+        stderr: '',
+        code: 0,
+        already: true,
+        mismatch: null,
+        logPath: null,
+      };
+    }
+  }
+
+  // Search TIDAL for candidate tracks
   if (!quiet) console.log(`Searching TIDAL for: "${query}"...`);
 
   let candidates;
@@ -197,14 +265,41 @@ export async function runTidalDlStrict(
     }
   }
 
-  // Try each candidate in order until we get a validated match or a mismatch
-  for (let i = 0; i < candidates.length; i++) {
-    const candidate = candidates[i];
+  // Pre-filter candidates using TIDAL metadata (before downloading!)
+  const filteredCandidates = filterCandidates(candidates, artist, title);
+
+  if (filteredCandidates.length === 0) {
+    if (!quiet) {
+      console.log(
+        `No candidates match expected artist/title after filtering (expected: ${artist} - ${title})`,
+      );
+    }
+    return {
+      ok: false,
+      added: [],
+      cmd: 'tidal-dl-ng dl <filtered out all candidates>',
+      stdout: '',
+      stderr: 'All candidates filtered out based on metadata',
+      code: 1,
+      mismatch: null,
+      logPath: null,
+    };
+  }
+
+  if (!quiet && filteredCandidates.length < candidates.length) {
+    console.log(
+      `Filtered to ${filteredCandidates.length} candidate(s) based on artist/title match`,
+    );
+  }
+
+  // Try each filtered candidate in order until successful
+  for (let i = 0; i < filteredCandidates.length; i++) {
+    const candidate = filteredCandidates[i];
     const candidateNum = i + 1;
 
     if (!quiet) {
       console.log(
-        `\nTrying candidate ${candidateNum}/${candidates.length}: ${candidate.title} - ${candidate.artist}`,
+        `\nTrying candidate ${candidateNum}/${filteredCandidates.length}: ${candidate.title} - ${candidate.artist}`,
       );
     }
 
@@ -239,7 +334,7 @@ export async function runTidalDlStrict(
       formatVideo: string;
     } | null = null;
     try {
-      originalConfig = await setTidalConfig(quality, directory);
+      originalConfig = await setTidalConfig(quality, dir);
     } catch (err) {
       if (!quiet) console.error(`Warning: Failed to set config: ${(err as Error).message}`);
     }
@@ -307,42 +402,23 @@ export async function runTidalDlStrict(
       proc.stderr,
     );
 
-    // Validate tags if artist/title provided
-    if (addedAudio.length > 0 && (artist || title)) {
-      const mismatch = await validateAddedAudioAgainstExpectation(addedAudio, {
-        directory,
-        query,
-        artist,
-        title,
-      });
-
-      if (mismatch) {
-        if (!quiet) {
-          console.log(
-            `Validation mismatch for candidate ${candidateNum}: expected "${artist} - ${title}", got "${mismatch.artistRaw} - ${mismatch.titleRaw}"`,
-          );
-          console.log('STOPPING candidate search due to mismatch (wrong match detected).');
-        }
-        return {
-          ok: false,
-          added: [],
-          cmd,
-          logPath,
-          mismatch,
-          ...proc,
-        } as unknown as RunTidalResult;
-      }
-    }
-
     const ok = proc.code === 0 && addedAudio.length > 0;
 
     if (!ok) {
-      if (!quiet) console.log(`Download failed for candidate ${candidateNum}, trying next...`);
+      if (!quiet) {
+        console.log(
+          `Download failed for "${candidate.title}" by ${candidate.artist} (ID: ${candidate.id}), trying next...`,
+        );
+      }
       continue;
     }
 
-    // SUCCESS! Process the audio files
-    if (!quiet) console.log(`✓ Match validated for candidate ${candidateNum}`);
+    // SUCCESS! We know this is correct because we downloaded by track ID from TIDAL
+    if (!quiet) {
+      console.log(
+        `✓ Downloaded "${candidate.title}" by ${candidate.artist} (${candidate.audioQuality})`,
+      );
+    }
 
     if (flacOnly) {
       return {
@@ -382,7 +458,7 @@ export async function runTidalDlStrict(
     return {
       ok: true,
       added: [],
-      cmd: `tidal-dl-ng dl <${candidates.length} candidates>`,
+      cmd: `tidal-dl-ng dl <${filteredCandidates.length} filtered candidates>`,
       stdout: '',
       stderr: '',
       code: 0,
@@ -392,15 +468,15 @@ export async function runTidalDlStrict(
     };
   }
 
-  // Exhausted all candidates without a match
-  if (!quiet) console.log('\nNo validated matches found in any candidate.');
+  // Exhausted all filtered candidates without a successful download
+  if (!quiet) console.log('\nNo successful downloads from any candidate.');
 
   return {
     ok: false,
     added: [],
-    cmd: `tidal-dl-ng dl <tried ${candidates.length} candidates>`,
+    cmd: `tidal-dl-ng dl <tried ${filteredCandidates.length} filtered candidates>`,
     stdout: '',
-    stderr: 'All candidates tried, no validated match',
+    stderr: 'All filtered candidates tried, no successful download',
     code: 1,
     mismatch: null,
     logPath: null,

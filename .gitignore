@@ -1,6 +1,7 @@
 node_modules
 coverage
 logs/
+.downloads/
 .env
 yarn.error.log
 *.wav

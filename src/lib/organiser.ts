@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { ORGANISED_AIFF_DIR, ORGANISED_FLAT } from './env';
 import { spawnStreaming } from './proc';
-import { readTags, Runner } from './tags';
+import { readTags, Runner, normaliseTag, normaliseTitleBase } from './tags';
 import { pickGenre, sanitizeName } from '../organiser/names';
 import { findCoverInSameDir } from '../organiser/cover';
 import { ensureUniqueAiffPath } from '../organiser/fs';
@@ -89,6 +89,14 @@ export async function processDownloadedAudio(
       runner,
       opts?.quiet ?? true,
     );
+
+    // Clean up the original FLAC file after successful conversion
+    try {
+      await fs.rm(inputPath, { force: true });
+      if (!opts?.quiet) console.log(`Cleaned up original: ${inputPath}`);
+    } catch (err) {
+      if (!opts?.quiet) console.warn(`Warning: Could not delete original file ${inputPath}`);
+    }
 
     if (!opts?.quiet) console.log(`Organised (converted -> AIFF): ${inputPath} -> ${destPath}`);
   } catch (err) {
