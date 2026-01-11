@@ -126,12 +126,23 @@ export async function findOrganisedAiff(
     const titleBase = sanitizeName(title || '');
 
     const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+    // Match files with optional remix/version info in parentheses, followed by optional (number) suffix
+    // Examples: "Title.aiff", "Title (Remix).aiff", "Title (Original Mix) (1).aiff"
     const fileRegex = (base: string) =>
-      new RegExp(`^${escapeRegex(base)}(?: \\((?:\\d+)\\))?\\.aiff$`, 'i');
+      new RegExp(`^${escapeRegex(base)}(?: \\([^)]+\\))?(?: \\((?:\\d+)\\))?\\.aiff$`, 'i');
     const titleRegex = fileRegex(titleBase);
     const artistTitleRegex = fileRegex(`${artistDirName} - ${titleBase}`);
+
+    // Also match if the search artist is a PREFIX of the file artist
+    // This handles cases like searching "Drum Origins" finding "Drum Origins, Emery, Dreazz - Title.aiff"
+    const artistPrefixRegex = new RegExp(
+      `^${escapeRegex(artistDirName)}(?:,\\s*[^-]+)*\\s*-\\s*${escapeRegex(titleBase)}(?: \\([^)]+\\))?(?: \\((?:\\d+)\\))?\\.aiff$`,
+      'i'
+    );
+
     const matchesFilename = (name: string) =>
-      titleRegex.test(name) || artistTitleRegex.test(name);
+      titleRegex.test(name) || artistTitleRegex.test(name) || artistPrefixRegex.test(name);
 
     // Search order based on user intent and defaults:
     // 1) If by-genre requested, prefer <Genre>/<Artist>/<Title>.aiff
