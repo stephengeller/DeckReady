@@ -31,13 +31,14 @@ export function parseTidalUrl(url: string): { type: TidalType; id: string } {
     throw new Error('Unsupported TIDAL URL');
   }
 
-  // Strip query parameters
-  id = id.split('?')[0];
+  // Strip query parameters and trailing path segments
+  id = id.split('?')[0].split('/')[0];
 
-  // Validate UUID format
+  // Validate ID format: either UUID (playlists) or numeric (albums/tracks)
   const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-  if (!uuidPattern.test(id)) {
-    throw new Error('Invalid TIDAL UUID format');
+  const numericPattern = /^\d+$/;
+  if (!uuidPattern.test(id) && !numericPattern.test(id)) {
+    throw new Error('Invalid TIDAL ID format (expected UUID or numeric ID)');
   }
 
   return { type: resourceType as TidalType, id };

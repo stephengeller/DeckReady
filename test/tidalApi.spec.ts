@@ -7,8 +7,9 @@ describe('tidalApi', () => {
     delete (global as any).fetch;
   });
 
-  test('parseTidalUrl supports playlist/album/track and extracts UUID', () => {
+  test('parseTidalUrl supports playlist/album/track and extracts UUID or numeric ID', () => {
     const { parseTidalUrl } = require('../src/lib/tidalApi');
+    // Playlists use UUIDs
     expect(
       parseTidalUrl('https://tidal.com/playlist/0d5165ae-81e3-4864-ab7c-2cd0b03f3572'),
     ).toEqual({
@@ -16,22 +17,30 @@ describe('tidalApi', () => {
       id: '0d5165ae-81e3-4864-ab7c-2cd0b03f3572',
     });
     expect(
-      parseTidalUrl('https://listen.tidal.com/album/12345678-1234-1234-1234-123456789abc'),
-    ).toEqual({
-      type: 'album',
-      id: '12345678-1234-1234-1234-123456789abc',
-    });
-    expect(
-      parseTidalUrl('https://tidal.com/track/abcdef12-3456-7890-abcd-ef1234567890?si=test'),
-    ).toEqual({
-      type: 'track',
-      id: 'abcdef12-3456-7890-abcd-ef1234567890',
-    });
-    expect(
       parseTidalUrl('https://tidal.com/browse/playlist/fedcba98-7654-3210-fedc-ba9876543210'),
     ).toEqual({
       type: 'playlist',
       id: 'fedcba98-7654-3210-fedc-ba9876543210',
+    });
+    // Albums use numeric IDs
+    expect(
+      parseTidalUrl('https://tidal.com/album/270779076/u'),
+    ).toEqual({
+      type: 'album',
+      id: '270779076',
+    });
+    expect(
+      parseTidalUrl('https://listen.tidal.com/album/12345678'),
+    ).toEqual({
+      type: 'album',
+      id: '12345678',
+    });
+    // Tracks use numeric IDs
+    expect(
+      parseTidalUrl('https://tidal.com/track/153983458?si=test'),
+    ).toEqual({
+      type: 'track',
+      id: '153983458',
     });
   });
 
@@ -43,13 +52,13 @@ describe('tidalApi', () => {
     expect(() => parseTidalUrl('https://google.com')).toThrow('Provide a tidal.com link');
   });
 
-  test('parseTidalUrl rejects invalid UUID format', () => {
+  test('parseTidalUrl rejects invalid ID format', () => {
     const { parseTidalUrl } = require('../src/lib/tidalApi');
     expect(() => parseTidalUrl('https://tidal.com/playlist/not-a-uuid')).toThrow(
-      'Invalid TIDAL UUID format',
+      'Invalid TIDAL ID format',
     );
-    expect(() => parseTidalUrl('https://tidal.com/playlist/12345')).toThrow(
-      'Invalid TIDAL UUID format',
+    expect(() => parseTidalUrl('https://tidal.com/playlist/abc123')).toThrow(
+      'Invalid TIDAL ID format',
     );
   });
 
@@ -131,7 +140,7 @@ describe('tidalApi', () => {
     });
 
     const lines = await getLinesFromTidalUrl(
-      'https://tidal.com/album/12345678-1234-1234-1234-123456789abc',
+      'https://tidal.com/album/270779076',
     );
     expect(lines).toEqual(['Album Track 1 - Album Artist', 'Album Track 2 - Album Artist']);
   });
@@ -159,7 +168,7 @@ describe('tidalApi', () => {
     });
 
     const lines = await getLinesFromTidalUrl(
-      'https://tidal.com/track/abcdef12-3456-7890-abcd-ef1234567890',
+      'https://tidal.com/track/153983458',
     );
     expect(lines).toEqual(['Track Name - Artist X, Artist Y']);
   });
