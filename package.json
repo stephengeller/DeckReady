@@ -22,6 +22,7 @@
   "bin": {
     "run-lucky": "script/run-lucky",
     "spotify-list": "script/spotify-list",
+    "tidal-list": "script/tidal-list",
     "qobuz-dl-url": "script/qobuz-dl-url",
     "deckready": "script/run"
   },

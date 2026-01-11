@@ -20,21 +20,21 @@ SCRIPT_DIR="$(cd -P "$(dirname "$SOURCE")" >/dev/null 2>&1 && pwd)"
 # Fallback to local sibling scripts when running from the repo directly.
 RUN_LUCKY_BIN="${RUN_LUCKY_BIN:-run-lucky}"
 SPOTIFY_LIST_BIN="${SPOTIFY_LIST_BIN:-spotify-list}"
-QOBUZ_DL_URL_BIN="${QOBUZ_DL_URL_BIN:-qobuz-dl-url}"
+TIDAL_LIST_BIN="${TIDAL_LIST_BIN:-tidal-list}"
 RUN_LUCKY_LOCAL="$SCRIPT_DIR/run-lucky"
 SPOTIFY_LIST_LOCAL="$SCRIPT_DIR/spotify-list"
-QOBUZ_DL_URL_LOCAL="$SCRIPT_DIR/qobuz-dl-url"
-if [[ -x "$RUN_LUCKY_LOCAL" && -x "$SPOTIFY_LIST_LOCAL" && -x "$QOBUZ_DL_URL_LOCAL" ]]; then
+TIDAL_LIST_LOCAL="$SCRIPT_DIR/tidal-list"
+if [[ -x "$RUN_LUCKY_LOCAL" && -x "$SPOTIFY_LIST_LOCAL" && -x "$TIDAL_LIST_LOCAL" ]]; then
   RUN_LUCKY_BIN="$RUN_LUCKY_LOCAL"
   SPOTIFY_LIST_BIN="$SPOTIFY_LIST_LOCAL"
-  QOBUZ_DL_URL_BIN="$QOBUZ_DL_URL_LOCAL"
+  TIDAL_LIST_BIN="$TIDAL_LIST_LOCAL"
 fi
 
 # -----------------------
 # Config defaults
 # -----------------------
-OUT_DIR="${OUT_DIR:-$HOME/Music/qobuz-dl}"
-QUALITY="${QUALITY:-6}"
+OUT_DIR="${OUT_DIR:-$HOME/Music/downloads}"
+QUALITY="${QUALITY:-LOSSLESS}"
 DRY_RUN="${DRY_RUN:-0}"
 TRACKLIST_FILE=""
 DO_CONVERT=0
@@ -46,12 +46,12 @@ RUN_LUCKY_EXTRA=()
 usage() {
   cat <<EOF
 Usage:
-  $(basename "$0") <spotify_url|qobuz_url|tracklist_file> [options]
+  $(basename "$0") <spotify_url|tidal_url|tracklist_file> [options]
 
 Options:
   --dir DIR            Output directory for downloads (default: $OUT_DIR)
-  --quality Q          5=320, 6=LOSSLESS, 7=24b<=96k, 27=>96k (default: $QUALITY)
-  --dry                Dry-run: print qobuz commands; no downloads
+  --quality Q          LOW, HIGH, LOSSLESS, HI_RES_LOSSLESS (default: $QUALITY)
+  --dry                Dry-run: print commands; no downloads
   --convert            (placeholder) enable FFmpeg→AIFF conversion
   --flac-only          Skip AIFF conversion/organising; keep downloaded files
   -h, --help           Show this help
@@ -59,7 +59,6 @@ Options:
 Env overrides:
   RUN_LUCKY_JS=/path/to/runLuckyForTracklist.js
   SPOTIFY_LIST_JS=/path/to/spotify_list.js
-  QOBUZ_DL_URL_JS=/path/to/qobuzDl.js
 EOF
 }
 
@@ -68,7 +67,7 @@ EOF
 # -----------------------
 if [[ $# -lt 1 ]]; then usage; exit 1; fi
 SPOTIFY_URL=""
-QOBUZ_URL=""
+TIDAL_URL=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -h|--help) usage; exit 0 ;;
@@ -80,7 +79,7 @@ while [[ $# -gt 0 ]]; do
     --verbose) VERBOSE=1; shift ;;
     --quiet) QUIET=1; shift ;;
     http*spotify.com*) SPOTIFY_URL="$1"; shift ;;
-    http*qobuz.com*) QOBUZ_URL="$1"; shift ;;
+    http*tidal.com*) TIDAL_URL="$1"; shift ;;
     --*)
       RUN_LUCKY_EXTRA+=("$1")
       shift
@@ -96,8 +95,8 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [[ -z "$SPOTIFY_URL" && -z "$QOBUZ_URL" && -z "$TRACKLIST_FILE" ]]; then
-  echo "Provide a Spotify or Qobuz URL, or a tracklist file path."
+if [[ -z "$SPOTIFY_URL" && -z "$TIDAL_URL" && -z "$TRACKLIST_FILE" ]]; then
+  echo "Provide a Spotify or TIDAL URL, or a tracklist file path."
   usage
   exit 1
 fi
@@ -107,11 +106,13 @@ fi
 # -----------------------
 need() { command -v "$1" >/dev/null 2>&1 || { echo "Missing: $1"; exit 1; }; }
 need node
-need qobuz-dl
+need tidal-dl-ng
 need "$RUN_LUCKY_BIN"
-need "$QOBUZ_DL_URL_BIN"
 if [[ -z "$TRACKLIST_FILE" && -n "$SPOTIFY_URL" ]]; then
   need "$SPOTIFY_LIST_BIN"
+fi
+if [[ -z "$TRACKLIST_FILE" && -n "$TIDAL_URL" ]]; then
+  need "$TIDAL_LIST_BIN"
 fi
 
 mkdir -p "$OUT_DIR"
@@ -122,23 +123,16 @@ mkdir -p "$OUT_DIR"
 TMP_ROOT="$(mktemp -d -t s2r.XXXXXX)"
 trap 'rm -rf "$TMP_ROOT"' EXIT
 
-if [[ -n "$QOBUZ_URL" ]]; then
-  echo "Downloading from Qobuz URL via qobuz-dl dl..."
-  ARGS=("$QOBUZ_DL_URL_BIN" "$QOBUZ_URL" --dir "$OUT_DIR")
-  [[ "$DRY_RUN" -eq 1 ]] && ARGS+=(--dry)
-  [[ "$VERBOSE" -eq 1 ]] && ARGS+=(--verbose)
-  [[ "$QUIET" -eq 1 ]] && ARGS+=(--quiet)
-  [[ "$FLAC_ONLY" -eq 1 ]] && ARGS+=(--flac-only)
-  QUALITY="$QUALITY" "${ARGS[@]}"
-  echo "Done."
-  exit 0
-fi
-
 TRACKS_TXT="$TRACKLIST_FILE"
 if [[ -z "$TRACKLIST_FILE" ]]; then
   TRACKS_TXT="$TMP_ROOT/tracklist.txt"
-  echo "Scraping Spotify → tracklist..."
-  "$SPOTIFY_LIST_BIN" "$SPOTIFY_URL" > "$TRACKS_TXT"
+  if [[ -n "$SPOTIFY_URL" ]]; then
+    echo "Scraping Spotify → tracklist..."
+    "$SPOTIFY_LIST_BIN" "$SPOTIFY_URL" > "$TRACKS_TXT"
+  elif [[ -n "$TIDAL_URL" ]]; then
+    echo "Scraping TIDAL → tracklist..."
+    "$TIDAL_LIST_BIN" "$TIDAL_URL" > "$TRACKS_TXT"
+  fi
 fi
 
 if [[ ! -f "$TRACKS_TXT" ]]; then
@@ -149,9 +143,9 @@ fi
 echo "Using tracklist: $TRACKS_TXT"
 
 # -----------------------
-# Step 2: run qobuz-dl lucky via local JS
+# Step 2: run tidal-dl-ng via local JS
 # -----------------------
-echo "Starting qobuz downloads…"
+echo "Starting TIDAL downloads…"
 RUN_LUCKY_ARGS=("$TRACKS_TXT")
 # append forwarded flags (e.g., --artist-first, --quality 5)
 if [[ ${#RUN_LUCKY_EXTRA[@]} -gt 0 ]]; then

@@ -59,9 +59,9 @@ DEFAULT_ORG="$HOME/Music/rekordbox/DROP_NEW_SONGS_HERE"
 mkdir -p "$DEFAULT_ORG" || true
 echo "    ensured: $DEFAULT_ORG"
 
-echo "==> Verifying required external tools (qobuz-dl, ffmpeg, ffprobe)"
+echo "==> Verifying required external tools (tidal-dl-ng, ffmpeg, ffprobe)"
 missing=()
-for cmd in qobuz-dl ffmpeg ffprobe; do
+for cmd in tidal-dl-ng ffmpeg ffprobe; do
   if ! command -v "$cmd" >/dev/null 2>&1; then
     missing+=("$cmd")
   fi
@@ -71,9 +71,9 @@ if [[ ${#missing[@]} -gt 0 ]]; then
   echo "    missing: ${missing[*]}"
   echo "--"
   echo "Install guidance:"
-  echo "  qobuz-dl  : pipx install qobuz-dl    (or pip install --user qobuz-dl)"
-  echo "  ffmpeg    : macOS(brew): brew install ffmpeg | Ubuntu: sudo apt-get install ffmpeg"
-  echo "  ffprobe   : included with ffmpeg packages"
+  echo "  tidal-dl-ng : pip install tidal-dl-ng    (or pipx install tidal-dl-ng)"
+  echo "  ffmpeg      : macOS(brew): brew install ffmpeg | Ubuntu: sudo apt-get install ffmpeg"
+  echo "  ffprobe     : included with ffmpeg packages"
   echo "--"
 else
   echo "    all found"
@@ -82,4 +82,6 @@ fi
 echo "==> Setup complete"
 echo "Next:"
 echo "  1) Open .env and set SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET"
-echo "  2) Try: script/run https://open.spotify.com/playlist/... --dir out --dry"
+echo "  2) Run 'tidal-dl-ng login' to authenticate with TIDAL"
+echo "  3) (Optional) Configure quality: tidal-dl-ng cfg quality_audio LOSSLESS"
+echo "  4) Try: script/run https://open.spotify.com/playlist/... --dir out --dry"

@@ -1,16 +1,16 @@
-# DeckReady — Spotify/Qobuz → AIFF Library
+# DeckReady — Spotify/TIDAL → AIFF Library
 
-Turn Spotify or Qobuz links into clean, tagged AIFF files organised on disk. Great for DJs who want tracks in a consistent, import‑ready format for software like Rekordbox, without manual cleanup.
+Turn Spotify or TIDAL links into clean, tagged AIFF files organised on disk. Great for DJs who want tracks in a consistent, import‑ready format for software like Rekordbox, without manual cleanup.
 
 What it does:
 
-- Gets tracks from either a Spotify or Qobuz URL (or a text file of `Title - Artist` lines).
-- Downloads the source audio (via `qobuz-dl`) — typically FLAC when available; falls back to 320 when needed.
+- Gets tracks from a Spotify or TIDAL URL (or a text file of `Title - Artist` lines).
+- Searches TIDAL's catalog and downloads the source audio (via `tidal-dl-ng`) — typically FLAC when available; falls back to 320kbps when needed.
 - Converts to AIFF and preserves metadata (title/artist/album/genre/cover, etc.).
 - Organises files into a neat folder layout: `ORGANISED_AIFF_DIR/Artist - Title.aiff` by default (flat). Use `--by-genre` for `Genre/Artist/Title.aiff`, or set `ORGANISED_FLAT=false` for `Artist/Title.aiff`.
-- Avoids duplicates: detects “already downloaded” runs and short‑circuits if an organised AIFF already exists.
+- Avoids duplicates: detects "already downloaded" runs and short‑circuits if an organised AIFF already exists.
 
-Works entirely from the CLI. No Spotify login is required for public content. Qobuz access uses your local `qobuz-dl` configuration/credentials.
+Works entirely from the CLI. No Spotify login is required for public content. TIDAL access requires authentication via `tidal-dl-ng login` (requires TIDAL subscription for lossless quality).
 
 ---
 
@@ -32,8 +32,9 @@ Works entirely from the CLI. No Spotify login is required for public content. Qo
 Requirements:
 
 - Node.js 18+
-- `qobuz-dl` in your PATH and configured with your Qobuz credentials
+- `tidal-dl-ng` in your PATH (install: `pip install tidal-dl-ng`)
 - `ffmpeg` and `ffprobe` in PATH
+- TIDAL account (HiFi or HiFi Plus subscription for lossless/hi-res quality)
 
 Install and bootstrap (idempotent):
 
@@ -48,7 +49,13 @@ The setup script:
 - Installs Node dependencies
 - Ensures `.env` exists (copied from `.env.example` if missing)
 - Creates `~/Music/rekordbox/DROP_NEW_SONGS_HERE` by default
-- Checks for external tools: `qobuz-dl`, `ffmpeg`, `ffprobe`
+- Checks for external tools: `tidal-dl-ng`, `ffmpeg`, `ffprobe`
+
+**Important**: After running setup, authenticate with TIDAL:
+
+```bash
+tidal-dl-ng login
+```
 
 ## Configuration
 
@@ -61,6 +68,8 @@ See the example: [.env.example](./.env.example)
 
 How to get Spotify credentials: [docs/CREDENTIALS.md](./docs/CREDENTIALS.md)
 
+**Note**: TIDAL support does not require API credentials. Public playlists, albums, and tracks are accessible directly.
+
 ## Quick Start
 
 1. Run the setup helper (installs Node deps, scaffolds `.env`, checks required CLI tools):
@@ -70,39 +79,50 @@ script/setup
 # or: yarn setup
 ```
 
-2. Create an output directory for `qobuz-dl` temporary downloads:
+2. Authenticate with TIDAL:
+
+```bash
+tidal-dl-ng login
+```
+
+3. Create an output directory for `tidal-dl-ng` temporary downloads:
 
 ```bash
 mkdir -p out
 ```
 
-3. Run the end‑to‑end helper:
+4. Run the end‑to‑end helper:
 
 ```bash
-script/run <spotify_url|qobuz_url|tracklist_file> --dir out [--dry] [--quality Q]
+script/run <spotify_url|tidal_url|tracklist_file> --dir out [--dry] [--quality Q]
 ```
 
 Notes:
 
-- Supports playlist, album, and track URLs from `open.spotify.com` and `open.qobuz.com`.
-- Use `--dry` to preview qobuz‑dl commands without downloading.
+- Supports playlist, album, and track URLs from `open.spotify.com` and `tidal.com`.
+- Use `--dry` to preview tidal‑dl-ng commands without downloading.
+- Quality options: `LOW`, `HIGH`, `LOSSLESS` (default), `HI_RES_LOSSLESS`
 
 Examples:
 
 ```bash
-# Playlist (dry run)
+# Spotify playlist (dry run)
 script/run https://open.spotify.com/playlist/... --dir out --dry
 
-# Single track
+# Spotify single track
 script/run https://open.spotify.com/track/... --dir out
+
+# TIDAL playlist
+script/run https://tidal.com/playlist/0d5165ae-81e3-4864-ab7c-2cd0b03f3572 --dir out
+
+# TIDAL album
+script/run https://tidal.com/album/... --dir out
 
 # Use a pre-made "Title - Artist" file (skip scraping)
 script/run path/to/tracklist.txt --dir out
 
-# Qobuz direct URL (playlist, track, album)
-script/run https://open.qobuz.com/playlist/35590683 --dir out
-script/run https://open.qobuz.com/track/349546995 --dir out
-script/run https://open.qobuz.com/album/... --dir out
+# Specify quality
+script/run <url> --dir out --quality HI_RES_LOSSLESS
 ```
 
 ## Usage
@@ -112,7 +132,7 @@ script/run https://open.qobuz.com/album/... --dir out
 - Installs Node dependencies via Yarn/NPM.
 - Creates `.env` from `.env.example` (or appends missing keys).
 - Ensures `~/Music/rekordbox/DROP_NEW_SONGS_HERE` exists.
-- Verifies `qobuz-dl`, `ffmpeg`, and `ffprobe` are on your `PATH`.
+- Verifies `tidal-dl-ng`, `ffmpeg`, and `ffprobe` are on your `PATH`.
 
 Run it anytime you change machines or update dependencies:
 
@@ -120,15 +140,17 @@ Run it anytime you change machines or update dependencies:
 script/setup           # or: yarn setup / npm run setup
 ```
 
+**Remember**: Run `tidal-dl-ng login` after setup to authenticate.
+
 ### script/run (recommended)
 
-- Pass a Spotify or Qobuz URL, or a local text file of `Title - Artist` lines.
-- Under the hood: scrapes Spotify (when given a Spotify URL), then calls the qobuz runner and organises output.
+- Pass a Spotify or TIDAL URL, or a local text file of `Title - Artist` lines.
+- Under the hood: scrapes Spotify (when given a Spotify URL), searches TIDAL, downloads via tidal-dl-ng, and organises output.
 
 Options:
 
-- `--dir DIR`: output directory for qobuz-dl downloads (required)
-- `--quality Q`: 5=320, 6=LOSSLESS, 7=24b≤96k, 27=>96k (default 6)
+- `--dir DIR`: output directory for tidal-dl-ng downloads (required)
+- `--quality Q`: `LOW`, `HIGH`, `LOSSLESS` (default), `HI_RES_LOSSLESS`
 - `--dry`: print commands without downloading
 - `--quiet` / `--verbose`: control streaming output
 - `--by-genre`: organise AIFFs into `Genre/Artist/Title.aiff` instead of the flat default (`Artist - Title.aiff`)
@@ -139,41 +161,40 @@ Options:
 
 #### Flags
 
-- `--dir DIR`: where qobuz-dl downloads land (required)
-- `--quality Q`: prefer 6; 5 used as fallback when needed
+- `--dir DIR`: where tidal-dl-ng downloads land (required)
+- `--quality Q`: `LOSSLESS` by default; `HIGH` used as fallback when needed
 - `--dry`: preview commands without making changes
-- `--quiet` / `--verbose`: hide or show underlying qobuz-dl output
+- `--quiet` / `--verbose`: hide or show underlying tidal-dl-ng output
 - `--by-genre`: organise as `Genre/Artist/Title.aiff` instead of the flat default (`Artist - Title.aiff`)
 
 ### script/run-lucky (advanced)
 
-- Processes an existing tracklist text file via `qobuz-dl`.
+- Processes an existing tracklist text file via `tidal-dl-ng`.
 - Accepts the same flags as `script/run` (including `--quality`, `--by-genre`, `--flac-only`).
 - Set `--dir DIR` to tell the runner where downloads land and where to look for cached results.
 
 Example:
 
 ```bash
-script/run-lucky tracklist.txt --dir out --quality 7 --verbose
+script/run-lucky tracklist.txt --dir out --quality HI_RES_LOSSLESS --verbose
 ```
 
-### script/qobuz-dl-url (direct Qobuz)
-
-- Wraps `qobuz-dl dl` for a single Qobuz playlist/album/track URL.
-- Handles logging, progress, and optional AIFF organisation.
-- Useful when you already have Qobuz links and want to skip Spotify scraping.
-
-```bash
-script/qobuz-dl-url https://open.qobuz.com/album/... --dir out [--dry] [--quality Q]
-```
-
-### script/spotify-list (export tracklist only)
+### script/spotify-list (export Spotify tracklist only)
 
 - Scrapes Spotify playlists/albums/tracks and prints `Title - Artist` lines to stdout.
 - Combine with shell redirection to build reusable tracklist files.
 
 ```bash
 script/spotify-list https://open.spotify.com/playlist/... > tracklist.txt
+```
+
+### script/tidal-list (export TIDAL tracklist only)
+
+- Scrapes TIDAL playlists/albums/tracks and prints `Title - Artist` lines to stdout.
+- Combine with shell redirection to build reusable tracklist files.
+
+```bash
+script/tidal-list https://tidal.com/playlist/... > tracklist.txt
 ```
 
 ### script/convert-flac-folder (reprocess downloads)
@@ -188,16 +209,19 @@ script/convert-flac-folder out --by-genre --dry-run
 ## Output & Logs
 
 - Organised AIFF files land under `ORGANISED_AIFF_DIR/Artist - Title.aiff` by default
-- Detailed qobuz‑dl logs: `<dir>/.qobuz-logs/`
+- Detailed tidal‑dl-ng logs: `<dir>/.download-logs/`
 - Unmatched lines: appended to `<dir>/not-found.log`
 - Wrong matches: files removed and mismatch noted in summary
 
 ## Troubleshooting
 
-- `qobuz-dl` not found: install and ensure it’s in PATH
+- `tidal-dl-ng` not found: install via `pip install tidal-dl-ng` and ensure it's in PATH
+- TIDAL authentication errors: run `tidal-dl-ng login` to re-authenticate
 - Spotify API errors (401/403): verify `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET` in `.env` (public content only)
-- Missing ffmpeg/ffprobe: install both and ensure they’re in PATH
-- Files not appearing in organised folder: check `ORGANISED_AIFF_DIR` and logs in `<dir>/.qobuz-logs`
+- TIDAL scraping errors: TIDAL support uses unofficial API; if playlists fail to load, the underlying API may have changed
+- Missing ffmpeg/ffprobe: install both and ensure they're in PATH
+- Files not appearing in organised folder: check `ORGANISED_AIFF_DIR` and logs in `<dir>/.download-logs`
+- Quality not available: Some tracks may only be available at lower quality (e.g., HIGH instead of LOSSLESS)
 
 More: [docs/TROUBLESHOOTING.md](./docs/TROUBLESHOOTING.md)
 
@@ -217,13 +241,14 @@ See: [docs/DEVELOPMENT.md](./docs/DEVELOPMENT.md)
 
 ## Repository Map (short)
 
-- `script/run`: unified entrypoint for Spotify/Qobuz/file input
+- `script/run`: unified entrypoint for Spotify/TIDAL/file input
 - `script/spotify-list`: fetches `Title - Artist` lines from Spotify
-- `script/qobuz-dl-url`: download from Qobuz URLs
-- `script/run-lucky`: process a tracklist file with qobuz-dl
+- `script/tidal-list`: fetches `Title - Artist` lines from TIDAL
+- `script/run-lucky`: process a tracklist file with tidal-dl-ng
 - `script/convert-flac-folder`: re-run AIFF organisation for existing FLACs
 - `script/setup`: idempotent environment bootstrapper
-- `src/qobuzRunner.ts`: qobuz‑dl integration (spawning, validation, logging)
+- `src/tidalRunner.ts`: tidal‑dl-ng integration (search, spawning, validation, logging)
+- `src/lib/tidalSearch.ts`: TIDAL API search integration
 - `src/lib/organiser.ts`: AIFF conversion and organised library placement
 - `src/lib/tags.ts`: ffprobe tag helpers
 - `src/lib/fsWalk.ts`: filesystem walking/snapshots
@@ -235,7 +260,7 @@ For a deeper dive into the flow and decisions, see [docs/ARCHITECTURE.md](./docs
 
 ## Legal
 
-Use responsibly and in accordance with Qobuz/Spotify terms. This tool automates search and download via your `qobuz-dl` configuration; ensure you have rights to obtain and use downloaded content.
+Use responsibly and in accordance with TIDAL/Spotify terms. This tool automates search and download via your `tidal-dl-ng` configuration; ensure you have rights to obtain and use downloaded content (requires TIDAL subscription).
 
 ## License
 

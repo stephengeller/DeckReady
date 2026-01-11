@@ -14,14 +14,16 @@ export function spawnStreaming(
     quiet = false,
     onStdout,
     onStderr,
+    env,
   }: {
     quiet?: boolean;
     onStdout?: (chunk: string) => void;
     onStderr?: (chunk: string) => void;
+    env?: NodeJS.ProcessEnv;
   } = {},
 ) {
   return new Promise<{ code: number; stdout: string; stderr: string }>((resolve) => {
-    const child = spawn(cmd, args, { stdio: ['ignore', 'pipe', 'pipe'] });
+    const child = spawn(cmd, args, { stdio: ['ignore', 'pipe', 'pipe'], env });
     let stdout = '',
       stderr = '';
     child.stdout.on('data', (d) => {

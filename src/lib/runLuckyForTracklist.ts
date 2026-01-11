@@ -11,14 +11,29 @@ void SPOTIFY_CLIENT_SECRET;
 
 import { makeBaseParts } from './normalize';
 import { buildQueries } from './queryBuilders';
-import { runQobuzLuckyStrict, findOrganisedAiff, processDownloadedAudio } from './qobuzRunner';
+import { runTidalDlStrict, findOrganisedAiff, processDownloadedAudio } from '../tidalRunner';
 import { createSpinner } from './ui/spinner';
 import { lineStream, isTrackLine } from '../tracklist/io';
 import { indent } from '../tracklist/text';
 import { persistLastRunLogs } from '../tracklist/logs';
 import { walkFiles } from './fsWalk';
 
-/** Main entrypoint for processing a tracklist with qobuz-dl and organising output. */
+/** Map numeric quality values to TIDAL quality names */
+function mapQualityToTidal(
+  q?: number | string,
+): 'LOW' | 'HIGH' | 'LOSSLESS' | 'HI_RES_LOSSLESS' {
+  if (typeof q === 'string') {
+    const upper = q.toUpperCase();
+    if (['LOW', 'HIGH', 'LOSSLESS', 'HI_RES_LOSSLESS'].includes(upper)) {
+      return upper as 'LOW' | 'HIGH' | 'LOSSLESS' | 'HI_RES_LOSSLESS';
+    }
+  }
+  if (q === 5 || q === '5') return 'HIGH'; // 320kbps
+  if (q === 7 || q === '7') return 'HI_RES_LOSSLESS'; // Hi-Res
+  return 'LOSSLESS'; // Default (was q=6)
+}
+
+/** Main entrypoint for processing a tracklist with tidal-dl-ng and organising output. */
 export async function main() {
   const {
     file,
@@ -155,7 +170,7 @@ export async function main() {
   const printAlreadyHint = () => {
     if (!quiet) {
       console.log(
-        `    ${dim('↪')} qobuz-dl reported success but no new audio was detected for this candidate.`,
+        `    ${dim('↪')} tidal-dl-ng reported success but no new audio was detected for this candidate.`,
       );
       console.log(
         `    ${dim('↪')} If this is unexpected, check your organised library or rerun with --verbose.`,
@@ -170,7 +185,7 @@ export async function main() {
     const parts = makeBaseParts(line, { preferredOrder: inputOrder });
     const candidateQueries = buildQueries(parts);
 
-    // Short-circuit: if a matching AIFF already exists, skip qobuz-dl (unless --flac-only)
+    // Short-circuit: if a matching AIFF already exists, skip tidal-dl-ng (unless --flac-only)
     if (!flacOnly) {
       let alreadyOrganisedPath: string | null = null;
       try {
@@ -191,7 +206,7 @@ export async function main() {
 
     console.log(cyan(`>>> ${line}`));
 
-    // try each candidate; per-candidate: q=6, then q=5
+    // try each candidate; per-candidate: LOSSLESS, then HIGH
     let didMatch = false;
     let hadMismatch = false;
     const seenMismatchKeys = new Set<string>();
@@ -207,11 +222,11 @@ export async function main() {
       : undefined;
 
     for (const candidateQuery of candidateQueries) {
-      // Primary attempt (default q=6 unless overridden by --quality)
+      // Primary attempt (default LOSSLESS unless overridden by --quality)
       spinner.setText('downloading');
       spinner.start('downloading');
-      const primaryQuality = typeof qualityArg === 'number' && qualityArg > 0 ? qualityArg : 6;
-      const losslessResult = await runQobuzLuckyStrict(candidateQuery, {
+      const primaryQuality = mapQualityToTidal(qualityArg);
+      const losslessResult = await runTidalDlStrict(candidateQuery, {
         directory: targetDir,
         quality: primaryQuality,
         dryRun: dry,
@@ -230,7 +245,7 @@ export async function main() {
         didMatch = true;
         break; // in dry-run we stop at first planned candidate
       }
-      const primaryLabel = primaryQuality === 6 ? 'lossless' : `q=${primaryQuality}`;
+      const primaryLabel = primaryQuality === 'LOSSLESS' ? 'lossless' : primaryQuality;
       if (losslessResult?.already) {
         const reuseInfo = await organiseExistingDownload(candidateQuery, parts);
         const reused = !!(reuseInfo && reuseInfo.located.length > 0);
@@ -244,7 +259,7 @@ export async function main() {
           break;
         }
         console.log(
-          `  ${yellow('⚠')} qobuz-dl reported already-downloaded (${primaryLabel}) via: ${candidateQuery}`,
+          `  ${yellow('⚠')} tidal-dl-ng reported already-downloaded (${primaryLabel}) via: ${candidateQuery}`,
         );
         printAlreadyHint();
         if (reuseInfo) reportExistingDownload(reuseInfo);
@@ -271,14 +286,14 @@ export async function main() {
       }
       printLogHint(losslessResult?.logPath);
 
-      // 320 fallback only if no explicit quality provided
-      if (typeof qualityArg === 'number' && qualityArg > 0) continue;
-      // 320 fallback
+      // HIGH (320kbps) fallback only if no explicit quality provided
+      if (qualityArg) continue;
+      // HIGH fallback
       spinner.setText('downloading');
       spinner.start('downloading');
-      const bitrate320Result = await runQobuzLuckyStrict(candidateQuery, {
+      const bitrate320Result = await runTidalDlStrict(candidateQuery, {
         directory: targetDir,
-        quality: 5,
+        quality: 'HIGH',
         dryRun: false,
         quiet,
         artist: parts.primArtist,
@@ -303,7 +318,7 @@ export async function main() {
           break;
         }
         console.log(
-          `  ${yellow('⚠')} qobuz-dl reported already-downloaded (320) via: ${candidateQuery}`,
+          `  ${yellow('⚠')} tidal-dl-ng reported already-downloaded (HIGH) via: ${candidateQuery}`,
         );
         printAlreadyHint();
         if (reuseInfo) reportExistingDownload(reuseInfo);

@@ -11,14 +11,14 @@ export async function writeRunLog(
   try {
     const repoRoot = process.cwd();
     const baseName = directory ? path.basename(directory) || 'downloads' : 'downloads';
-    const logDir = path.join(repoRoot, 'logs', 'qobuz-dl', baseName);
+    const logDir = path.join(repoRoot, 'logs', 'downloads', baseName);
     await fs.mkdir(logDir, { recursive: true });
     const file = path.join(logDir, `${filenameBase}.log`);
     const content = `CMD: ${cmd}\n\nSTDOUT:\n${stdout}\n\nSTDERR:\n${stderr}\n`;
     await fs.writeFile(file, content, 'utf8');
     return file;
   } catch (e) {
-    console.error('Failed to write qobuz-dl log:', e);
+    console.error('Failed to write download log:', e);
     return null;
   }
 }
