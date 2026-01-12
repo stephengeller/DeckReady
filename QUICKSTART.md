@@ -17,7 +17,7 @@ Get your Spotify playlists converted to organized AIFF files in 10 minutes.
 Before you start, make sure you have:
 
 - **Mac/Linux/Windows** with command line access
-- **Node.js 18+** ([Download here](https://nodejs.org/))
+- **Node.js 20+** ([Download here](https://nodejs.org/))
 - **Python 3** (usually pre-installed on Mac/Linux, [Windows download](https://www.python.org/downloads/))
 - **TIDAL subscription** (HiFi or HiFi Plus for lossless quality)
 - **Spotify account** (free account works fine)

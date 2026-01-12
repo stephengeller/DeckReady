@@ -11,8 +11,8 @@ Thanks for your interest in contributing!
 
 Requirements:
 
-- Node.js 18+
-- `qobuz-dl`, `ffmpeg`, and `ffprobe` available in your PATH for integration runs
+- Node.js 20+
+- `tidal-dl-ng`, `ffmpeg`, and `ffprobe` available in your PATH for integration runs
 
 Bootstrap:
 
