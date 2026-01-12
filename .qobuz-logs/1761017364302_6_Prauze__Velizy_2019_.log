@@ -1,19 +1,0 @@
-CMD: qobuz-dl lucky -t track -n 1 -q 6 -d . --no-db --no-m3u --no-fallback -ff {artist} - {album} ({year}) [{bit_depth}B-{sampling_rate}kHz] -tf {tracktitle} Prauze "Velizy 2019"
-
-STDOUT:
-
-
-STDERR:
-Logging...
-Logged: OK
-Membership: Studio
-Set max quality: 6 - 16 bit, 44.1kHz
-
-Searching tracks for "Prauze "Velizy 2019"".
-qobuz-dl will attempt to download the first 1 results.
-
-Downloading: Prauze - Velizy 2019
-0.00/151k /// cover.jpg13.0k/151k /// cover.jpg42.0k/151k /// cover.jpg98.0k/151k /// cover.jpg151k/151k /// cover.jpg 
-0.00/37.0M /// ./Prauze - Purple Rave EP (2025) [16B-44.1kHz]/.01.tmp16.0k/37.0M /// ./Prauze - Purple Rave EP (2025) [16B-44.1kHz]/.01.tmp35.0k/37.0M /// ./Prauze - Purple Rave EP (2025) [16B-44.1kHz]/.01.tmp51.0k/37.0M /// ./Prauze - Purple Rave EP (2025) [16B-44.1kHz]/.01.tmp75.0k/37.0M /// ./Prauze - Purple Rave EP (2025) [16B-44.1kHz]/.01.tmp114k/37.0M /// ./Prauze - Purple Rave EP (2025) [16B-44.1kHz]/.01.tmp 154k/37.0M /// ./Prauze - Purple Rave EP (2025) [16B-44.1kHz]/.01.tmp210k/37.0M /// ./Prauze - Purple Rave EP (2025) [16B-44.1kHz]/.01.tmp289k/37.0M /// ./Prauze - Purple Rave EP (2025) [16B-44.1kHz]/.01.tmp393k/37.0M /// ./Prauze - Purple Rave EP (2025) [16B-44.1kHz]/.01.tmp532k/37.0M /// ./Prauze - Purple Rave EP (2025) [16B-44.1kHz]/.01.tmp715k/37.0M /// ./Prauze - Purple Rave EP (2025) [16B-44.1kHz]/.01.tmp969k/37.0M /// ./Prauze - Purple Rave EP (2025) [16B-44.1kHz]/.01.tmp1.29M/37.0M /// ./Prauze - Purple Rave EP (2025) [16B-44.1kHz]/.01.tmp1.72M/37.0M /// ./Prauze - Purple Rave EP (2025) [16B-44.1kHz]/.01.tmp2.24M/37.0M /// ./Prauze - Purple Rave EP (2025) [16B-44.1kHz]/.01.tmp3.02M/37.0M /// ./Prauze - Purple Rave EP (2025) [16B-44.1kHz]/.01.tmp4.01M/37.0M /// ./Prauze - Purple Rave EP (2025) [16B-44.1kHz]/.01.tmp5.11M/37.0M /// ./Prauze - Purple Rave EP (2025) [16B-44.1kHz]/.01.tmp6.12M/37.0M /// ./Prauze - Purple Rave EP (2025) [16B-44.1kHz]/.01.tmp7.07M/37.0M /// ./Prauze - Purple Rave EP (2025) [16B-44.1kHz]/.01.tmp7.87M/37.0M /// ./Prauze - Purple Rave EP (2025) [16B-44.1kHz]/.01.tmp9.16M/37.0M /// ./Prauze - Purple Rave EP (2025) [16B-44.1kHz]/.01.tmp11.0M/37.0M /// ./Prauze - Purple Rave EP (2025) [16B-44.1kHz]/.01.tmp12.1M/37.0M /// ./Prauze - Purple Rave EP (2025) [16B-44.1kHz]/.01.tmp13.2M/37.0M /// ./Prauze - Purple Rave EP (2025) [16B-44.1kHz]/.01.tmp14.2M/37.0M /// ./Prauze - Purple Rave EP (2025) [16B-44.1kHz]/.01.tmp15.6M/37.0M /// ./Prauze - Purple Rave EP (2025) [16B-44.1kHz]/.01.tmp16.7M/37.0M /// ./Prauze - Purple Rave EP (2025) [16B-44.1kHz]/.01.tmp17.8M/37.0M /// ./Prauze - Purple Rave EP (2025) [16B-44.1kHz]/.01.tmp19.2M/37.0M /// ./Prauze - Purple Rave EP (2025) [16B-44.1kHz]/.01.tmp20.3M/37.0M /// ./Prauze - Purple Rave EP (2025) [16B-44.1kHz]/.01.tmp21.5M/37.0M /// ./Prauze - Purple Rave EP (2025) [16B-44.1kHz]/.01.tmp22.6M/37.0M /// ./Prauze - Purple Rave EP (2025) [16B-44.1kHz]/.01.tmp23.7M/37.0M /// ./Prauze - Purple Rave EP (2025) [16B-44.1kHz]/.01.tmp24.8M/37.0M /// ./Prauze - Purple Rave EP (2025) [16B-44.1kHz]/.01.tmp25.8M/37.0M /// ./Prauze - Purple Rave EP (2025) [16B-44.1kHz]/.01.tmp26.8M/37.0M /// ./Prauze - Purple Rave EP (2025) [16B-44.1kHz]/.01.tmp28.1M/37.0M /// ./Prauze - Purple Rave EP (2025) [16B-44.1kHz]/.01.tmp29.2M/37.0M /// ./Prauze - Purple Rave EP (2025) [16B-44.1kHz]/.01.tmp30.5M/37.0M /// ./Prauze - Purple Rave EP (2025) [16B-44.1kHz]/.01.tmp31.6M/37.0M /// ./Prauze - Purple Rave EP (2025) [16B-44.1kHz]/.01.tmp32.7M/37.0M /// ./Prauze - Purple Rave EP (2025) [16B-44.1kHz]/.01.tmp33.7M/37.0M /// ./Prauze - Purple Rave EP (2025) [16B-44.1kHz]/.01.tmp35.0M/37.0M /// ./Prauze - Purple Rave EP (2025) [16B-44.1kHz]/.01.tmp36.1M/37.0M /// ./Prauze - Purple Rave EP (2025) [16B-44.1kHz]/.01.tmp37.0M/37.0M /// ./Prauze - Purple Rave EP (2025) [16B-44.1kHz]/.01.tmp
-Completed
-

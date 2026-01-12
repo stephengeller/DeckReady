@@ -1,19 +1,0 @@
-CMD: qobuz-dl lucky -t track -n 1 -q 6 -d . --no-db --no-m3u --no-fallback -ff {artist} - {album} ({year}) [{bit_depth}B-{sampling_rate}kHz] -tf {tracktitle} DAN (DNA) "Distruction"
-
-STDOUT:
-
-
-STDERR:
-Logging...
-Logged: OK
-Membership: Studio
-Set max quality: 6 - 16 bit, 44.1kHz
-
-Searching tracks for "DAN (DNA) "Distruction"".
-qobuz-dl will attempt to download the first 1 results.
-
-Downloading: Dhyana Dan - 741 Hz DNA Repair
-0.00/45.8k /// cover.jpg45.8k/45.8k /// cover.jpg
-0.00/2.73M /// ./Dhyana Dan - 741 Hz Body Regeneration (2021) [16B-44.1kHz]/.01.tmp16.0k/2.73M /// ./Dhyana Dan - 741 Hz Body Regeneration (2021) [16B-44.1kHz]/.01.tmp35.0k/2.73M /// ./Dhyana Dan - 741 Hz Body Regeneration (2021) [16B-44.1kHz]/.01.tmp51.0k/2.73M /// ./Dhyana Dan - 741 Hz Body Regeneration (2021) [16B-44.1kHz]/.01.tmp75.0k/2.73M /// ./Dhyana Dan - 741 Hz Body Regeneration (2021) [16B-44.1kHz]/.01.tmp115k/2.73M /// ./Dhyana Dan - 741 Hz Body Regeneration (2021) [16B-44.1kHz]/.01.tmp 170k/2.73M /// ./Dhyana Dan - 741 Hz Body Regeneration (2021) [16B-44.1kHz]/.01.tmp234k/2.73M /// ./Dhyana Dan - 741 Hz Body Regeneration (2021) [16B-44.1kHz]/.01.tmp329k/2.73M /// ./Dhyana Dan - 741 Hz Body Regeneration (2021) [16B-44.1kHz]/.01.tmp449k/2.73M /// ./Dhyana Dan - 741 Hz Body Regeneration (2021) [16B-44.1kHz]/.01.tmp624k/2.73M /// ./Dhyana Dan - 741 Hz Body Regeneration (2021) [16B-44.1kHz]/.01.tmp846k/2.73M /// ./Dhyana Dan - 741 Hz Body Regeneration (2021) [16B-44.1kHz]/.01.tmp1.13M/2.73M /// ./Dhyana Dan - 741 Hz Body Regeneration (2021) [16B-44.1kHz]/.01.tmp1.56M/2.73M /// ./Dhyana Dan - 741 Hz Body Regeneration (2021) [16B-44.1kHz]/.01.tmp2.14M/2.73M /// ./Dhyana Dan - 741 Hz Body Regeneration (2021) [16B-44.1kHz]/.01.tmp2.73M/2.73M /// ./Dhyana Dan - 741 Hz Body Regeneration (2021) [16B-44.1kHz]/.01.tmp
-Completed
-

@@ -1,10 +1,48 @@
+# Dependencies
 node_modules
-coverage
-logs/
+package-lock.json
+
+# Build outputs
+dist/
+build/
+out/
+coverage/
+
+# Temp and cache
+.cache/
+tmp/
+temp/
+*.tmp
+
+# Downloads and logs
 .downloads/
-.env
-yarn.error.log
+.qobuz-logs/
+.download-logs/
+logs/
+*.log
+not-found.log
+not-matched.log
+
+# Audio files
 *.wav
 *.mp3
 *.flac
+*.aiff
+*.m4a
+*.ogg
+
+# Environment and secrets
+.env
+.env.local
+.env.*.local
+
+# OS files
 .DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~

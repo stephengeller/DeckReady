@@ -1,19 +1,0 @@
-CMD: qobuz-dl lucky -t track -n 1 -q 6 -d . --no-db --no-m3u --no-fallback -ff {artist} - {album} ({year}) [{bit_depth}B-{sampling_rate}kHz] -tf {tracktitle} OSIO "I Got (Original Mix) – IOSIO"
-
-STDOUT:
-
-
-STDERR:
-Logging...
-Logged: OK
-Membership: Studio
-Set max quality: 6 - 16 bit, 44.1kHz
-
-Searching tracks for "OSIO "I Got (Original Mix) – IOSIO"".
-qobuz-dl will attempt to download the first 1 results.
-
-Downloading: Neneh Cherry - I've Got You Under My Skin (Original Baby Afrika Bambaataa & Booga Bear Mix)
-0.00/47.4k /// cover.jpg47.4k/47.4k /// cover.jpg
-0.00/18.0M /// ./Neneh Cherry - I've Got You Under My Skin (2020) [16B-44.1kHz]/.01.tmp16.0k/18.0M /// ./Neneh Cherry - I've Got You Under My Skin (2020) [16B-44.1kHz]/.01.tmp50.0k/18.0M /// ./Neneh Cherry - I've Got You Under My Skin (2020) [16B-44.1kHz]/.01.tmp74.0k/18.0M /// ./Neneh Cherry - I've Got You Under My Skin (2020) [16B-44.1kHz]/.01.tmp114k/18.0M /// ./Neneh Cherry - I've Got You Under My Skin (2020) [16B-44.1kHz]/.01.tmp 169k/18.0M /// ./Neneh Cherry - I've Got You Under My Skin (2020) [16B-44.1kHz]/.01.tmp233k/18.0M /// ./Neneh Cherry - I've Got You Under My Skin (2020) [16B-44.1kHz]/.01.tmp329k/18.0M /// ./Neneh Cherry - I've Got You Under My Skin (2020) [16B-44.1kHz]/.01.tmp448k/18.0M /// ./Neneh Cherry - I've Got You Under My Skin (2020) [16B-44.1kHz]/.01.tmp607k/18.0M /// ./Neneh Cherry - I've Got You Under My Skin (2020) [16B-44.1kHz]/.01.tmp806k/18.0M /// ./Neneh Cherry - I've Got You Under My Skin (2020) [16B-44.1kHz]/.01.tmp1.08M/18.0M /// ./Neneh Cherry - I've Got You Under My Skin (2020) [16B-44.1kHz]/.01.tmp1.43M/18.0M /// ./Neneh Cherry - I've Got You Under My Skin (2020) [16B-44.1kHz]/.01.tmp1.93M/18.0M /// ./Neneh Cherry - I've Got You Under My Skin (2020) [16B-44.1kHz]/.01.tmp2.58M/18.0M /// ./Neneh Cherry - I've Got You Under My Skin (2020) [16B-44.1kHz]/.01.tmp3.45M/18.0M /// ./Neneh Cherry - I've Got You Under My Skin (2020) [16B-44.1kHz]/.01.tmp4.55M/18.0M /// ./Neneh Cherry - I've Got You Under My Skin (2020) [16B-44.1kHz]/.01.tmp5.57M/18.0M /// ./Neneh Cherry - I've Got You Under My Skin (2020) [16B-44.1kHz]/.01.tmp6.59M/18.0M /// ./Neneh Cherry - I've Got You Under My Skin (2020) [16B-44.1kHz]/.01.tmp7.61M/18.0M /// ./Neneh Cherry - I've Got You Under My Skin (2020) [16B-44.1kHz]/.01.tmp8.52M/18.0M /// ./Neneh Cherry - I've Got You Under My Skin (2020) [16B-44.1kHz]/.01.tmp9.74M/18.0M /// ./Neneh Cherry - I've Got You Under My Skin (2020) [16B-44.1kHz]/.01.tmp10.7M/18.0M /// ./Neneh Cherry - I've Got You Under My Skin (2020) [16B-44.1kHz]/.01.tmp11.8M/18.0M /// ./Neneh Cherry - I've Got You Under My Skin (2020) [16B-44.1kHz]/.01.tmp13.1M/18.0M /// ./Neneh Cherry - I've Got You Under My Skin (2020) [16B-44.1kHz]/.01.tmp14.2M/18.0M /// ./Neneh Cherry - I've Got You Under My Skin (2020) [16B-44.1kHz]/.01.tmp15.3M/18.0M /// ./Neneh Cherry - I've Got You Under My Skin (2020) [16B-44.1kHz]/.01.tmp16.6M/18.0M /// ./Neneh Cherry - I've Got You Under My Skin (2020) [16B-44.1kHz]/.01.tmp17.7M/18.0M /// ./Neneh Cherry - I've Got You Under My Skin (2020) [16B-44.1kHz]/.01.tmp18.0M/18.0M /// ./Neneh Cherry - I've Got You Under My Skin (2020) [16B-44.1kHz]/.01.tmp
-Completed
-

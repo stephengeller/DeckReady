@@ -1,19 +1,0 @@
-CMD: qobuz-dl lucky -t track -n 1 -q 6 -d . --no-db --no-m3u --no-fallback -ff {artist} - {album} ({year}) [{bit_depth}B-{sampling_rate}kHz] -tf {tracktitle} Ben Gold "Poco Loco"
-
-STDOUT:
-
-
-STDERR:
-Logging...
-Logged: OK
-Membership: Studio
-Set max quality: 6 - 16 bit, 44.1kHz
-
-Searching tracks for "Ben Gold "Poco Loco"".
-qobuz-dl will attempt to download the first 1 results.
-
-Downloading: Gene and Eunice - Poco Loco
-0.00/115k /// cover.jpg30.0k/115k /// cover.jpg93.0k/115k /// cover.jpg115k/115k /// cover.jpg 
-0.00/11.2M /// ./Various Artists - Still More Gold Hits, Vol. 3 (1965) [16B-44.1kHz]/.01.tmp16.0k/11.2M /// ./Various Artists - Still More Gold Hits, Vol. 3 (1965) [16B-44.1kHz]/.01.tmp33.0k/11.2M /// ./Various Artists - Still More Gold Hits, Vol. 3 (1965) [16B-44.1kHz]/.01.tmp49.0k/11.2M /// ./Various Artists - Still More Gold Hits, Vol. 3 (1965) [16B-44.1kHz]/.01.tmp73.0k/11.2M /// ./Various Artists - Still More Gold Hits, Vol. 3 (1965) [16B-44.1kHz]/.01.tmp113k/11.2M /// ./Various Artists - Still More Gold Hits, Vol. 3 (1965) [16B-44.1kHz]/.01.tmp 153k/11.2M /// ./Various Artists - Still More Gold Hits, Vol. 3 (1965) [16B-44.1kHz]/.01.tmp209k/11.2M /// ./Various Artists - Still More Gold Hits, Vol. 3 (1965) [16B-44.1kHz]/.01.tmp288k/11.2M /// ./Various Artists - Still More Gold Hits, Vol. 3 (1965) [16B-44.1kHz]/.01.tmp391k/11.2M /// ./Various Artists - Still More Gold Hits, Vol. 3 (1965) [16B-44.1kHz]/.01.tmp531k/11.2M /// ./Various Artists - Still More Gold Hits, Vol. 3 (1965) [16B-44.1kHz]/.01.tmp713k/11.2M /// ./Various Artists - Still More Gold Hits, Vol. 3 (1965) [16B-44.1kHz]/.01.tmp968k/11.2M /// ./Various Artists - Still More Gold Hits, Vol. 3 (1965) [16B-44.1kHz]/.01.tmp1.28M/11.2M /// ./Various Artists - Still More Gold Hits, Vol. 3 (1965) [16B-44.1kHz]/.01.tmp1.70M/11.2M /// ./Various Artists - Still More Gold Hits, Vol. 3 (1965) [16B-44.1kHz]/.01.tmp2.29M/11.2M /// ./Various Artists - Still More Gold Hits, Vol. 3 (1965) [16B-44.1kHz]/.01.tmp3.05M/11.2M /// ./Various Artists - Still More Gold Hits, Vol. 3 (1965) [16B-44.1kHz]/.01.tmp4.06M/11.2M /// ./Various Artists - Still More Gold Hits, Vol. 3 (1965) [16B-44.1kHz]/.01.tmp4.97M/11.2M /// ./Various Artists - Still More Gold Hits, Vol. 3 (1965) [16B-44.1kHz]/.01.tmp5.88M/11.2M /// ./Various Artists - Still More Gold Hits, Vol. 3 (1965) [16B-44.1kHz]/.01.tmp6.90M/11.2M /// ./Various Artists - Still More Gold Hits, Vol. 3 (1965) [16B-44.1kHz]/.01.tmp7.75M/11.2M /// ./Various Artists - Still More Gold Hits, Vol. 3 (1965) [16B-44.1kHz]/.01.tmp8.79M/11.2M /// ./Various Artists - Still More Gold Hits, Vol. 3 (1965) [16B-44.1kHz]/.01.tmp9.68M/11.2M /// ./Various Artists - Still More Gold Hits, Vol. 3 (1965) [16B-44.1kHz]/.01.tmp10.6M/11.2M /// ./Various Artists - Still More Gold Hits, Vol. 3 (1965) [16B-44.1kHz]/.01.tmp11.2M/11.2M /// ./Various Artists - Still More Gold Hits, Vol. 3 (1965) [16B-44.1kHz]/.01.tmp
-Completed
-

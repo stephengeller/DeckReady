@@ -1,19 +1,0 @@
-CMD: qobuz-dl lucky -t track -n 1 -q 6 -d . --no-db --no-m3u --no-fallback -ff {artist} - {album} ({year}) [{bit_depth}B-{sampling_rate}kHz] -tf {tracktitle} leechy "Bounce Block Lewis Cameron"
-
-STDOUT:
-
-
-STDERR:
-Logging...
-Logged: OK
-Membership: Studio
-Set max quality: 6 - 16 bit, 44.1kHz
-
-Searching tracks for "leechy "Bounce Block Lewis Cameron"".
-qobuz-dl will attempt to download the first 1 results.
-
-Downloading: Leechy - The Moment
-0.00/97.7k /// cover.jpg31.0k/97.7k /// cover.jpg97.7k/97.7k /// cover.jpg
-0.00/21.2M /// ./Leechy - The Moment (2024) [16B-44.1kHz]/.01.tmp34.0k/21.2M /// ./Leechy - The Moment (2024) [16B-44.1kHz]/.01.tmp50.0k/21.2M /// ./Leechy - The Moment (2024) [16B-44.1kHz]/.01.tmp90.0k/21.2M /// ./Leechy - The Moment (2024) [16B-44.1kHz]/.01.tmp129k/21.2M /// ./Leechy - The Moment (2024) [16B-44.1kHz]/.01.tmp 185k/21.2M /// ./Leechy - The Moment (2024) [16B-44.1kHz]/.01.tmp249k/21.2M /// ./Leechy - The Moment (2024) [16B-44.1kHz]/.01.tmp344k/21.2M /// ./Leechy - The Moment (2024) [16B-44.1kHz]/.01.tmp463k/21.2M /// ./Leechy - The Moment (2024) [16B-44.1kHz]/.01.tmp610k/21.2M /// ./Leechy - The Moment (2024) [16B-44.1kHz]/.01.tmp825k/21.2M /// ./Leechy - The Moment (2024) [16B-44.1kHz]/.01.tmp1.06M/21.2M /// ./Leechy - The Moment (2024) [16B-44.1kHz]/.01.tmp1.41M/21.2M /// ./Leechy - The Moment (2024) [16B-44.1kHz]/.01.tmp1.79M/21.2M /// ./Leechy - The Moment (2024) [16B-44.1kHz]/.01.tmp2.50M/21.2M /// ./Leechy - The Moment (2024) [16B-44.1kHz]/.01.tmp3.32M/21.2M /// ./Leechy - The Moment (2024) [16B-44.1kHz]/.01.tmp4.24M/21.2M /// ./Leechy - The Moment (2024) [16B-44.1kHz]/.01.tmp5.07M/21.2M /// ./Leechy - The Moment (2024) [16B-44.1kHz]/.01.tmp6.32M/21.2M /// ./Leechy - The Moment (2024) [16B-44.1kHz]/.01.tmp7.18M/21.2M /// ./Leechy - The Moment (2024) [16B-44.1kHz]/.01.tmp8.00M/21.2M /// ./Leechy - The Moment (2024) [16B-44.1kHz]/.01.tmp9.64M/21.2M /// ./Leechy - The Moment (2024) [16B-44.1kHz]/.01.tmp10.7M/21.2M /// ./Leechy - The Moment (2024) [16B-44.1kHz]/.01.tmp11.7M/21.2M /// ./Leechy - The Moment (2024) [16B-44.1kHz]/.01.tmp12.8M/21.2M /// ./Leechy - The Moment (2024) [16B-44.1kHz]/.01.tmp14.2M/21.2M /// ./Leechy - The Moment (2024) [16B-44.1kHz]/.01.tmp15.3M/21.2M /// ./Leechy - The Moment (2024) [16B-44.1kHz]/.01.tmp16.4M/21.2M /// ./Leechy - The Moment (2024) [16B-44.1kHz]/.01.tmp17.6M/21.2M /// ./Leechy - The Moment (2024) [16B-44.1kHz]/.01.tmp18.7M/21.2M /// ./Leechy - The Moment (2024) [16B-44.1kHz]/.01.tmp19.8M/21.2M /// ./Leechy - The Moment (2024) [16B-44.1kHz]/.01.tmp20.9M/21.2M /// ./Leechy - The Moment (2024) [16B-44.1kHz]/.01.tmp21.2M/21.2M /// ./Leechy - The Moment (2024) [16B-44.1kHz]/.01.tmp
-Completed
-
