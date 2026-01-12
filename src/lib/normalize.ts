@@ -3,8 +3,10 @@
 /** Return the first/primary artist from a joined artist string. */
 export function primaryArtist(artists: string | null | undefined): string | null | undefined {
   if (!artists) return artists;
+  // Split on comma, " x " (with spaces), and other delimiters
+  // But DON'T split on & because it's often part of artist names (e.g., "Chase & Status", "Simon & Garfunkel")
   const parts = artists
-    .split(/\s*,\s*|\s*&\s*|\s+x\s+|\s*×\s*|\s+\band\s+/gi) // only split on ' x ' (with spaces), not the letter 'x'
+    .split(/\s*,\s*|\s+x\s+|\s*×\s*|\s+\band\s+/gi)
     .map((s) => s.trim())
     .filter(Boolean);
   return parts[0] || artists.trim();
@@ -37,8 +39,10 @@ export function stripDecorations(title: string | null | undefined): string | nul
 /** Split a joined artist string into individual artist names. */
 export function splitArtists(artistStr: string | null | undefined): string[] {
   if (!artistStr) return [];
+  // Split on comma, " x " (with spaces), and other delimiters
+  // But DON'T split on & because it's often part of artist names (e.g., "Chase & Status", "Simon & Garfunkel")
   return artistStr
-    .split(/\s*,\s*|\s*&\s*|\s+x\s+|\s*×\s*|\s+\band\s+/gi)
+    .split(/\s*,\s*|\s+x\s+|\s*×\s*|\s+\band\s+/gi)
     .map((s) => s.trim())
     .filter(Boolean);
 }
@@ -90,8 +94,35 @@ export function makeBaseParts(
   const segments = trimmed.split(' - ');
   const preferredOrder = options?.preferredOrder ?? 'auto';
   if (segments.length >= 2) {
-    const left = (segments[0] || '').trim();
-    const right = segments.slice(1).join(' - ').trim();
+    // For lines with multiple dashes (3+ segments), try to find the best split point
+    // by looking for the segment with the strongest artist indicator (comma)
+    let left: string;
+    let right: string;
+
+    if (segments.length >= 3) {
+      // Find the split that maximizes artist score difference
+      let bestLeftIdx = 0;
+      let bestScore = -Infinity;
+
+      for (let i = 0; i < segments.length - 1; i++) {
+        const leftPart = segments.slice(0, i + 1).join(' - ').trim();
+        const rightPart = segments.slice(i + 1).join(' - ').trim();
+        const artistScore = scoreAsArtist(rightPart) - scoreAsArtist(leftPart);
+        const titleScore = scoreAsTitle(leftPart) - scoreAsTitle(rightPart);
+        const combinedScore = artistScore + titleScore;
+
+        if (combinedScore > bestScore) {
+          bestScore = combinedScore;
+          bestLeftIdx = i;
+        }
+      }
+
+      left = segments.slice(0, bestLeftIdx + 1).join(' - ').trim();
+      right = segments.slice(bestLeftIdx + 1).join(' - ').trim();
+    } else {
+      left = (segments[0] || '').trim();
+      right = segments.slice(1).join(' - ').trim();
+    }
 
     const leftArtistScore = scoreAsArtist(left);
     const rightArtistScore = scoreAsArtist(right);
