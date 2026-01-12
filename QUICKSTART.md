@@ -5,7 +5,9 @@ Get your Spotify playlists converted to organized AIFF files in 10 minutes.
 ## What You'll Get
 
 ✅ **Input**: Any Spotify playlist URL
+
 ✅ **Output**: Clean AIFF files organized in a folder, ready for Rekordbox/Serato/Traktor
+
 ✅ **Quality**: Lossless FLAC from TIDAL → AIFF (16-bit by default, 24-bit available)
 
 ---
@@ -63,7 +65,7 @@ This will:
 
 ### Step 4: Get Spotify API Keys
 
-**Why?** To read public Spotify playlists (no login required).
+**Why?** To read public Spotify playlists (no Premium subscription required).
 
 1. Go to https://developer.spotify.com/dashboard
 2. Log in with your Spotify account
@@ -87,8 +89,6 @@ tidal-dl-ng login
 ```
 
 Follow the prompts to log in with your TIDAL account. This is needed to download tracks.
-
-**⚠️ Important**: You need a TIDAL HiFi or HiFi Plus subscription for lossless quality.
 
 ### Step 6: Set Your Output Folder
 
