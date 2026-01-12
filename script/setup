@@ -1,65 +1,42 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Idempotent local setup for DeckReady
-# - Installs Node deps (yarn or npm)
-# - Ensures .env exists with required keys
-# - Creates default organised AIFF folder if missing
-# - Verifies required external tools
+# Interactive setup for DeckReady-TIDAL
+# Guides users through all configuration steps
 
 ROOT_DIR="$(cd -- "$(dirname "${BASH_SOURCE[0]}")/.." >/dev/null 2>&1 && pwd)"
 cd "$ROOT_DIR"
 
-echo "==> Detecting package manager"
+# Colors for better UX
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "${BLUE}  DeckReady-TIDAL Setup${NC}"
+echo -e "${BLUE}  Convert Spotify playlists to organized AIFF files${NC}"
+echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo ""
+
+# Step 1: Install Node dependencies
+echo -e "${YELLOW}[1/6]${NC} Installing Node dependencies..."
 PKG="npm"
 if [[ -f yarn.lock ]]; then
   if command -v yarn >/dev/null 2>&1; then PKG="yarn"; fi
 fi
-echo "    using: $PKG"
 
-echo "==> Installing Node dependencies (idempotent)"
 if [[ "$PKG" == "yarn" ]]; then
   yarn install --silent || yarn install
 else
   npm install --silent || npm install
 fi
+echo -e "      ${GREEN}✓${NC} Dependencies installed"
+echo ""
 
-ENV_FILE=".env"
-ENV_EXAMPLE=".env.example"
-
-echo "==> Ensuring $ENV_FILE exists"
-if [[ ! -f "$ENV_FILE" ]]; then
-  if [[ -f "$ENV_EXAMPLE" ]]; then
-    cp "$ENV_EXAMPLE" "$ENV_FILE"
-    echo "    created $ENV_FILE from $ENV_EXAMPLE"
-  else
-    cat > "$ENV_FILE" <<'EOF'
-# Spotify API credentials (Client Credentials flow)
-SPOTIFY_CLIENT_ID=
-SPOTIFY_CLIENT_SECRET=
-
-# Where organised AIFF files are stored (defaults to ~/Music/rekordbox/DROP_NEW_SONGS_HERE)
-# ORGANISED_AIFF_DIR=
-EOF
-    echo "    created minimal $ENV_FILE"
-  fi
-else
-  # Ensure required keys are present (append if missing)
-  if ! grep -q '^SPOTIFY_CLIENT_ID=' "$ENV_FILE"; then echo 'SPOTIFY_CLIENT_ID=' >> "$ENV_FILE"; fi
-  if ! grep -q '^SPOTIFY_CLIENT_SECRET=' "$ENV_FILE"; then echo 'SPOTIFY_CLIENT_SECRET=' >> "$ENV_FILE"; fi
-  if ! grep -q '^# ORGANISED_AIFF_DIR=' "$ENV_FILE" && ! grep -q '^ORGANISED_AIFF_DIR=' "$ENV_FILE"; then
-    echo '' >> "$ENV_FILE"
-    echo '# ORGANISED_AIFF_DIR=' >> "$ENV_FILE"
-  fi
-  echo "    $ENV_FILE present"
-fi
-
-echo "==> Creating default organised AIFF folder if missing"
-DEFAULT_ORG="$HOME/Music/rekordbox/DROP_NEW_SONGS_HERE"
-mkdir -p "$DEFAULT_ORG" || true
-echo "    ensured: $DEFAULT_ORG"
-
-echo "==> Verifying required external tools (tidal-dl-ng, ffmpeg, ffprobe)"
+# Step 2: Check external tools
+echo -e "${YELLOW}[2/6]${NC} Checking required tools..."
 missing=()
 for cmd in tidal-dl-ng ffmpeg ffprobe; do
   if ! command -v "$cmd" >/dev/null 2>&1; then
@@ -68,20 +45,168 @@ for cmd in tidal-dl-ng ffmpeg ffprobe; do
 done
 
 if [[ ${#missing[@]} -gt 0 ]]; then
-  echo "    missing: ${missing[*]}"
-  echo "--"
-  echo "Install guidance:"
-  echo "  tidal-dl-ng : pip install tidal-dl-ng    (or pipx install tidal-dl-ng)"
-  echo "  ffmpeg      : macOS(brew): brew install ffmpeg | Ubuntu: sudo apt-get install ffmpeg"
-  echo "  ffprobe     : included with ffmpeg packages"
-  echo "--"
+  echo -e "      ${RED}✗${NC} Missing tools: ${missing[*]}"
+  echo ""
+  echo "Please install the missing tools:"
+  echo ""
+  for tool in "${missing[@]}"; do
+    case "$tool" in
+      tidal-dl-ng)
+        echo "  tidal-dl-ng:"
+        echo "    pip install tidal-dl-ng"
+        echo "    (or: pip3 install tidal-dl-ng)"
+        echo ""
+        ;;
+      ffmpeg|ffprobe)
+        echo "  ffmpeg:"
+        echo "    macOS:        brew install ffmpeg"
+        echo "    Ubuntu:       sudo apt-get install ffmpeg"
+        echo "    Windows:      Download from https://ffmpeg.org/download.html"
+        echo ""
+        ;;
+    esac
+  done
+  echo -e "${RED}Please install these tools and run setup again.${NC}"
+  exit 1
 else
-  echo "    all found"
+  echo -e "      ${GREEN}✓${NC} All tools found (tidal-dl-ng, ffmpeg, ffprobe)"
 fi
+echo ""
 
-echo "==> Setup complete"
-echo "Next:"
-echo "  1) Open .env and set SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET"
-echo "  2) Run 'tidal-dl-ng login' to authenticate with TIDAL"
-echo "  3) (Optional) Configure quality: tidal-dl-ng cfg quality_audio LOSSLESS"
-echo "  4) Try: script/run https://open.spotify.com/playlist/... --dir out --dry"
+# Step 3: Check TIDAL login
+echo -e "${YELLOW}[3/6]${NC} Checking TIDAL authentication..."
+if tidal-dl-ng cfg 2>&1 | grep -q "quality_audio"; then
+  echo -e "      ${GREEN}✓${NC} TIDAL is configured"
+  # Try to verify login by checking if config has valid settings
+  if tidal-dl-ng cfg 2>&1 | grep -q "LOSSLESS"; then
+    echo -e "      ${GREEN}✓${NC} Logged in to TIDAL"
+  else
+    echo -e "      ${YELLOW}⚠${NC}  TIDAL login status unclear"
+    echo ""
+    echo "You may need to log in to TIDAL:"
+    echo "  tidal-dl-ng login"
+    echo ""
+    read -p "Press Enter to continue..."
+  fi
+else
+  echo -e "      ${RED}✗${NC} Not logged in to TIDAL"
+  echo ""
+  echo "Please log in to TIDAL to download tracks:"
+  echo "  tidal-dl-ng login"
+  echo ""
+  echo -e "${YELLOW}Note: You need a TIDAL HiFi or HiFi Plus subscription for lossless quality.${NC}"
+  echo ""
+  read -p "Press Enter after logging in..."
+fi
+echo ""
+
+# Step 4: Create/configure .env
+ENV_FILE=".env"
+ENV_EXAMPLE=".env.example"
+
+echo -e "${YELLOW}[4/6]${NC} Configuring environment..."
+if [[ ! -f "$ENV_FILE" ]]; then
+  if [[ -f "$ENV_EXAMPLE" ]]; then
+    cp "$ENV_EXAMPLE" "$ENV_FILE"
+    echo -e "      ${GREEN}✓${NC} Created $ENV_FILE from template"
+  else
+    cat > "$ENV_FILE" <<'EOF'
+# Spotify API credentials (Client Credentials flow)
+# Get these from https://developer.spotify.com/dashboard
+SPOTIFY_CLIENT_ID=
+SPOTIFY_CLIENT_SECRET=
+
+# Where organised AIFF files are stored (defaults to ~/Music/rekordbox/DROP_NEW_SONGS_HERE)
+# ORGANISED_AIFF_DIR=
+EOF
+    echo -e "      ${GREEN}✓${NC} Created $ENV_FILE"
+  fi
+else
+  echo -e "      ${GREEN}✓${NC} $ENV_FILE exists"
+fi
+echo ""
+
+# Step 5: Check/prompt for Spotify credentials
+echo -e "${YELLOW}[5/6]${NC} Setting up Spotify API credentials..."
+SPOTIFY_ID=$(grep '^SPOTIFY_CLIENT_ID=' "$ENV_FILE" | cut -d'=' -f2- || echo "")
+SPOTIFY_SECRET=$(grep '^SPOTIFY_CLIENT_SECRET=' "$ENV_FILE" | cut -d'=' -f2- || echo "")
+
+if [[ -z "$SPOTIFY_ID" || -z "$SPOTIFY_SECRET" ]]; then
+  echo -e "      ${YELLOW}⚠${NC}  Spotify credentials not set"
+  echo ""
+  echo "To use Spotify playlist URLs, you need API credentials."
+  echo ""
+  echo "Get them here: https://developer.spotify.com/dashboard"
+  echo "  1. Log in with your Spotify account"
+  echo "  2. Click 'Create app'"
+  echo "  3. Name it anything (e.g., 'DeckReady')"
+  echo "  4. Copy the Client ID and Client Secret"
+  echo ""
+  echo "See detailed guide: ./QUICKSTART.md or docs/CREDENTIALS.md"
+  echo ""
+  read -p "Do you want to add them now? (y/n) " -n 1 -r
+  echo ""
+  if [[ $REPLY =~ ^[Yy]$ ]]; then
+    read -p "Spotify Client ID: " SPOTIFY_ID
+    read -p "Spotify Client Secret: " SPOTIFY_SECRET
+
+    # Update .env file
+    if grep -q '^SPOTIFY_CLIENT_ID=' "$ENV_FILE"; then
+      sed -i.bak "s/^SPOTIFY_CLIENT_ID=.*/SPOTIFY_CLIENT_ID=$SPOTIFY_ID/" "$ENV_FILE"
+      sed -i.bak "s/^SPOTIFY_CLIENT_SECRET=.*/SPOTIFY_CLIENT_SECRET=$SPOTIFY_SECRET/" "$ENV_FILE"
+      rm -f "$ENV_FILE.bak"
+    else
+      echo "SPOTIFY_CLIENT_ID=$SPOTIFY_ID" >> "$ENV_FILE"
+      echo "SPOTIFY_CLIENT_SECRET=$SPOTIFY_SECRET" >> "$ENV_FILE"
+    fi
+    echo -e "      ${GREEN}✓${NC} Spotify credentials saved"
+  else
+    echo -e "      ${YELLOW}⚠${NC}  Skipped - You can add them later in .env"
+  fi
+else
+  echo -e "      ${GREEN}✓${NC} Spotify credentials configured"
+fi
+echo ""
+
+# Step 6: Create output directory
+echo -e "${YELLOW}[6/6]${NC} Setting up output directory..."
+DEFAULT_ORG="$HOME/Music/rekordbox/DROP_NEW_SONGS_HERE"
+
+# Check if user has custom directory in .env
+CUSTOM_ORG=$(grep '^ORGANISED_AIFF_DIR=' "$ENV_FILE" | cut -d'=' -f2- || echo "")
+
+if [[ -n "$CUSTOM_ORG" ]]; then
+  # Expand ~ to $HOME
+  CUSTOM_ORG="${CUSTOM_ORG/#\~/$HOME}"
+  mkdir -p "$CUSTOM_ORG" || true
+  echo -e "      ${GREEN}✓${NC} Using custom directory: $CUSTOM_ORG"
+else
+  mkdir -p "$DEFAULT_ORG" || true
+  echo -e "      ${GREEN}✓${NC} Using default directory: $DEFAULT_ORG"
+fi
+echo ""
+
+# Final summary
+echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "${GREEN}  Setup Complete!${NC}"
+echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo ""
+echo "Next steps:"
+echo ""
+echo "  1. Try it out with a test (dry run):"
+echo "     ./script/run \"https://open.spotify.com/playlist/...\" --dry"
+echo ""
+echo "  2. Download tracks for real:"
+echo "     ./script/run \"https://open.spotify.com/playlist/...\""
+echo ""
+echo "  3. Check your organized files in:"
+if [[ -n "$CUSTOM_ORG" ]]; then
+  echo "     $CUSTOM_ORG"
+else
+  echo "     $DEFAULT_ORG"
+fi
+echo ""
+echo "For more examples and options, see:"
+echo "  ./QUICKSTART.md  - Quick guide for DJs"
+echo "  ./README.md      - Full documentation"
+echo ""

@@ -1,16 +1,23 @@
-# DeckReady — Spotify/TIDAL → AIFF Library
+# DeckReady-TIDAL — Spotify Playlists → Organized AIFF Files
 
-Turn Spotify or TIDAL links into clean, tagged AIFF files organised on disk. Great for DJs who want tracks in a consistent, import‑ready format for software like Rekordbox, without manual cleanup.
+**For DJs**: Drop in a Spotify playlist URL, get back clean AIFF files ready for Rekordbox/Serato/Traktor.
 
-What it does:
+## What It Does
 
-- Gets tracks from a Spotify or TIDAL URL (or a text file of `Title - Artist` lines).
-- Searches TIDAL's catalog and downloads the source audio (via `tidal-dl-ng`) — typically FLAC when available; falls back to 320kbps when needed.
-- Converts to AIFF and preserves metadata (title/artist/album/genre/cover, etc.).
-- Organises files into a neat folder layout: `ORGANISED_AIFF_DIR/Artist - Title.aiff` by default (flat). Use `--by-genre` for `Genre/Artist/Title.aiff`, or set `ORGANISED_FLAT=false` for `Artist/Title.aiff`.
-- Avoids duplicates: detects "already downloaded" runs and short‑circuits if an organised AIFF already exists.
+1. **Input**: Any Spotify or TIDAL playlist/album/track URL
+2. **Download**: Fetches lossless audio from TIDAL (FLAC, falls back to 320kbps)
+3. **Convert**: Creates AIFF files with full metadata (title, artist, album, genre, artwork)
+4. **Organize**: Saves to your DJ library folder as `Artist - Title.aiff`
+5. **Skip Duplicates**: Detects tracks you already have and won't re-download
 
-Works entirely from the CLI. No Spotify login is required for public content. TIDAL access requires authentication via `tidal-dl-ng login` (requires TIDAL subscription for lossless quality).
+**New to this?** → Start with the [Quick Start Guide for DJs](./QUICKSTART.md)
+
+## Requirements
+
+- **Mac/Linux/Windows** with command line
+- **Node.js 18+** ([download](https://nodejs.org/))
+- **TIDAL subscription** (HiFi or HiFi Plus for lossless quality)
+- **Spotify account** (free account works — no login needed for public playlists)
 
 ---
 
@@ -27,31 +34,27 @@ Works entirely from the CLI. No Spotify login is required for public content. TI
 
 ---
 
-## Getting Started
+## Installation
 
-Requirements:
+The setup script will check for these and guide you through installation:
 
-- Node.js 18+
-- `tidal-dl-ng` in your PATH (install: `pip install tidal-dl-ng`)
-- `ffmpeg` and `ffprobe` in PATH
-- TIDAL account (HiFi or HiFi Plus subscription for lossless/hi-res quality)
-
-Install and bootstrap (idempotent):
+- Node.js 18+ ([download](https://nodejs.org/))
+- Python 3 (for `tidal-dl-ng`)
+- `ffmpeg` (audio conversion)
 
 ```bash
-script/setup
-# or: yarn setup
-# or: npm run setup
+git clone https://github.com/stephengeller/DeckReady-TIDAL.git
+cd DeckReady-TIDAL
+./script/setup
 ```
 
-The setup script:
+The setup script will:
+- Install all dependencies
+- Guide you through getting Spotify API credentials
+- Check for required tools (`tidal-dl-ng`, `ffmpeg`)
+- Set up your output directory
 
-- Installs Node dependencies
-- Ensures `.env` exists (copied from `.env.example` if missing)
-- Creates `~/Music/rekordbox/DROP_NEW_SONGS_HERE` by default
-- Checks for external tools: `tidal-dl-ng`, `ffmpeg`, `ffprobe`
-
-**Important**: After running setup, authenticate with TIDAL:
+Then authenticate with TIDAL:
 
 ```bash
 tidal-dl-ng login
@@ -59,171 +62,182 @@ tidal-dl-ng login
 
 ## Configuration
 
-Edit `.env` in the repo root:
+After running `./script/setup`, edit the `.env` file to configure:
 
-- `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET` for Spotify Web API access
-- `ORGANISED_AIFF_DIR` base folder for organised AIFF files (defaults to `~/Music/rekordbox/DROP_NEW_SONGS_HERE`)
+### 1. Output Directory (Where Your Tracks Go)
 
-See the example: [.env.example](./.env.example)
+```bash
+# Where organized AIFF files end up
+ORGANISED_AIFF_DIR=~/Music/rekordbox/DROP_NEW_SONGS_HERE
+```
 
-How to get Spotify credentials: [docs/CREDENTIALS.md](./docs/CREDENTIALS.md)
+This is the folder where your final, organized AIFF files will be saved. Point it to your DJ software's import folder.
 
-**Note**: TIDAL support does not require API credentials. Public playlists, albums, and tracks are accessible directly.
+### 2. Spotify API Credentials
+
+```bash
+SPOTIFY_CLIENT_ID=your_client_id_here
+SPOTIFY_CLIENT_SECRET=your_client_secret_here
+```
+
+**Why needed?** To read public Spotify playlists (no Spotify login required).
+
+**How to get them:** See [QUICKSTART.md](./QUICKSTART.md) or [docs/CREDENTIALS.md](./docs/CREDENTIALS.md)
+
+**Note**: TIDAL playlists work without any API credentials.
 
 ## Quick Start
 
-1. Run the setup helper (installs Node deps, scaffolds `.env`, checks required CLI tools):
+### First Time Setup
 
 ```bash
-script/setup
-# or: yarn setup
-```
+# 1. Clone and setup
+git clone https://github.com/stephengeller/DeckReady-TIDAL.git
+cd DeckReady-TIDAL
+./script/setup
 
-2. Authenticate with TIDAL:
-
-```bash
+# 2. Login to TIDAL
 tidal-dl-ng login
 ```
 
-3. Create an output directory for `tidal-dl-ng` temporary downloads:
+The setup script will guide you through getting Spotify API credentials and configuring your output folder.
+
+**Detailed setup guide**: [QUICKSTART.md](./QUICKSTART.md)
+
+### Basic Usage
 
 ```bash
-mkdir -p out
+# Convert a Spotify playlist
+./script/run "https://open.spotify.com/playlist/..." --dir out
+
+# That's it! Your AIFF files will be organized and ready to import.
 ```
 
-4. Run the end‑to‑end helper:
+The `--dir out` flag is just temporary working space. Your organized files go to the folder you configured in `.env` (default: `~/Music/rekordbox/DROP_NEW_SONGS_HERE`).
+
+### More Examples
 
 ```bash
-script/run <spotify_url|tidal_url|tracklist_file> --dir out [--dry] [--quality Q]
-```
+# Try it first without downloading (dry run)
+./script/run "https://open.spotify.com/playlist/..." --dir out --dry
 
-Notes:
+# Use a TIDAL playlist directly
+./script/run "https://tidal.com/playlist/0d5165ae-81e3-4864-ab7c-2cd0b03f3572" --dir out
 
-- Supports playlist, album, and track URLs from `open.spotify.com` and `tidal.com`.
-- Use `--dry` to preview tidal‑dl-ng commands without downloading.
-- Quality options: `LOW`, `HIGH`, `LOSSLESS` (default), `HI_RES_LOSSLESS`
+# Get 24-bit quality (if available on TIDAL)
+./script/run "https://open.spotify.com/playlist/..." --dir out --quality HI_RES_LOSSLESS
 
-Examples:
-
-```bash
-# Spotify playlist (dry run)
-script/run https://open.spotify.com/playlist/... --dir out --dry
-
-# Spotify single track
-script/run https://open.spotify.com/track/... --dir out
-
-# TIDAL playlist
-script/run https://tidal.com/playlist/0d5165ae-81e3-4864-ab7c-2cd0b03f3572 --dir out
-
-# TIDAL album
-script/run https://tidal.com/album/... --dir out
-
-# Use a pre-made "Title - Artist" file (skip scraping)
-script/run path/to/tracklist.txt --dir out
-
-# Specify quality
-script/run <url> --dir out --quality HI_RES_LOSSLESS
+# Organize by genre (Genre/Artist/Title.aiff)
+./script/run "https://open.spotify.com/playlist/..." --dir out --by-genre
 ```
 
 ## Usage
 
-### script/setup (first run)
+### Main Command: `script/run`
 
-- Installs Node dependencies via Yarn/NPM.
-- Creates `.env` from `.env.example` (or appends missing keys).
-- Ensures `~/Music/rekordbox/DROP_NEW_SONGS_HERE` exists.
-- Verifies `tidal-dl-ng`, `ffmpeg`, and `ffprobe` are on your `PATH`.
-
-Run it anytime you change machines or update dependencies:
+This is what you'll use most of the time. It handles everything end-to-end.
 
 ```bash
-script/setup           # or: yarn setup / npm run setup
+./script/run <spotify_or_tidal_url> --dir out [options]
 ```
 
-**Remember**: Run `tidal-dl-ng login` after setup to authenticate.
+**Common Options**:
 
-### script/run (recommended)
+- `--dir out` - Temporary download folder (will be cleaned up after organizing)
+- `--dry` - Preview what will happen without downloading
+- `--by-genre` - Organize as `Genre/Artist/Title.aiff` (default is `Artist - Title.aiff`)
+- `--quality HI_RES_LOSSLESS` - Request 24-bit quality (default: `LOSSLESS`)
+- `--quiet` - Hide detailed output
+- `--verbose` - Show detailed output including TIDAL API responses
 
-- Pass a Spotify or TIDAL URL, or a local text file of `Title - Artist` lines.
-- Under the hood: scrapes Spotify (when given a Spotify URL), searches TIDAL, downloads via tidal-dl-ng, and organises output.
+**What happens**:
+1. Scrapes track list from Spotify/TIDAL
+2. Downloads from TIDAL (FLAC format)
+3. Converts to AIFF with metadata
+4. Organizes into your configured folder
+5. Cleans up temporary files
 
-Options:
+### Advanced Usage
 
-- `--dir DIR`: output directory for tidal-dl-ng downloads (required)
-- `--quality Q`: `LOW`, `HIGH`, `LOSSLESS` (default), `HI_RES_LOSSLESS`
-- `--dry`: print commands without downloading
-- `--quiet` / `--verbose`: control streaming output
-- `--by-genre`: organise AIFFs into `Genre/Artist/Title.aiff` instead of the flat default (`Artist - Title.aiff`)
-- `--flac-only`: skip AIFF conversion/organisation and keep the raw downloads
-- `--convert`: (experimental) convert downloaded audio to AIFF in-place using `ffmpeg`
-- `--artist-first` / `--title-first`: override how `Title - Artist` lines are interpreted
-- Extra `--flag` arguments are forwarded to `script/run-lucky`
-
-#### Flags
-
-- `--dir DIR`: where tidal-dl-ng downloads land (required)
-- `--quality Q`: `LOSSLESS` by default; `HIGH` used as fallback when needed
-- `--dry`: preview commands without making changes
-- `--quiet` / `--verbose`: hide or show underlying tidal-dl-ng output
-- `--by-genre`: organise as `Genre/Artist/Title.aiff` instead of the flat default (`Artist - Title.aiff`)
-
-### script/run-lucky (advanced)
-
-- Processes an existing tracklist text file via `tidal-dl-ng`.
-- Accepts the same flags as `script/run` (including `--quality`, `--by-genre`, `--flac-only`).
-- Set `--dir DIR` to tell the runner where downloads land and where to look for cached results.
-
-Example:
+#### Export Track Lists Only
 
 ```bash
-script/run-lucky tracklist.txt --dir out --quality HI_RES_LOSSLESS --verbose
+# Get track list from Spotify playlist
+./script/spotify-list "https://open.spotify.com/playlist/..." > tracklist.txt
+
+# Get track list from TIDAL playlist
+./script/tidal-list "https://tidal.com/playlist/..." > tracklist.txt
 ```
 
-### script/spotify-list (export Spotify tracklist only)
-
-- Scrapes Spotify playlists/albums/tracks and prints `Title - Artist` lines to stdout.
-- Combine with shell redirection to build reusable tracklist files.
+#### Process Existing Track List
 
 ```bash
-script/spotify-list https://open.spotify.com/playlist/... > tracklist.txt
+./script/run-lucky tracklist.txt --dir out
 ```
 
-### script/tidal-list (export TIDAL tracklist only)
-
-- Scrapes TIDAL playlists/albums/tracks and prints `Title - Artist` lines to stdout.
-- Combine with shell redirection to build reusable tracklist files.
+#### Batch Process Multiple Playlists
 
 ```bash
-script/tidal-list https://tidal.com/playlist/... > tracklist.txt
+for url in $(cat playlists.txt); do
+  ./script/run "$url" --dir out
+done
 ```
 
-### script/convert-flac-folder (reprocess downloads)
-
-- Walks a directory of `.flac` files, converts each file through the organiser pipeline, and writes AIFFs into your organised library.
-- Handy for re-running the organisation logic on old downloads.
+#### Re-organize Existing FLAC Files
 
 ```bash
-script/convert-flac-folder out --by-genre --dry-run
+./script/convert-flac-folder /path/to/flac/folder --by-genre
 ```
 
-## Output & Logs
+## Where Files Go
 
-- Organised AIFF files land under `ORGANISED_AIFF_DIR/Artist - Title.aiff` by default
-- Detailed tidal‑dl-ng logs: `<dir>/.download-logs/`
-- Unmatched lines: appended to `<dir>/not-found.log`
-- Wrong matches: files removed and mismatch noted in summary
+### Organized AIFF Files
+Your final tracks go to `ORGANISED_AIFF_DIR` (configured in `.env`):
+- **Default layout**: `Artist - Title.aiff`
+- **With `--by-genre`**: `Genre/Artist/Title.aiff`
+
+### Temporary Files
+The `--dir out` folder contains:
+- Downloaded FLAC files (deleted after conversion)
+- `.download-logs/` - Detailed logs for each download
+- `not-found.log` - Tracks that couldn't be found on TIDAL
+
+### What Happens to Duplicates
+- If you already have a track in your organized folder, it won't be downloaded again
+- Remix variations are treated as different tracks
+- Multi-artist tracks are matched intelligently (e.g., "Drum Origins" matches "Drum Origins, Emery, Dreazz")
 
 ## Troubleshooting
 
-- `tidal-dl-ng` not found: install via `pip install tidal-dl-ng` and ensure it's in PATH
-- TIDAL authentication errors: run `tidal-dl-ng login` to re-authenticate
-- Spotify API errors (401/403): verify `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET` in `.env` (public content only)
-- TIDAL scraping errors: TIDAL support uses unofficial API; if playlists fail to load, the underlying API may have changed
-- Missing ffmpeg/ffprobe: install both and ensure they're in PATH
-- Files not appearing in organised folder: check `ORGANISED_AIFF_DIR` and logs in `<dir>/.download-logs`
-- Quality not available: Some tracks may only be available at lower quality (e.g., HIGH instead of LOSSLESS)
+### Common Issues
 
-More: [docs/TROUBLESHOOTING.md](./docs/TROUBLESHOOTING.md)
+**"tidal-dl-ng: command not found"**
+```bash
+pip install tidal-dl-ng
+# or: pip3 install tidal-dl-ng
+```
+
+**TIDAL authentication errors**
+```bash
+tidal-dl-ng login
+```
+You need a TIDAL HiFi or HiFi Plus subscription for lossless quality.
+
+**Spotify API errors (401/403)**
+- Check `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET` in `.env`
+- Try regenerating the secret in [Spotify Dashboard](https://developer.spotify.com/dashboard)
+
+**Tracks not found on TIDAL**
+- Some tracks may not be available in your region
+- Check `out/not-found.log` for details
+- Try searching manually on TIDAL to confirm availability
+
+**Files not appearing in organized folder**
+- Check `ORGANISED_AIFF_DIR` setting in `.env`
+- Look at logs in `out/.download-logs/` for errors
+- Run with `--verbose` flag to see detailed output
+
+**More help**: [docs/TROUBLESHOOTING.md](./docs/TROUBLESHOOTING.md) or [file an issue](https://github.com/stephengeller/DeckReady-TIDAL/issues)
 
 ## Development
 
