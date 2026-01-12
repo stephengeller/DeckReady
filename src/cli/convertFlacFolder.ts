@@ -33,7 +33,9 @@ function expandUserPath(input: string) {
   if (input.startsWith('~')) {
     const home = os.homedir() || process.env.HOME || '';
     const remainder = input.slice(1);
-    return path.resolve(path.join(home, remainder.startsWith('/') ? remainder.slice(1) : remainder));
+    return path.resolve(
+      path.join(home, remainder.startsWith('/') ? remainder.slice(1) : remainder),
+    );
   }
   return path.resolve(input);
 }
@@ -85,7 +87,10 @@ async function main() {
   try {
     stats = await fs.stat(targetDir);
   } catch (err) {
-    console.error(`Error: could not access ${targetDir}:`, err instanceof Error ? err.message : err);
+    console.error(
+      `Error: could not access ${targetDir}:`,
+      err instanceof Error ? err.message : err,
+    );
     process.exit(1);
   }
 

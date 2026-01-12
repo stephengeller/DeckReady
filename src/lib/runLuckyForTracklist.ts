@@ -19,9 +19,7 @@ import { persistLastRunLogs } from '../tracklist/logs';
 import { walkFiles } from './fsWalk';
 
 /** Map numeric quality values to TIDAL quality names */
-function mapQualityToTidal(
-  q?: number | string,
-): 'LOW' | 'HIGH' | 'LOSSLESS' | 'HI_RES_LOSSLESS' {
+function mapQualityToTidal(q?: number | string): 'LOW' | 'HIGH' | 'LOSSLESS' | 'HI_RES_LOSSLESS' {
   if (typeof q === 'string') {
     const upper = q.toUpperCase();
     if (['LOW', 'HIGH', 'LOSSLESS', 'HI_RES_LOSSLESS'].includes(upper)) {
@@ -267,7 +265,9 @@ export async function main() {
         printAlreadyHint();
         if (reuseInfo) reportExistingDownload(reuseInfo);
         printLogHint(losslessResult?.logPath, true);
-        console.log('    ' + dim('↪ No cached download was found. Continuing with other candidates…'));
+        console.log(
+          '    ' + dim('↪ No cached download was found. Continuing with other candidates…'),
+        );
         continue;
       }
       if (losslessResult?.ok) {
@@ -326,7 +326,9 @@ export async function main() {
         printAlreadyHint();
         if (reuseInfo) reportExistingDownload(reuseInfo);
         printLogHint(bitrate320Result?.logPath, true);
-        console.log('    ' + dim('↪ No cached download was found. Continuing with other candidates…'));
+        console.log(
+          '    ' + dim('↪ No cached download was found. Continuing with other candidates…'),
+        );
         continue;
       }
       if (bitrate320Result?.ok) {

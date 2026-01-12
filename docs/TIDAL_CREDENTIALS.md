@@ -9,6 +9,7 @@ TIDAL scraping uses an unofficial API approach based on [tidal_unofficial](https
 ## No Configuration Required
 
 Unlike Spotify, TIDAL support **does not require**:
+
 - API credentials (Client ID/Secret)
 - Developer account registration
 - OAuth authentication
@@ -46,6 +47,7 @@ script/run https://tidal.com/playlist/0d5165ae-81e3-4864-ab7c-2cd0b03f3572 --dir
 ### Playlists fail to load
 
 If TIDAL playlists suddenly stop working:
+
 1. The unofficial API token may have been invalidated
 2. TIDAL may have changed their API structure
 3. The playlist may be private or region-locked
@@ -66,12 +68,12 @@ See `src/lib/tidalApi.ts` for implementation details.
 
 ## Comparison with Official API
 
-| Feature | Unofficial (Current) | Official API |
-|---------|---------------------|--------------|
-| Setup Required | None | Developer account + OAuth |
-| Public Playlists | ✅ Yes | ✅ Yes (with auth) |
-| Private Playlists | ❌ No | ✅ Yes (with user auth) |
-| Stability | Medium | High |
-| Rate Limits | Unknown | Documented |
+| Feature           | Unofficial (Current) | Official API              |
+| ----------------- | -------------------- | ------------------------- |
+| Setup Required    | None                 | Developer account + OAuth |
+| Public Playlists  | ✅ Yes               | ✅ Yes (with auth)        |
+| Private Playlists | ❌ No                | ✅ Yes (with user auth)   |
+| Stability         | Medium               | High                      |
+| Rate Limits       | Unknown              | Documented                |
 
 For this use case (scraping public playlists for metadata), the unofficial approach is simpler and more suitable than the official API's Authorization Code flow requirement.

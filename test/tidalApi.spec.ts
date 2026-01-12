@@ -23,22 +23,16 @@ describe('tidalApi', () => {
       id: 'fedcba98-7654-3210-fedc-ba9876543210',
     });
     // Albums use numeric IDs
-    expect(
-      parseTidalUrl('https://tidal.com/album/270779076/u'),
-    ).toEqual({
+    expect(parseTidalUrl('https://tidal.com/album/270779076/u')).toEqual({
       type: 'album',
       id: '270779076',
     });
-    expect(
-      parseTidalUrl('https://listen.tidal.com/album/12345678'),
-    ).toEqual({
+    expect(parseTidalUrl('https://listen.tidal.com/album/12345678')).toEqual({
       type: 'album',
       id: '12345678',
     });
     // Tracks use numeric IDs
-    expect(
-      parseTidalUrl('https://tidal.com/track/153983458?si=test'),
-    ).toEqual({
+    expect(parseTidalUrl('https://tidal.com/track/153983458?si=test')).toEqual({
       type: 'track',
       id: '153983458',
     });
@@ -139,9 +133,7 @@ describe('tidalApi', () => {
       return Promise.resolve(mkRes(404, { error: 'unknown url ' + url }));
     });
 
-    const lines = await getLinesFromTidalUrl(
-      'https://tidal.com/album/270779076',
-    );
+    const lines = await getLinesFromTidalUrl('https://tidal.com/album/270779076');
     expect(lines).toEqual(['Album Track 1 - Album Artist', 'Album Track 2 - Album Artist']);
   });
 
@@ -167,9 +159,7 @@ describe('tidalApi', () => {
       return Promise.resolve(mkRes(404, { error: 'unknown url ' + url }));
     });
 
-    const lines = await getLinesFromTidalUrl(
-      'https://tidal.com/track/153983458',
-    );
+    const lines = await getLinesFromTidalUrl('https://tidal.com/track/153983458');
     expect(lines).toEqual(['Track Name - Artist X, Artist Y']);
   });
 

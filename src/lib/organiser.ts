@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { ORGANISED_AIFF_DIR, ORGANISED_FLAT } from './env';
 import { spawnStreaming } from './proc';
-import { readTags, Runner, normaliseTag, normaliseTitleBase } from './tags';
+import { readTags, Runner } from './tags';
 import { pickGenre, sanitizeName } from '../organiser/names';
 import { findCoverInSameDir } from '../organiser/cover';
 import { ensureUniqueAiffPath } from '../organiser/fs';
@@ -50,8 +50,7 @@ export async function processDownloadedAudio(
         : path.join(ORG_BASE, artist);
     await fs.mkdir(destDir, { recursive: true });
 
-    const baseName =
-      opts?.byGenre || !ORGANISED_FLAT ? title : `${artist} - ${title}`;
+    const baseName = opts?.byGenre || !ORGANISED_FLAT ? title : `${artist} - ${title}`;
 
     const destPath = await ensureUniqueAiffPath(destDir, baseName);
 
@@ -94,7 +93,7 @@ export async function processDownloadedAudio(
     try {
       await fs.rm(inputPath, { force: true });
       if (!opts?.quiet) console.log(`Cleaned up original: ${inputPath}`);
-    } catch (err) {
+    } catch {
       if (!opts?.quiet) console.warn(`Warning: Could not delete original file ${inputPath}`);
     }
 
@@ -138,7 +137,7 @@ export async function findOrganisedAiff(
     // This handles cases like searching "Drum Origins" finding "Drum Origins, Emery, Dreazz - Title.aiff"
     const artistPrefixRegex = new RegExp(
       `^${escapeRegex(artistDirName)}(?:,\\s*[^-]+)*\\s*-\\s*${escapeRegex(titleBase)}(?: \\([^)]+\\))?(?: \\((?:\\d+)\\))?\\.aiff$`,
-      'i'
+      'i',
     );
 
     const matchesFilename = (name: string) =>

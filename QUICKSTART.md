@@ -59,6 +59,7 @@ cd DeckReady-TIDAL
 ```
 
 This will:
+
 - Install Node dependencies
 - Create a `.env` file for your settings
 - Check that all tools are installed
@@ -111,6 +112,7 @@ ORGANISED_AIFF_DIR=/Users/yourname/Music/Rekordbox/Imports
 ```
 
 That's it! The script will:
+
 1. Read tracks from the Spotify playlist
 2. Search for each track on TIDAL
 3. Download lossless FLAC files
@@ -209,6 +211,7 @@ Double-check your Client ID and Secret in `.env` are correct. Try regenerating t
 ### Tracks not found on TIDAL
 
 Some tracks may not be available on TIDAL:
+
 - Check the `not-found.log` file in your downloads folder
 - Try searching manually on TIDAL to confirm availability
 - Regional availability varies

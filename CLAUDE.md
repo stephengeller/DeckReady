@@ -9,11 +9,13 @@ DeckReady is a TypeScript CLI tool that converts Spotify/TIDAL URLs into clean, 
 ## Common Commands
 
 ### Setup
+
 ```bash
 script/setup            # Idempotent: installs deps, creates .env, checks external tools
 ```
 
 ### Development
+
 ```bash
 yarn typecheck          # Type-check without emitting files
 yarn test               # Run Jest tests (with --runInBand)
@@ -24,6 +26,7 @@ yarn format:check       # Check formatting
 ```
 
 ### Running Tests
+
 ```bash
 yarn test                                    # All tests
 yarn test -- path/to/file.spec.ts          # Single test file
@@ -31,6 +34,7 @@ yarn test -- --testNamePattern="pattern"    # Specific test
 ```
 
 ### Main CLI Scripts
+
 ```bash
 # Unified entrypoint (Spotify/TIDAL URL or tracklist file)
 script/run <url|file> --dir out [--quality Q] [--dry] [--by-genre] [--flac-only]
@@ -47,6 +51,7 @@ script/convert-flac-folder <dir> [--by-genre]        # Re-organize existing FLAC
 ## Architecture
 
 ### Pipeline Flow
+
 1. **Input**: Spotify/TIDAL URL or text file with `Title - Artist` lines
 2. **Scraping** (`src/lib/spotifyApi.ts` or `src/lib/tidalApi.ts`): Fetch track metadata via Spotify Web API or TIDAL API
 3. **Query Building** (`src/lib/queryBuilders.ts`, `src/lib/normalize.ts`): Generate ranked search candidates (artist-first, title-first, remix-aware)
@@ -59,6 +64,7 @@ script/convert-flac-folder <dir> [--by-genre]        # Re-organize existing FLAC
 ### Key Modules
 
 **Core Pipeline**
+
 - `src/lib/runLuckyForTracklist.ts`: Main orchestrator for tracklist processing
   - Loops through each track line
   - Tries LOSSLESS first, falls back to HIGH (320kbps) if no explicit quality specified
@@ -67,6 +73,7 @@ script/convert-flac-folder <dir> [--by-genre]        # Re-organize existing FLAC
   - Caches previous downloads via `.search.txt` sidecar files
 
 **TIDAL Search & Download**
+
 - `src/lib/tidalSearch.ts`: TIDAL API search integration
   - `searchTidalTracks()`: Search TIDAL catalog, return structured results with track IDs and URLs
   - Uses unofficial TIDAL API with public token
@@ -81,12 +88,14 @@ script/convert-flac-folder <dir> [--by-genre]        # Re-organize existing FLAC
   - Handles "already downloaded" detection to avoid redundant fallback
 
 **Audio Processing**
+
 - `src/lib/organiser.ts`: AIFF conversion and file organization
   - `processDownloadedAudio()`: Convert to AIFF, preserve metadata, move to organized location
   - `findOrganisedAiff()`: Check if track already exists in organized library
   - Supports three layouts: flat (default: `Artist - Title.aiff`), by-genre (`Genre/Artist/Title.aiff`), nested (`Artist/Title.aiff`)
 
 **Metadata & Normalization**
+
 - `src/lib/normalize.ts`: Clean track metadata for search (strip decorations, normalize accents, detect remixes)
 - `src/lib/queryBuilders.ts`: Build ranked candidate queries from normalized parts
 - `src/lib/tags.ts`: ffprobe wrapper for reading audio file tags
@@ -94,6 +103,7 @@ script/convert-flac-folder <dir> [--by-genre]        # Re-organize existing FLAC
 - `src/organiser/names.ts`: Path-safe sanitization, genre selection
 
 **CLI Entrypoints**
+
 - `src/cli/runLucky.ts`: Thin wrapper for `runLuckyForTracklist.ts`
 - `src/cli/spotifyList.ts`: Spotify scraper CLI
 - `src/cli/tidalList.ts`: TIDAL scraper CLI
@@ -101,12 +111,14 @@ script/convert-flac-folder <dir> [--by-genre]        # Re-organize existing FLAC
 - `src/cli/convertFlacFolder.ts`: Bulk re-organization of existing FLACs
 
 **Shell Scripts**
+
 - `script/run`: Bash wrapper that dispatches to appropriate CLI tool based on input type (Spotify/TIDAL URL or tracklist file)
 - `script/setup`: Bootstrap script (deps, .env, directory creation, tool checks)
 
 ### Organization Layouts
 
 Three modes (controlled by env vars and CLI flags):
+
 1. **Flat** (default, `ORGANISED_FLAT=true`): `ORGANISED_AIFF_DIR/Artist - Title.aiff`
 2. **By-genre** (`--by-genre` flag): `ORGANISED_AIFF_DIR/Genre/Artist/Title.aiff`
 3. **Nested** (`ORGANISED_FLAT=false`): `ORGANISED_AIFF_DIR/Artist/Title.aiff`

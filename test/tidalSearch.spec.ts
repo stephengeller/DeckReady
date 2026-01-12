@@ -41,7 +41,7 @@ describe('tidalSearch', () => {
               },
             ],
             totalNumberOfItems: 2,
-          })
+          }),
         );
       }
       return Promise.resolve(mkRes(404, { error: 'unknown url ' + url }));
@@ -83,7 +83,7 @@ describe('tidalSearch', () => {
       text: async () => JSON.stringify(body),
     });
 
-    const fetchMock = ((global as any).fetch = jest.fn((url: string) => {
+    const fetchMock = ((global as any).fetch = jest.fn((_url: string) => {
       return Promise.resolve(
         mkRes(200, {
           items: [
@@ -96,7 +96,7 @@ describe('tidalSearch', () => {
             },
           ],
           totalNumberOfItems: 1,
-        })
+        }),
       );
     }));
 
@@ -117,12 +117,12 @@ describe('tidalSearch', () => {
       text: async () => JSON.stringify(body),
     });
 
-    const fetchMock = ((global as any).fetch = jest.fn((url: string) => {
+    const fetchMock = ((global as any).fetch = jest.fn((_url: string) => {
       return Promise.resolve(
         mkRes(200, {
           items: [],
           totalNumberOfItems: 0,
-        })
+        }),
       );
     }));
 
@@ -143,7 +143,7 @@ describe('tidalSearch', () => {
       text: async () => JSON.stringify(body),
     });
 
-    (global as any).fetch = jest.fn((url: string) => {
+    (global as any).fetch = jest.fn((_url: string) => {
       return Promise.resolve(
         mkRes(200, {
           items: [
@@ -171,7 +171,7 @@ describe('tidalSearch', () => {
             null, // Null item
           ],
           totalNumberOfItems: 5,
-        })
+        }),
       );
     });
 
@@ -192,7 +192,7 @@ describe('tidalSearch', () => {
       text: async () => JSON.stringify(body),
     });
 
-    (global as any).fetch = jest.fn((url: string) => {
+    (global as any).fetch = jest.fn((_url: string) => {
       return Promise.resolve(
         mkRes(200, {
           items: [
@@ -206,7 +206,7 @@ describe('tidalSearch', () => {
             },
           ],
           totalNumberOfItems: 1,
-        })
+        }),
       );
     });
 
@@ -228,7 +228,7 @@ describe('tidalSearch', () => {
       text: async () => JSON.stringify(body),
     });
 
-    (global as any).fetch = jest.fn((url: string) => {
+    (global as any).fetch = jest.fn((_url: string) => {
       return Promise.resolve(mkRes(403, { error: 'Forbidden' }));
     });
 
@@ -246,12 +246,12 @@ describe('tidalSearch', () => {
       text: async () => JSON.stringify(body),
     });
 
-    (global as any).fetch = jest.fn((url: string) => {
+    (global as any).fetch = jest.fn((_url: string) => {
       return Promise.resolve(
         mkRes(200, {
           items: [],
           totalNumberOfItems: 0,
-        })
+        }),
       );
     });
 
@@ -271,12 +271,12 @@ describe('tidalSearch', () => {
       text: async () => JSON.stringify(body),
     });
 
-    const fetchMock = ((global as any).fetch = jest.fn((url: string) => {
+    const fetchMock = ((global as any).fetch = jest.fn((_url: string) => {
       return Promise.resolve(
         mkRes(200, {
           items: [],
           totalNumberOfItems: 0,
-        })
+        }),
       );
     }));
 

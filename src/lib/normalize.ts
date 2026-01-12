@@ -105,8 +105,14 @@ export function makeBaseParts(
       let bestScore = -Infinity;
 
       for (let i = 0; i < segments.length - 1; i++) {
-        const leftPart = segments.slice(0, i + 1).join(' - ').trim();
-        const rightPart = segments.slice(i + 1).join(' - ').trim();
+        const leftPart = segments
+          .slice(0, i + 1)
+          .join(' - ')
+          .trim();
+        const rightPart = segments
+          .slice(i + 1)
+          .join(' - ')
+          .trim();
         const artistScore = scoreAsArtist(rightPart) - scoreAsArtist(leftPart);
         const titleScore = scoreAsTitle(leftPart) - scoreAsTitle(rightPart);
         const combinedScore = artistScore + titleScore;
@@ -117,8 +123,14 @@ export function makeBaseParts(
         }
       }
 
-      left = segments.slice(0, bestLeftIdx + 1).join(' - ').trim();
-      right = segments.slice(bestLeftIdx + 1).join(' - ').trim();
+      left = segments
+        .slice(0, bestLeftIdx + 1)
+        .join(' - ')
+        .trim();
+      right = segments
+        .slice(bestLeftIdx + 1)
+        .join(' - ')
+        .trim();
     } else {
       left = (segments[0] || '').trim();
       right = segments.slice(1).join(' - ').trim();

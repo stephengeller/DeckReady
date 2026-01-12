@@ -33,6 +33,7 @@ cd DeckReady-TIDAL
 ```
 
 The setup script handles everything:
+
 - ✓ Installs dependencies
 - ✓ Guides you through Spotify API credentials
 - ✓ Checks for required tools
@@ -66,6 +67,7 @@ The setup script will guide you through everything, but if you need to change se
 That's it! Your AIFF files will be organized in the folder you configured during setup.
 
 **Notes**:
+
 - Works with Spotify or TIDAL URLs (playlists, albums, tracks)
 - Temp files are automatically cleaned up after conversion
 - Final files go to the folder in `.env` (default: `~/Music/rekordbox/DROP_NEW_SONGS_HERE`)
@@ -84,7 +86,6 @@ That's it! Your AIFF files will be organized in the folder you configured during
 ```
 
 **More examples**: See [QUICKSTART.md](./QUICKSTART.md)
-
 
 ## Where Files Go
 

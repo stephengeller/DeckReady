@@ -10,14 +10,14 @@
 const TIDAL_TOKEN = 'gsFXkJqGrUNoYMQPZe4k3WKwijnrp8iGSwn3bApe';
 
 export type TidalSearchTrack = {
-  id: string;              // Track ID (numeric, converted to string)
+  id: string; // Track ID (numeric, converted to string)
   title: string;
-  artist: string;          // Primary artist (first in artists array)
-  artists: string[];       // All artists
+  artist: string; // Primary artist (first in artists array)
+  artists: string[]; // All artists
   album: string;
-  audioQuality: string;    // "HI_RES", "LOSSLESS", "HIGH", "LOW"
-  duration?: number;       // Duration in seconds
-  url: string;             // https://tidal.com/track/{id}
+  audioQuality: string; // "HI_RES", "LOSSLESS", "HIGH", "LOW"
+  duration?: number; // Duration in seconds
+  url: string; // https://tidal.com/track/{id}
 };
 
 async function fetchJson<T>(url: string): Promise<T> {
@@ -52,7 +52,7 @@ export async function searchTidalTracks(
   options?: {
     limit?: number;
     countryCode?: string;
-  }
+  },
 ): Promise<TidalSearchTrack[]> {
   const limit = options?.limit ?? 5;
   const countryCode = options?.countryCode ?? 'US';
@@ -81,9 +81,7 @@ export async function searchTidalTracks(
     if (!item || !item.id || !item.title) continue;
 
     // Extract artist names
-    const artistNames = (item.artists || [])
-      .map((a) => (a?.name || '').trim())
-      .filter(Boolean);
+    const artistNames = (item.artists || []).map((a) => (a?.name || '').trim()).filter(Boolean);
 
     // Fallback to single artist field if artists array is empty
     if (artistNames.length === 0 && item.artist?.name) {

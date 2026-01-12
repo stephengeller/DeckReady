@@ -64,11 +64,11 @@ function filterCandidates(
   });
 }
 
-async function getTidalConfig(): Promise<any> {
+async function getTidalConfig(): Promise<Record<string, unknown>> {
   try {
     const content = await fs.readFile(TIDAL_CONFIG_PATH, 'utf-8');
-    return JSON.parse(content);
-  } catch (err) {
+    return JSON.parse(content) as Record<string, unknown>;
+  } catch {
     throw new Error(
       `Failed to read tidal-dl-ng config at ${TIDAL_CONFIG_PATH}. Have you run 'tidal-dl-ng login'?`,
     );
@@ -89,13 +89,13 @@ async function setTidalConfig(
 }> {
   const config = await getTidalConfig();
   const original = {
-    quality: config.quality_audio,
-    basePath: config.download_base_path,
-    formatTrack: config.format_track,
-    formatAlbum: config.format_album,
-    formatPlaylist: config.format_playlist,
-    formatMix: config.format_mix,
-    formatVideo: config.format_video,
+    quality: String(config.quality_audio ?? ''),
+    basePath: String(config.download_base_path ?? ''),
+    formatTrack: String(config.format_track ?? ''),
+    formatAlbum: String(config.format_album ?? ''),
+    formatPlaylist: String(config.format_playlist ?? ''),
+    formatMix: String(config.format_mix ?? ''),
+    formatVideo: String(config.format_video ?? ''),
   };
 
   config.quality_audio = quality;
