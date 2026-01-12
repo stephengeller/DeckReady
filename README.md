@@ -18,8 +18,11 @@ Drop in a Spotify playlist URL → Get lossless AIFF files ready for Rekordbox/S
 **Output**: Organized AIFF files in your DJ library folder
 
 ✓ Lossless quality from TIDAL (FLAC → AIFF)
+
 ✓ Full metadata (artist, title, album, genre, artwork)
+
 ✓ Automatic duplicate detection
+
 ✓ Clean filenames: `Artist - Title.aiff`
 
 ---
