@@ -1,19 +1,0 @@
-CMD: qobuz-dl lucky -t track -n 1 -q 6 -d . --no-db --no-m3u --no-fallback -ff {artist} - {album} ({year}) [{bit_depth}B-{sampling_rate}kHz] -tf {tracktitle}  "1999 – Matty Ralph"
-
-STDOUT:
-
-
-STDERR:
-Logging...
-Logged: OK
-Membership: Studio
-Set max quality: 6 - 16 bit, 44.1kHz
-
-Searching tracks for " "1999 – Matty Ralph"".
-qobuz-dl will attempt to download the first 1 results.
-
-Downloading: Matty Ralph - 1999
-0.00/26.3k /// cover.jpg13.0k/26.3k /// cover.jpg26.3k/26.3k /// cover.jpg
-0.00/24.2M /// ./Matty Ralph - 1999 (2025) [16B-44.1kHz]/.01.tmp17.0k/24.2M /// ./Matty Ralph - 1999 (2025) [16B-44.1kHz]/.01.tmp38.0k/24.2M /// ./Matty Ralph - 1999 (2025) [16B-44.1kHz]/.01.tmp54.0k/24.2M /// ./Matty Ralph - 1999 (2025) [16B-44.1kHz]/.01.tmp93.0k/24.2M /// ./Matty Ralph - 1999 (2025) [16B-44.1kHz]/.01.tmp133k/24.2M /// ./Matty Ralph - 1999 (2025) [16B-44.1kHz]/.01.tmp 197k/24.2M /// ./Matty Ralph - 1999 (2025) [16B-44.1kHz]/.01.tmp276k/24.2M /// ./Matty Ralph - 1999 (2025) [16B-44.1kHz]/.01.tmp372k/24.2M /// ./Matty Ralph - 1999 (2025) [16B-44.1kHz]/.01.tmp511k/24.2M /// ./Matty Ralph - 1999 (2025) [16B-44.1kHz]/.01.tmp702k/24.2M /// ./Matty Ralph - 1999 (2025) [16B-44.1kHz]/.01.tmp948k/24.2M /// ./Matty Ralph - 1999 (2025) [16B-44.1kHz]/.01.tmp1.27M/24.2M /// ./Matty Ralph - 1999 (2025) [16B-44.1kHz]/.01.tmp1.73M/24.2M /// ./Matty Ralph - 1999 (2025) [16B-44.1kHz]/.01.tmp2.37M/24.2M /// ./Matty Ralph - 1999 (2025) [16B-44.1kHz]/.01.tmp3.20M/24.2M /// ./Matty Ralph - 1999 (2025) [16B-44.1kHz]/.01.tmp4.29M/24.2M /// ./Matty Ralph - 1999 (2025) [16B-44.1kHz]/.01.tmp5.31M/24.2M /// ./Matty Ralph - 1999 (2025) [16B-44.1kHz]/.01.tmp6.23M/24.2M /// ./Matty Ralph - 1999 (2025) [16B-44.1kHz]/.01.tmp7.58M/24.2M /// ./Matty Ralph - 1999 (2025) [16B-44.1kHz]/.01.tmp8.53M/24.2M /// ./Matty Ralph - 1999 (2025) [16B-44.1kHz]/.01.tmp9.47M/24.2M /// ./Matty Ralph - 1999 (2025) [16B-44.1kHz]/.01.tmp10.4M/24.2M /// ./Matty Ralph - 1999 (2025) [16B-44.1kHz]/.01.tmp11.9M/24.2M /// ./Matty Ralph - 1999 (2025) [16B-44.1kHz]/.01.tmp12.9M/24.2M /// ./Matty Ralph - 1999 (2025) [16B-44.1kHz]/.01.tmp13.9M/24.2M /// ./Matty Ralph - 1999 (2025) [16B-44.1kHz]/.01.tmp14.9M/24.2M /// ./Matty Ralph - 1999 (2025) [16B-44.1kHz]/.01.tmp16.4M/24.2M /// ./Matty Ralph - 1999 (2025) [16B-44.1kHz]/.01.tmp17.5M/24.2M /// ./Matty Ralph - 1999 (2025) [16B-44.1kHz]/.01.tmp18.6M/24.2M /// ./Matty Ralph - 1999 (2025) [16B-44.1kHz]/.01.tmp19.7M/24.2M /// ./Matty Ralph - 1999 (2025) [16B-44.1kHz]/.01.tmp20.8M/24.2M /// ./Matty Ralph - 1999 (2025) [16B-44.1kHz]/.01.tmp22.0M/24.2M /// ./Matty Ralph - 1999 (2025) [16B-44.1kHz]/.01.tmp23.1M/24.2M /// ./Matty Ralph - 1999 (2025) [16B-44.1kHz]/.01.tmp24.2M/24.2M /// ./Matty Ralph - 1999 (2025) [16B-44.1kHz]/.01.tmp
-Completed
-

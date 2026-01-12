@@ -1,19 +1,0 @@
-CMD: qobuz-dl lucky -t track -n 1 -q 6 -d . --no-db --no-m3u --no-fallback -ff {artist} - {album} ({year}) [{bit_depth}B-{sampling_rate}kHz] -tf {tracktitle} t e s t p r e s s "WORK TO THA BEAT"
-
-STDOUT:
-
-
-STDERR:
-Logging...
-Logged: OK
-Membership: Studio
-Set max quality: 6 - 16 bit, 44.1kHz
-
-Searching tracks for "t e s t p r e s s "WORK TO THA BEAT"".
-qobuz-dl will attempt to download the first 1 results.
-
-Downloading: Noizu - Push To Start (t e s t p r e s s Remix)
-0.00/76.9k /// cover.jpg14.0k/76.9k /// cover.jpg42.0k/76.9k /// cover.jpg76.9k/76.9k /// cover.jpg
-0.00/18.4M /// ./Noizu - Push To Start (2023) [16B-44.1kHz]/.01.tmp16.0k/18.4M /// ./Noizu - Push To Start (2023) [16B-44.1kHz]/.01.tmp50.0k/18.4M /// ./Noizu - Push To Start (2023) [16B-44.1kHz]/.01.tmp74.0k/18.4M /// ./Noizu - Push To Start (2023) [16B-44.1kHz]/.01.tmp114k/18.4M /// ./Noizu - Push To Start (2023) [16B-44.1kHz]/.01.tmp 170k/18.4M /// ./Noizu - Push To Start (2023) [16B-44.1kHz]/.01.tmp217k/18.4M /// ./Noizu - Push To Start (2023) [16B-44.1kHz]/.01.tmp297k/18.4M /// ./Noizu - Push To Start (2023) [16B-44.1kHz]/.01.tmp416k/18.4M /// ./Noizu - Push To Start (2023) [16B-44.1kHz]/.01.tmp567k/18.4M /// ./Noizu - Push To Start (2023) [16B-44.1kHz]/.01.tmp762k/18.4M /// ./Noizu - Push To Start (2023) [16B-44.1kHz]/.01.tmp1.00M/18.4M /// ./Noizu - Push To Start (2023) [16B-44.1kHz]/.01.tmp1.35M/18.4M /// ./Noizu - Push To Start (2023) [16B-44.1kHz]/.01.tmp1.86M/18.4M /// ./Noizu - Push To Start (2023) [16B-44.1kHz]/.01.tmp2.50M/18.4M /// ./Noizu - Push To Start (2023) [16B-44.1kHz]/.01.tmp3.33M/18.4M /// ./Noizu - Push To Start (2023) [16B-44.1kHz]/.01.tmp4.45M/18.4M /// ./Noizu - Push To Start (2023) [16B-44.1kHz]/.01.tmp5.47M/18.4M /// ./Noizu - Push To Start (2023) [16B-44.1kHz]/.01.tmp6.26M/18.4M /// ./Noizu - Push To Start (2023) [16B-44.1kHz]/.01.tmp7.34M/18.4M /// ./Noizu - Push To Start (2023) [16B-44.1kHz]/.01.tmp9.23M/18.4M /// ./Noizu - Push To Start (2023) [16B-44.1kHz]/.01.tmp10.3M/18.4M /// ./Noizu - Push To Start (2023) [16B-44.1kHz]/.01.tmp11.4M/18.4M /// ./Noizu - Push To Start (2023) [16B-44.1kHz]/.01.tmp12.6M/18.4M /// ./Noizu - Push To Start (2023) [16B-44.1kHz]/.01.tmp14.1M/18.4M /// ./Noizu - Push To Start (2023) [16B-44.1kHz]/.01.tmp15.6M/18.4M /// ./Noizu - Push To Start (2023) [16B-44.1kHz]/.01.tmp16.8M/18.4M /// ./Noizu - Push To Start (2023) [16B-44.1kHz]/.01.tmp17.8M/18.4M /// ./Noizu - Push To Start (2023) [16B-44.1kHz]/.01.tmp18.4M/18.4M /// ./Noizu - Push To Start (2023) [16B-44.1kHz]/.01.tmp
-Completed
-

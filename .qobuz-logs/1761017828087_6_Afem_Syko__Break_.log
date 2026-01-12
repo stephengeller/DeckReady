@@ -1,19 +1,0 @@
-CMD: qobuz-dl lucky -t track -n 1 -q 6 -d . --no-db --no-m3u --no-fallback -ff {artist} - {album} ({year}) [{bit_depth}B-{sampling_rate}kHz] -tf {tracktitle} Afem Syko "Break"
-
-STDOUT:
-
-
-STDERR:
-Logging...
-Logged: OK
-Membership: Studio
-Set max quality: 6 - 16 bit, 44.1kHz
-
-Searching tracks for "Afem Syko "Break"".
-qobuz-dl will attempt to download the first 1 results.
-
-Downloading: Afem Syko - Dream
-0.00/76.3k /// cover.jpg13.0k/76.3k /// cover.jpg42.0k/76.3k /// cover.jpg76.3k/76.3k /// cover.jpg
-0.00/22.0M /// ./Afem Syko - Dream (2025) [16B-44.1kHz]/.01.tmp16.0k/22.0M /// ./Afem Syko - Dream (2025) [16B-44.1kHz]/.01.tmp35.0k/22.0M /// ./Afem Syko - Dream (2025) [16B-44.1kHz]/.01.tmp51.0k/22.0M /// ./Afem Syko - Dream (2025) [16B-44.1kHz]/.01.tmp74.0k/22.0M /// ./Afem Syko - Dream (2025) [16B-44.1kHz]/.01.tmp114k/22.0M /// ./Afem Syko - Dream (2025) [16B-44.1kHz]/.01.tmp 154k/22.0M /// ./Afem Syko - Dream (2025) [16B-44.1kHz]/.01.tmp210k/22.0M /// ./Afem Syko - Dream (2025) [16B-44.1kHz]/.01.tmp289k/22.0M /// ./Afem Syko - Dream (2025) [16B-44.1kHz]/.01.tmp369k/22.0M /// ./Afem Syko - Dream (2025) [16B-44.1kHz]/.01.tmp488k/22.0M /// ./Afem Syko - Dream (2025) [16B-44.1kHz]/.01.tmp651k/22.0M /// ./Afem Syko - Dream (2025) [16B-44.1kHz]/.01.tmp834k/22.0M /// ./Afem Syko - Dream (2025) [16B-44.1kHz]/.01.tmp1.08M/22.0M /// ./Afem Syko - Dream (2025) [16B-44.1kHz]/.01.tmp1.41M/22.0M /// ./Afem Syko - Dream (2025) [16B-44.1kHz]/.01.tmp1.83M/22.0M /// ./Afem Syko - Dream (2025) [16B-44.1kHz]/.01.tmp2.43M/22.0M /// ./Afem Syko - Dream (2025) [16B-44.1kHz]/.01.tmp3.16M/22.0M /// ./Afem Syko - Dream (2025) [16B-44.1kHz]/.01.tmp3.95M/22.0M /// ./Afem Syko - Dream (2025) [16B-44.1kHz]/.01.tmp4.78M/22.0M /// ./Afem Syko - Dream (2025) [16B-44.1kHz]/.01.tmp6.03M/22.0M /// ./Afem Syko - Dream (2025) [16B-44.1kHz]/.01.tmp7.00M/22.0M /// ./Afem Syko - Dream (2025) [16B-44.1kHz]/.01.tmp8.57M/22.0M /// ./Afem Syko - Dream (2025) [16B-44.1kHz]/.01.tmp9.96M/22.0M /// ./Afem Syko - Dream (2025) [16B-44.1kHz]/.01.tmp11.3M/22.0M /// ./Afem Syko - Dream (2025) [16B-44.1kHz]/.01.tmp12.3M/22.0M /// ./Afem Syko - Dream (2025) [16B-44.1kHz]/.01.tmp13.4M/22.0M /// ./Afem Syko - Dream (2025) [16B-44.1kHz]/.01.tmp14.4M/22.0M /// ./Afem Syko - Dream (2025) [16B-44.1kHz]/.01.tmp15.5M/22.0M /// ./Afem Syko - Dream (2025) [16B-44.1kHz]/.01.tmp16.5M/22.0M /// ./Afem Syko - Dream (2025) [16B-44.1kHz]/.01.tmp17.7M/22.0M /// ./Afem Syko - Dream (2025) [16B-44.1kHz]/.01.tmp18.9M/22.0M /// ./Afem Syko - Dream (2025) [16B-44.1kHz]/.01.tmp19.9M/22.0M /// ./Afem Syko - Dream (2025) [16B-44.1kHz]/.01.tmp21.4M/22.0M /// ./Afem Syko - Dream (2025) [16B-44.1kHz]/.01.tmp22.0M/22.0M /// ./Afem Syko - Dream (2025) [16B-44.1kHz]/.01.tmp
-Completed
-

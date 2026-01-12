@@ -1,19 +1,0 @@
-CMD: qobuz-dl lucky -t track -n 1 -q 6 -d . --no-db --no-m3u --no-fallback -ff {artist} - {album} ({year}) [{bit_depth}B-{sampling_rate}kHz] -tf {tracktitle} Kyle Wood "Drugs"
-
-STDOUT:
-
-
-STDERR:
-Logging...
-Logged: OK
-Membership: Studio
-Set max quality: 6 - 16 bit, 44.1kHz
-
-Searching tracks for "Kyle Wood "Drugs"".
-qobuz-dl will attempt to download the first 1 results.
-
-Downloading: Will Wood - Sex, Drugs, Rock 'n' Roll
-0.00/16.9k /// cover.jpg14.0k/16.9k /// cover.jpg16.9k/16.9k /// cover.jpg
-0.00/27.7M /// ./Will Wood - Sex, Drugs, Rock 'n' Roll (2021) [16B-44.1kHz]/.01.tmp17.0k/27.7M /// ./Will Wood - Sex, Drugs, Rock 'n' Roll (2021) [16B-44.1kHz]/.01.tmp39.0k/27.7M /// ./Will Wood - Sex, Drugs, Rock 'n' Roll (2021) [16B-44.1kHz]/.01.tmp71.0k/27.7M /// ./Will Wood - Sex, Drugs, Rock 'n' Roll (2021) [16B-44.1kHz]/.01.tmp95.0k/27.7M /// ./Will Wood - Sex, Drugs, Rock 'n' Roll (2021) [16B-44.1kHz]/.01.tmp134k/27.7M /// ./Will Wood - Sex, Drugs, Rock 'n' Roll (2021) [16B-44.1kHz]/.01.tmp 198k/27.7M /// ./Will Wood - Sex, Drugs, Rock 'n' Roll (2021) [16B-44.1kHz]/.01.tmp277k/27.7M /// ./Will Wood - Sex, Drugs, Rock 'n' Roll (2021) [16B-44.1kHz]/.01.tmp373k/27.7M /// ./Will Wood - Sex, Drugs, Rock 'n' Roll (2021) [16B-44.1kHz]/.01.tmp513k/27.7M /// ./Will Wood - Sex, Drugs, Rock 'n' Roll (2021) [16B-44.1kHz]/.01.tmp703k/27.7M /// ./Will Wood - Sex, Drugs, Rock 'n' Roll (2021) [16B-44.1kHz]/.01.tmp942k/27.7M /// ./Will Wood - Sex, Drugs, Rock 'n' Roll (2021) [16B-44.1kHz]/.01.tmp1.23M/27.7M /// ./Will Wood - Sex, Drugs, Rock 'n' Roll (2021) [16B-44.1kHz]/.01.tmp1.66M/27.7M /// ./Will Wood - Sex, Drugs, Rock 'n' Roll (2021) [16B-44.1kHz]/.01.tmp2.23M/27.7M /// ./Will Wood - Sex, Drugs, Rock 'n' Roll (2021) [16B-44.1kHz]/.01.tmp2.91M/27.7M /// ./Will Wood - Sex, Drugs, Rock 'n' Roll (2021) [16B-44.1kHz]/.01.tmp3.91M/27.7M /// ./Will Wood - Sex, Drugs, Rock 'n' Roll (2021) [16B-44.1kHz]/.01.tmp4.52M/27.7M /// ./Will Wood - Sex, Drugs, Rock 'n' Roll (2021) [16B-44.1kHz]/.01.tmp5.51M/27.7M /// ./Will Wood - Sex, Drugs, Rock 'n' Roll (2021) [16B-44.1kHz]/.01.tmp6.64M/27.7M /// ./Will Wood - Sex, Drugs, Rock 'n' Roll (2021) [16B-44.1kHz]/.01.tmp7.67M/27.7M /// ./Will Wood - Sex, Drugs, Rock 'n' Roll (2021) [16B-44.1kHz]/.01.tmp8.48M/27.7M /// ./Will Wood - Sex, Drugs, Rock 'n' Roll (2021) [16B-44.1kHz]/.01.tmp9.61M/27.7M /// ./Will Wood - Sex, Drugs, Rock 'n' Roll (2021) [16B-44.1kHz]/.01.tmp10.5M/27.7M /// ./Will Wood - Sex, Drugs, Rock 'n' Roll (2021) [16B-44.1kHz]/.01.tmp11.4M/27.7M /// ./Will Wood - Sex, Drugs, Rock 'n' Roll (2021) [16B-44.1kHz]/.01.tmp12.2M/27.7M /// ./Will Wood - Sex, Drugs, Rock 'n' Roll (2021) [16B-44.1kHz]/.01.tmp13.8M/27.7M /// ./Will Wood - Sex, Drugs, Rock 'n' Roll (2021) [16B-44.1kHz]/.01.tmp14.8M/27.7M /// ./Will Wood - Sex, Drugs, Rock 'n' Roll (2021) [16B-44.1kHz]/.01.tmp15.6M/27.7M /// ./Will Wood - Sex, Drugs, Rock 'n' Roll (2021) [16B-44.1kHz]/.01.tmp16.4M/27.7M /// ./Will Wood - Sex, Drugs, Rock 'n' Roll (2021) [16B-44.1kHz]/.01.tmp17.9M/27.7M /// ./Will Wood - Sex, Drugs, Rock 'n' Roll (2021) [16B-44.1kHz]/.01.tmp18.9M/27.7M /// ./Will Wood - Sex, Drugs, Rock 'n' Roll (2021) [16B-44.1kHz]/.01.tmp19.9M/27.7M /// ./Will Wood - Sex, Drugs, Rock 'n' Roll (2021) [16B-44.1kHz]/.01.tmp20.9M/27.7M /// ./Will Wood - Sex, Drugs, Rock 'n' Roll (2021) [16B-44.1kHz]/.01.tmp21.9M/27.7M /// ./Will Wood - Sex, Drugs, Rock 'n' Roll (2021) [16B-44.1kHz]/.01.tmp23.3M/27.7M /// ./Will Wood - Sex, Drugs, Rock 'n' Roll (2021) [16B-44.1kHz]/.01.tmp24.4M/27.7M /// ./Will Wood - Sex, Drugs, Rock 'n' Roll (2021) [16B-44.1kHz]/.01.tmp25.6M/27.7M /// ./Will Wood - Sex, Drugs, Rock 'n' Roll (2021) [16B-44.1kHz]/.01.tmp26.7M/27.7M /// ./Will Wood - Sex, Drugs, Rock 'n' Roll (2021) [16B-44.1kHz]/.01.tmp27.7M/27.7M /// ./Will Wood - Sex, Drugs, Rock 'n' Roll (2021) [16B-44.1kHz]/.01.tmp
-Completed
-

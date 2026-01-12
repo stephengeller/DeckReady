@@ -1,19 +1,0 @@
-CMD: qobuz-dl lucky -t track -n 1 -q 6 -d . --no-db --no-m3u --no-fallback -ff {artist} - {album} ({year}) [{bit_depth}B-{sampling_rate}kHz] -tf {tracktitle} Ben Gold "Lumi Idea"
-
-STDOUT:
-
-
-STDERR:
-Logging...
-Logged: OK
-Membership: Studio
-Set max quality: 6 - 16 bit, 44.1kHz
-
-Searching tracks for "Ben Gold "Lumi Idea"".
-qobuz-dl will attempt to download the first 1 results.
-
-Downloading: Ben Harper - Gold To Me
-0.00/39.9k /// cover.jpg39.9k/39.9k /// cover.jpg
-0.00/33.6M /// ./Ben Harper - Fight For Your Mind (1995) [16B-44.1kHz]/.01.tmp1.00M/33.6M /// ./Ben Harper - Fight For Your Mind (1995) [16B-44.1kHz]/.01.tmp2.36M/33.6M /// ./Ben Harper - Fight For Your Mind (1995) [16B-44.1kHz]/.01.tmp3.45M/33.6M /// ./Ben Harper - Fight For Your Mind (1995) [16B-44.1kHz]/.01.tmp4.90M/33.6M /// ./Ben Harper - Fight For Your Mind (1995) [16B-44.1kHz]/.01.tmp5.99M/33.6M /// ./Ben Harper - Fight For Your Mind (1995) [16B-44.1kHz]/.01.tmp7.05M/33.6M /// ./Ben Harper - Fight For Your Mind (1995) [16B-44.1kHz]/.01.tmp8.06M/33.6M /// ./Ben Harper - Fight For Your Mind (1995) [16B-44.1kHz]/.01.tmp9.09M/33.6M /// ./Ben Harper - Fight For Your Mind (1995) [16B-44.1kHz]/.01.tmp10.2M/33.6M /// ./Ben Harper - Fight For Your Mind (1995) [16B-44.1kHz]/.01.tmp11.4M/33.6M /// ./Ben Harper - Fight For Your Mind (1995) [16B-44.1kHz]/.01.tmp12.4M/33.6M /// ./Ben Harper - Fight For Your Mind (1995) [16B-44.1kHz]/.01.tmp13.3M/33.6M /// ./Ben Harper - Fight For Your Mind (1995) [16B-44.1kHz]/.01.tmp14.3M/33.6M /// ./Ben Harper - Fight For Your Mind (1995) [16B-44.1kHz]/.01.tmp15.2M/33.6M /// ./Ben Harper - Fight For Your Mind (1995) [16B-44.1kHz]/.01.tmp16.2M/33.6M /// ./Ben Harper - Fight For Your Mind (1995) [16B-44.1kHz]/.01.tmp17.3M/33.6M /// ./Ben Harper - Fight For Your Mind (1995) [16B-44.1kHz]/.01.tmp18.1M/33.6M /// ./Ben Harper - Fight For Your Mind (1995) [16B-44.1kHz]/.01.tmp18.9M/33.6M /// ./Ben Harper - Fight For Your Mind (1995) [16B-44.1kHz]/.01.tmp20.4M/33.6M /// ./Ben Harper - Fight For Your Mind (1995) [16B-44.1kHz]/.01.tmp21.4M/33.6M /// ./Ben Harper - Fight For Your Mind (1995) [16B-44.1kHz]/.01.tmp22.3M/33.6M /// ./Ben Harper - Fight For Your Mind (1995) [16B-44.1kHz]/.01.tmp23.3M/33.6M /// ./Ben Harper - Fight For Your Mind (1995) [16B-44.1kHz]/.01.tmp24.2M/33.6M /// ./Ben Harper - Fight For Your Mind (1995) [16B-44.1kHz]/.01.tmp25.1M/33.6M /// ./Ben Harper - Fight For Your Mind (1995) [16B-44.1kHz]/.01.tmp25.9M/33.6M /// ./Ben Harper - Fight For Your Mind (1995) [16B-44.1kHz]/.01.tmp26.8M/33.6M /// ./Ben Harper - Fight For Your Mind (1995) [16B-44.1kHz]/.01.tmp27.8M/33.6M /// ./Ben Harper - Fight For Your Mind (1995) [16B-44.1kHz]/.01.tmp28.8M/33.6M /// ./Ben Harper - Fight For Your Mind (1995) [16B-44.1kHz]/.01.tmp29.9M/33.6M /// ./Ben Harper - Fight For Your Mind (1995) [16B-44.1kHz]/.01.tmp30.8M/33.6M /// ./Ben Harper - Fight For Your Mind (1995) [16B-44.1kHz]/.01.tmp31.9M/33.6M /// ./Ben Harper - Fight For Your Mind (1995) [16B-44.1kHz]/.01.tmp33.6M/33.6M /// ./Ben Harper - Fight For Your Mind (1995) [16B-44.1kHz]/.01.tmp
-Completed
-

@@ -1,19 +1,0 @@
-CMD: qobuz-dl lucky -t track -n 1 -q 6 -d . --no-db --no-m3u --no-fallback -ff {artist} - {album} ({year}) [{bit_depth}B-{sampling_rate}kHz] -tf {tracktitle} MATT "Virgos"
-
-STDOUT:
-
-
-STDERR:
-Logging...
-Logged: OK
-Membership: Studio
-Set max quality: 6 - 16 bit, 44.1kHz
-
-Searching tracks for "MATT "Virgos"".
-qobuz-dl will attempt to download the first 1 results.
-
-Downloading: Matt Jasper - Two Virgos
-0.00/52.4k /// cover.jpg14.0k/52.4k /// cover.jpg42.0k/52.4k /// cover.jpg52.4k/52.4k /// cover.jpg
-0.00/20.8M /// ./Matt Jasper - Catalog Two (2025) [16B-44.1kHz]/.01.tmp16.0k/20.8M /// ./Matt Jasper - Catalog Two (2025) [16B-44.1kHz]/.01.tmp34.0k/20.8M /// ./Matt Jasper - Catalog Two (2025) [16B-44.1kHz]/.01.tmp50.0k/20.8M /// ./Matt Jasper - Catalog Two (2025) [16B-44.1kHz]/.01.tmp74.0k/20.8M /// ./Matt Jasper - Catalog Two (2025) [16B-44.1kHz]/.01.tmp114k/20.8M /// ./Matt Jasper - Catalog Two (2025) [16B-44.1kHz]/.01.tmp 170k/20.8M /// ./Matt Jasper - Catalog Two (2025) [16B-44.1kHz]/.01.tmp233k/20.8M /// ./Matt Jasper - Catalog Two (2025) [16B-44.1kHz]/.01.tmp329k/20.8M /// ./Matt Jasper - Catalog Two (2025) [16B-44.1kHz]/.01.tmp432k/20.8M /// ./Matt Jasper - Catalog Two (2025) [16B-44.1kHz]/.01.tmp591k/20.8M /// ./Matt Jasper - Catalog Two (2025) [16B-44.1kHz]/.01.tmp810k/20.8M /// ./Matt Jasper - Catalog Two (2025) [16B-44.1kHz]/.01.tmp1.08M/20.8M /// ./Matt Jasper - Catalog Two (2025) [16B-44.1kHz]/.01.tmp1.46M/20.8M /// ./Matt Jasper - Catalog Two (2025) [16B-44.1kHz]/.01.tmp1.97M/20.8M /// ./Matt Jasper - Catalog Two (2025) [16B-44.1kHz]/.01.tmp2.66M/20.8M /// ./Matt Jasper - Catalog Two (2025) [16B-44.1kHz]/.01.tmp3.53M/20.8M /// ./Matt Jasper - Catalog Two (2025) [16B-44.1kHz]/.01.tmp4.22M/20.8M /// ./Matt Jasper - Catalog Two (2025) [16B-44.1kHz]/.01.tmp5.32M/20.8M /// ./Matt Jasper - Catalog Two (2025) [16B-44.1kHz]/.01.tmp6.24M/20.8M /// ./Matt Jasper - Catalog Two (2025) [16B-44.1kHz]/.01.tmp7.04M/20.8M /// ./Matt Jasper - Catalog Two (2025) [16B-44.1kHz]/.01.tmp7.85M/20.8M /// ./Matt Jasper - Catalog Two (2025) [16B-44.1kHz]/.01.tmp8.59M/20.8M /// ./Matt Jasper - Catalog Two (2025) [16B-44.1kHz]/.01.tmp10.5M/20.8M /// ./Matt Jasper - Catalog Two (2025) [16B-44.1kHz]/.01.tmp11.6M/20.8M /// ./Matt Jasper - Catalog Two (2025) [16B-44.1kHz]/.01.tmp12.7M/20.8M /// ./Matt Jasper - Catalog Two (2025) [16B-44.1kHz]/.01.tmp13.6M/20.8M /// ./Matt Jasper - Catalog Two (2025) [16B-44.1kHz]/.01.tmp14.6M/20.8M /// ./Matt Jasper - Catalog Two (2025) [16B-44.1kHz]/.01.tmp16.0M/20.8M /// ./Matt Jasper - Catalog Two (2025) [16B-44.1kHz]/.01.tmp17.0M/20.8M /// ./Matt Jasper - Catalog Two (2025) [16B-44.1kHz]/.01.tmp18.0M/20.8M /// ./Matt Jasper - Catalog Two (2025) [16B-44.1kHz]/.01.tmp19.3M/20.8M /// ./Matt Jasper - Catalog Two (2025) [16B-44.1kHz]/.01.tmp20.3M/20.8M /// ./Matt Jasper - Catalog Two (2025) [16B-44.1kHz]/.01.tmp20.8M/20.8M /// ./Matt Jasper - Catalog Two (2025) [16B-44.1kHz]/.01.tmp
-Completed
-

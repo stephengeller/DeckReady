@@ -1,19 +1,0 @@
-CMD: qobuz-dl lucky -t track -n 1 -q 6 -d . --no-db --no-m3u --no-fallback -ff {artist} - {album} ({year}) [{bit_depth}B-{sampling_rate}kHz] -tf {tracktitle} Modular Project "Right Now"
-
-STDOUT:
-
-
-STDERR:
-Logging...
-Logged: OK
-Membership: Studio
-Set max quality: 6 - 16 bit, 44.1kHz
-
-Searching tracks for "Modular Project "Right Now"".
-qobuz-dl will attempt to download the first 1 results.
-
-Downloading: Modular Project - Don't Play Right
-0.00/143k /// cover.jpg13.0k/143k /// cover.jpg42.0k/143k /// cover.jpg98.0k/143k /// cover.jpg143k/143k /// cover.jpg 
-0.00/21.3M /// ./Modular Project - Don't Play Right (2025) [16B-44.1kHz]/.01.tmp32.0k/21.3M /// ./Modular Project - Don't Play Right (2025) [16B-44.1kHz]/.01.tmp64.0k/21.3M /// ./Modular Project - Don't Play Right (2025) [16B-44.1kHz]/.01.tmp88.0k/21.3M /// ./Modular Project - Don't Play Right (2025) [16B-44.1kHz]/.01.tmp125k/21.3M /// ./Modular Project - Don't Play Right (2025) [16B-44.1kHz]/.01.tmp 181k/21.3M /// ./Modular Project - Don't Play Right (2025) [16B-44.1kHz]/.01.tmp260k/21.3M /// ./Modular Project - Don't Play Right (2025) [16B-44.1kHz]/.01.tmp356k/21.3M /// ./Modular Project - Don't Play Right (2025) [16B-44.1kHz]/.01.tmp475k/21.3M /// ./Modular Project - Don't Play Right (2025) [16B-44.1kHz]/.01.tmp642k/21.3M /// ./Modular Project - Don't Play Right (2025) [16B-44.1kHz]/.01.tmp873k/21.3M /// ./Modular Project - Don't Play Right (2025) [16B-44.1kHz]/.01.tmp1.13M/21.3M /// ./Modular Project - Don't Play Right (2025) [16B-44.1kHz]/.01.tmp1.52M/21.3M /// ./Modular Project - Don't Play Right (2025) [16B-44.1kHz]/.01.tmp2.02M/21.3M /// ./Modular Project - Don't Play Right (2025) [16B-44.1kHz]/.01.tmp2.71M/21.3M /// ./Modular Project - Don't Play Right (2025) [16B-44.1kHz]/.01.tmp3.65M/21.3M /// ./Modular Project - Don't Play Right (2025) [16B-44.1kHz]/.01.tmp4.75M/21.3M /// ./Modular Project - Don't Play Right (2025) [16B-44.1kHz]/.01.tmp5.79M/21.3M /// ./Modular Project - Don't Play Right (2025) [16B-44.1kHz]/.01.tmp6.68M/21.3M /// ./Modular Project - Don't Play Right (2025) [16B-44.1kHz]/.01.tmp8.05M/21.3M /// ./Modular Project - Don't Play Right (2025) [16B-44.1kHz]/.01.tmp9.01M/21.3M /// ./Modular Project - Don't Play Right (2025) [16B-44.1kHz]/.01.tmp10.5M/21.3M /// ./Modular Project - Don't Play Right (2025) [16B-44.1kHz]/.01.tmp11.5M/21.3M /// ./Modular Project - Don't Play Right (2025) [16B-44.1kHz]/.01.tmp12.5M/21.3M /// ./Modular Project - Don't Play Right (2025) [16B-44.1kHz]/.01.tmp14.0M/21.3M /// ./Modular Project - Don't Play Right (2025) [16B-44.1kHz]/.01.tmp15.1M/21.3M /// ./Modular Project - Don't Play Right (2025) [16B-44.1kHz]/.01.tmp16.3M/21.3M /// ./Modular Project - Don't Play Right (2025) [16B-44.1kHz]/.01.tmp17.3M/21.3M /// ./Modular Project - Don't Play Right (2025) [16B-44.1kHz]/.01.tmp18.3M/21.3M /// ./Modular Project - Don't Play Right (2025) [16B-44.1kHz]/.01.tmp19.8M/21.3M /// ./Modular Project - Don't Play Right (2025) [16B-44.1kHz]/.01.tmp21.0M/21.3M /// ./Modular Project - Don't Play Right (2025) [16B-44.1kHz]/.01.tmp21.3M/21.3M /// ./Modular Project - Don't Play Right (2025) [16B-44.1kHz]/.01.tmp
-Completed
-

@@ -1,19 +1,0 @@
-CMD: qobuz-dl lucky -t track -n 1 -q 6 -d . --no-db --no-m3u --no-fallback -ff {artist} - {album} ({year}) [{bit_depth}B-{sampling_rate}kHz] -tf {tracktitle} KI/KI "Time for Acid"
-
-STDOUT:
-
-
-STDERR:
-Logging...
-Logged: OK
-Membership: Studio
-Set max quality: 6 - 16 bit, 44.1kHz
-
-Searching tracks for "KI/KI "Time for Acid"".
-qobuz-dl will attempt to download the first 1 results.
-
-Downloading: KI/KI - Time for Acid
-cover.jpg was already downloaded
-0.00/26.1M /// ./KI/KI - club slash 006 - Time to Party (2025) [16B-44.1kHz]/.01.tmp16.0k/26.1M /// ./KI/KI - club slash 006 - Time to Party (2025) [16B-44.1kHz]/.01.tmp34.0k/26.1M /// ./KI/KI - club slash 006 - Time to Party (2025) [16B-44.1kHz]/.01.tmp66.0k/26.1M /// ./KI/KI - club slash 006 - Time to Party (2025) [16B-44.1kHz]/.01.tmp90.0k/26.1M /// ./KI/KI - club slash 006 - Time to Party (2025) [16B-44.1kHz]/.01.tmp129k/26.1M /// ./KI/KI - club slash 006 - Time to Party (2025) [16B-44.1kHz]/.01.tmp 193k/26.1M /// ./KI/KI - club slash 006 - Time to Party (2025) [16B-44.1kHz]/.01.tmp273k/26.1M /// ./KI/KI - club slash 006 - Time to Party (2025) [16B-44.1kHz]/.01.tmp384k/26.1M /// ./KI/KI - club slash 006 - Time to Party (2025) [16B-44.1kHz]/.01.tmp515k/26.1M /// ./KI/KI - club slash 006 - Time to Party (2025) [16B-44.1kHz]/.01.tmp706k/26.1M /// ./KI/KI - club slash 006 - Time to Party (2025) [16B-44.1kHz]/.01.tmp953k/26.1M /// ./KI/KI - club slash 006 - Time to Party (2025) [16B-44.1kHz]/.01.tmp1.28M/26.1M /// ./KI/KI - club slash 006 - Time to Party (2025) [16B-44.1kHz]/.01.tmp1.74M/26.1M /// ./KI/KI - club slash 006 - Time to Party (2025) [16B-44.1kHz]/.01.tmp2.37M/26.1M /// ./KI/KI - club slash 006 - Time to Party (2025) [16B-44.1kHz]/.01.tmp3.18M/26.1M /// ./KI/KI - club slash 006 - Time to Party (2025) [16B-44.1kHz]/.01.tmp4.26M/26.1M /// ./KI/KI - club slash 006 - Time to Party (2025) [16B-44.1kHz]/.01.tmp5.30M/26.1M /// ./KI/KI - club slash 006 - Time to Party (2025) [16B-44.1kHz]/.01.tmp6.09M/26.1M /// ./KI/KI - club slash 006 - Time to Party (2025) [16B-44.1kHz]/.01.tmp7.59M/26.1M /// ./KI/KI - club slash 006 - Time to Party (2025) [16B-44.1kHz]/.01.tmp9.52M/26.1M /// ./KI/KI - club slash 006 - Time to Party (2025) [16B-44.1kHz]/.01.tmp10.6M/26.1M /// ./KI/KI - club slash 006 - Time to Party (2025) [16B-44.1kHz]/.01.tmp11.7M/26.1M /// ./KI/KI - club slash 006 - Time to Party (2025) [16B-44.1kHz]/.01.tmp12.9M/26.1M /// ./KI/KI - club slash 006 - Time to Party (2025) [16B-44.1kHz]/.01.tmp14.0M/26.1M /// ./KI/KI - club slash 006 - Time to Party (2025) [16B-44.1kHz]/.01.tmp15.1M/26.1M /// ./KI/KI - club slash 006 - Time to Party (2025) [16B-44.1kHz]/.01.tmp16.2M/26.1M /// ./KI/KI - club slash 006 - Time to Party (2025) [16B-44.1kHz]/.01.tmp17.2M/26.1M /// ./KI/KI - club slash 006 - Time to Party (2025) [16B-44.1kHz]/.01.tmp18.5M/26.1M /// ./KI/KI - club slash 006 - Time to Party (2025) [16B-44.1kHz]/.01.tmp19.6M/26.1M /// ./KI/KI - club slash 006 - Time to Party (2025) [16B-44.1kHz]/.01.tmp20.6M/26.1M /// ./KI/KI - club slash 006 - Time to Party (2025) [16B-44.1kHz]/.01.tmp21.9M/26.1M /// ./KI/KI - club slash 006 - Time to Party (2025) [16B-44.1kHz]/.01.tmp23.0M/26.1M /// ./KI/KI - club slash 006 - Time to Party (2025) [16B-44.1kHz]/.01.tmp24.0M/26.1M /// ./KI/KI - club slash 006 - Time to Party (2025) [16B-44.1kHz]/.01.tmp25.2M/26.1M /// ./KI/KI - club slash 006 - Time to Party (2025) [16B-44.1kHz]/.01.tmp26.1M/26.1M /// ./KI/KI - club slash 006 - Time to Party (2025) [16B-44.1kHz]/.01.tmp
-Completed
-
