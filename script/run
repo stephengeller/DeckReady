@@ -34,7 +34,8 @@ fi
 # Config defaults
 # -----------------------
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-OUT_DIR="${OUT_DIR:-$REPO_ROOT/.downloads}"
+# Default to system temp directory if not specified
+OUT_DIR="${OUT_DIR:-$(mktemp -d -t deckready-downloads.XXXXXX)}"
 QUALITY="${QUALITY:-LOSSLESS}"
 DRY_RUN="${DRY_RUN:-0}"
 TRACKLIST_FILE=""
@@ -50,7 +51,7 @@ Usage:
   $(basename "$0") <spotify_url|tidal_url|tracklist_file> [options]
 
 Options:
-  --dir DIR            Output directory for downloads (default: <repo>/.downloads)
+  --dir DIR            Output directory for temp downloads (optional, defaults to system temp)
   --quality Q          LOW, HIGH, LOSSLESS, HI_RES_LOSSLESS (default: $QUALITY)
   --dry                Dry-run: print commands; no downloads
   --convert            (placeholder) enable FFmpeg→AIFF conversion

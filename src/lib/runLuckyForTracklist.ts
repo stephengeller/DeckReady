@@ -49,7 +49,10 @@ export async function main() {
   } = parseCliArgs(process.argv);
   if (noColor) setColorEnabled(false);
   const quiet = quietArg && !verbose; // verbose overrides quiet
-  if (!dir) throw new Error('--dir is required so we can verify files were actually written');
+
+  // Use default temp directory if --dir not provided
+  const defaultDir = dir || path.join(os.tmpdir(), 'deckready-downloads');
+
   const resolveUserPath = (input: string) => {
     if (!input) return input;
     if (input.startsWith('~')) {
@@ -59,7 +62,7 @@ export async function main() {
     }
     return path.resolve(input);
   };
-  const targetDir = resolveUserPath(dir);
+  const targetDir = resolveUserPath(defaultDir);
   type SidecarIndexEntry = { available: string[]; stale: string[] };
   type SidecarIndex = Map<string, SidecarIndexEntry>;
   type ExistingReuseInfo = {

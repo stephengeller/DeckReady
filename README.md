@@ -60,27 +60,27 @@ The setup script will guide you through everything, but if you need to change se
 ## Usage
 
 ```bash
-./script/run "https://open.spotify.com/playlist/..." --dir out
+./script/run "https://open.spotify.com/playlist/..."
 ```
 
 That's it! Your AIFF files will be organized in the folder you configured during setup.
 
 **Notes**:
-- `--dir out` is temporary working space (downloads are deleted after conversion)
-- Your final organized files go to the folder in `.env` (default: `~/Music/rekordbox/DROP_NEW_SONGS_HERE`)
 - Works with Spotify or TIDAL URLs (playlists, albums, tracks)
+- Temp files are automatically cleaned up after conversion
+- Final files go to the folder in `.env` (default: `~/Music/rekordbox/DROP_NEW_SONGS_HERE`)
 
 ### Common Options
 
 ```bash
 # Dry run (preview without downloading)
-./script/run "<url>" --dir out --dry
+./script/run "<url>" --dry
 
 # 24-bit quality
-./script/run "<url>" --dir out --quality HI_RES_LOSSLESS
+./script/run "<url>" --quality HI_RES_LOSSLESS
 
 # Organize by genre
-./script/run "<url>" --dir out --by-genre
+./script/run "<url>" --by-genre
 ```
 
 **More examples**: See [QUICKSTART.md](./QUICKSTART.md)
@@ -90,9 +90,9 @@ That's it! Your AIFF files will be organized in the folder you configured during
 
 **Your organized AIFF files**: The folder you configured in `.env` (default: `~/Music/rekordbox/DROP_NEW_SONGS_HERE`)
 
-**Temporary downloads**: `--dir out` folder (automatically cleaned up after conversion)
+**Temporary downloads**: System temp directory (automatically cleaned up after conversion)
 
-**Logs**: `out/.download-logs/` and `out/not-found.log`
+**Logs**: Check the organized folder for `.download-logs/` and `not-found.log`
 
 Files are saved as `Artist - Title.aiff` (or `Genre/Artist/Title.aiff` with `--by-genre`).
 
@@ -104,9 +104,9 @@ Files are saved as `Artist - Title.aiff` (or `Genre/Artist/Title.aiff` with `--b
 
 **Spotify API errors**: Check credentials in `.env` or regenerate at [developer.spotify.com](https://developer.spotify.com/dashboard)
 
-**Tracks not found**: Check `out/not-found.log` — some tracks may not be available in your region
+**Tracks not found**: Check `not-found.log` in your organized folder — some tracks may not be available in your region
 
-**Files not appearing**: Check `.env` settings and `out/.download-logs/` for errors
+**Files not appearing**: Check `.env` settings and `.download-logs/` in your organized folder for errors
 
 **Need more help?** [File an issue](https://github.com/stephengeller/DeckReady-TIDAL/issues) or see [detailed troubleshooting](./docs/TROUBLESHOOTING.md)
 
