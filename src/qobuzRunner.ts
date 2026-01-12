@@ -3,10 +3,10 @@ import { spawnStreaming } from './lib/proc';
 import { readTags } from './lib/tags';
 import { walkFiles, snapshot, diffNewAudio } from './lib/fsWalk';
 import { processDownloadedAudio, findOrganisedAiff } from './lib/organiser';
-import { makeProgressHandler } from './qobuz/progress';
-import { cleanupOnNoAudio } from './qobuz/fsOps';
-import { writeRunLog, writeSidecarText } from './qobuz/logging';
-import { validateAddedAudioAgainstExpectation } from './qobuz/validation';
+import { makeProgressHandler } from './provider/progress';
+import { cleanupOnNoAudio } from './provider/fsOps';
+import { writeRunLog, writeSidecarText } from './provider/logging';
+import { validateAddedAudioAgainstExpectation } from './provider/validation';
 
 export type RunQobuzResult = {
   /** True if qobuz-dl returned success and at least one new audio file was detected. */
