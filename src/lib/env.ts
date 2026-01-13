@@ -25,11 +25,11 @@ try {
 
 export const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID ?? '';
 export const SPOTIFY_CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET ?? '';
-export const ORGANISED_AIFF_DIR =
-  process.env.ORGANISED_AIFF_DIR ??
-  path.join(process.env.HOME || '', 'Music', 'rekordbox', 'DROP_NEW_SONGS_HERE');
+export const MUSIC_LIBRARY_DIR =
+  process.env.MUSIC_LIBRARY_DIR ??
+  path.join(process.env.HOME || '', 'Music', 'DJLibrary');
 
-// When true, place organised AIFFs directly under ORGANISED_AIFF_DIR
+// When true, place organised AIFFs directly under MUSIC_LIBRARY_DIR
 // as <Artist - Title>.aiff (no artist/genre parent folders).
 export const ORGANISED_FLAT = (() => {
   // Default: true (flat layout). Allow explicit false via env.

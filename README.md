@@ -56,7 +56,7 @@ tidal-dl-ng login
 
 The setup script will guide you through everything, but if you need to change settings later, edit `.env`:
 
-- `ORGANISED_AIFF_DIR` — Where your organized AIFF files go
+- `MUSIC_LIBRARY_DIR` — Where your organized AIFF files go
 - `SPOTIFY_CLIENT_ID` / `SPOTIFY_CLIENT_SECRET` — For reading Spotify playlists
 
 **Getting Spotify credentials**: [QUICKSTART.md](./QUICKSTART.md) has step-by-step instructions.

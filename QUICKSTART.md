@@ -96,7 +96,7 @@ Follow the prompts to log in with your TIDAL account. This is needed to download
 Open `.env` and set where you want your organized AIFF files:
 
 ```bash
-ORGANISED_AIFF_DIR=/Users/yourname/Music/Rekordbox/Imports
+MUSIC_LIBRARY_DIR=/Users/yourname/Music/Rekordbox/Imports
 ```
 
 **Default**: `~/Music/rekordbox/DROP_NEW_SONGS_HERE` (will be created automatically)
@@ -258,7 +258,7 @@ The tool automatically skips tracks you've already downloaded and organized. Run
 
 ### Import to Rekordbox
 
-1. Set `ORGANISED_AIFF_DIR` to your Rekordbox import folder
+1. Set `MUSIC_LIBRARY_DIR` to your Rekordbox import folder
 2. After running the script, open Rekordbox
 3. Your tracks will appear in the import folder
 4. Rekordbox will automatically analyze them

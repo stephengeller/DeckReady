@@ -10,14 +10,14 @@ describe('findOrganisedAiff', () => {
     tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'find-aiff-test-'));
     orgDir = path.join(tmpDir, 'organised');
     await fs.mkdir(orgDir, { recursive: true });
-    process.env.ORGANISED_AIFF_DIR = orgDir;
+    process.env.MUSIC_LIBRARY_DIR = orgDir;
     // Force module reload to pick up new env
     jest.resetModules();
   });
 
   afterEach(async () => {
     await fs.rm(tmpDir, { recursive: true, force: true });
-    delete process.env.ORGANISED_AIFF_DIR;
+    delete process.env.MUSIC_LIBRARY_DIR;
   });
 
   describe('exact matching', () => {

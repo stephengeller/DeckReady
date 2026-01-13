@@ -21,7 +21,7 @@
 
 ## Files not appearing in organised folders
 
-- Confirm `ORGANISED_AIFF_DIR` is set (or use the default). Check console output for lines like `Organised (converted -> AIFF): ...`.
+- Confirm `MUSIC_LIBRARY_DIR` is set (or use the default). Check console output for lines like `Organised (converted -> AIFF): ...`.
 - Inspect `<dir>/.qobuz-logs/` for per-query logs and `<dir>/not-found.log` for unfound tracks.
 
 ## Frequent mismatches
