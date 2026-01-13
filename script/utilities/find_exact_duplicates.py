@@ -5,9 +5,15 @@ import hashlib
 import shlex
 from collections import defaultdict
 from typing import Dict, List, Iterable, Tuple
+from pathlib import Path
 
-# Default root (can be overridden by argv[1])
-DEFAULT_ROOT = "/Users/stephengeller/Music/rekordbox/ALL_SONGS"
+# Load .env file if available
+try:
+    from dotenv import load_dotenv
+    env_path = Path(__file__).parent.parent.parent / ".env"
+    load_dotenv(env_path)
+except ImportError:
+    pass
 
 # Consider common audio extensions; set to None to scan all files
 EXTENSIONS = {".mp3", ".wav", ".aiff", ".aif", ".flac"}
@@ -198,7 +204,18 @@ def base_len_after_normalize(path: str) -> int:
 
 
 def main():
-    root = sys.argv[1] if len(sys.argv) > 1 and not sys.argv[1].startswith("-") else DEFAULT_ROOT
+    # Get directory from command line or environment variable
+    if len(sys.argv) > 1 and not sys.argv[1].startswith("-"):
+        root = sys.argv[1]
+    else:
+        root = os.environ.get("MUSIC_LIBRARY_DIR")
+        if not root:
+            print("Error: No directory specified.")
+            print("Usage: python3 find_exact_duplicates.py <directory> [--strict]")
+            print("Or set MUSIC_LIBRARY_DIR in your .env file")
+            sys.exit(1)
+
+    root = os.path.expanduser(root)
     strict = "--strict" in sys.argv  # when set, hash entire files (include metadata)
 
     if not os.path.isdir(root):

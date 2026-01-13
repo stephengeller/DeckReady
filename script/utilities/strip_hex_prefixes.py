@@ -2,8 +2,15 @@
 import os
 import re
 import sys
+from pathlib import Path
 
-DEFAULT_ROOT = "/Users/stephengeller/Music/rekordbox/ALL_SONGS"
+# Load .env file if available
+try:
+    from dotenv import load_dotenv
+    env_path = Path(__file__).parent.parent.parent / ".env"
+    load_dotenv(env_path)
+except ImportError:
+    pass
 HEX_PREFIX = re.compile(r"^[0-9A-Fa-f]{8}_")
 
 # Restrict to common audio files
@@ -25,7 +32,18 @@ def ensure_unique_name(dirpath: str, name: str) -> str:
 
 
 def main():
-    root = sys.argv[1] if len(sys.argv) > 1 and not sys.argv[1].startswith("-") else DEFAULT_ROOT
+    # Get directory from command line or environment variable
+    if len(sys.argv) > 1 and not sys.argv[1].startswith("-"):
+        root = sys.argv[1]
+    else:
+        root = os.environ.get("MUSIC_LIBRARY_DIR")
+        if not root:
+            print("Error: No directory specified.")
+            print("Usage: python3 strip_hex_prefixes.py <directory> [--dry-run|-n]")
+            print("Or set MUSIC_LIBRARY_DIR in your .env file")
+            sys.exit(1)
+
+    root = os.path.expanduser(root)
     dry = "--dry-run" in sys.argv or "-n" in sys.argv
 
     if not os.path.isdir(root):
