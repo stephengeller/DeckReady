@@ -3,9 +3,16 @@ import os
 import sys
 import shutil
 from typing import Iterable, Tuple
+from pathlib import Path
 
-# Default root (can be overridden by argv[1])
-DEFAULT_ROOT = "/Users/stephengeller/Music/rekordbox/ALL_SONGS"
+# Load .env file if available
+try:
+    from dotenv import load_dotenv
+    # Try loading from project root (two directories up from this script)
+    env_path = Path(__file__).parent.parent.parent / ".env"
+    load_dotenv(env_path)
+except ImportError:
+    pass  # dotenv not available, will rely on system environment
 
 # File extensions to flatten (lowercased)
 EXTENSIONS = {".mp3", ".aiff", ".aif", ".wav", ".m4a"}
@@ -95,7 +102,19 @@ def cleanup_empty_dirs(root: str, dry_run: bool = False) -> None:
 
 
 def main():
-    root = sys.argv[1] if len(sys.argv) > 1 and not sys.argv[1].startswith("-") else DEFAULT_ROOT
+    # Get directory from command line or environment variable
+    if len(sys.argv) > 1 and not sys.argv[1].startswith("-"):
+        root = sys.argv[1]
+    else:
+        root = os.environ.get("MUSIC_LIBRARY_DIR")
+        if not root:
+            print("Error: No directory specified.")
+            print("Usage: python3 flatten_all_songs.py <directory> [--dry-run|-n]")
+            print("Or set MUSIC_LIBRARY_DIR in your .env file")
+            sys.exit(1)
+
+    # Expand ~ in paths
+    root = os.path.expanduser(root)
     dry_run = "--dry-run" in sys.argv or "-n" in sys.argv
 
     if not os.path.isdir(root):

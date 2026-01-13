@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Organize dropped audio files into ~/Music/rekordbox/ALL_MUSIC_BY_ARTIST
-by Artist/Title based on metadata. Works as a CLI for Automator's "Run Shell Script".
+Organize dropped audio files by Artist/Title based on metadata.
+Works as a CLI for Automator's "Run Shell Script".
 
 Features
 - Accepts files and/or folders (recurses directories)
@@ -13,12 +13,14 @@ Features
 - Handles name collisions by appending (1), (2), ... when configured
 
 Usage (example)
-  python3 scripts/organize_audio.py \
-    --dest "~/Music/rekordbox/ALL_MUSIC_BY_ARTIST" \
+  python3 script/utilities/organize_audio.py \
+    --dest "$MUSIC_LIBRARY_DIR" \
     "$@"   # when used from Automator "Run Shell Script" with input as arguments
 
 Recommended: install mutagen for best tag coverage
   python3 -m pip install --user mutagen
+
+Configuration: Set MUSIC_LIBRARY_DIR in your .env file or use --dest
 """
 
 from __future__ import annotations
@@ -32,6 +34,13 @@ import sys
 from pathlib import Path
 from typing import Iterable, Optional, Tuple, Any
 
+# Load .env file if available
+try:
+    from dotenv import load_dotenv
+    env_path = Path(__file__).parent.parent.parent / ".env"
+    load_dotenv(env_path)
+except ImportError:
+    pass
 
 # Try mutagen if available for robust multi-format tagging
 try:
@@ -41,8 +50,8 @@ except Exception:  # noqa: BLE001 - mutagen may not be installed
     MFile = None  # type: ignore
     ID3 = None  # type: ignore
 
-
-DEFAULT_DEST = str(Path.home() / "Music/rekordbox/ALL_MUSIC_BY_ARTIST")
+# Default destination from environment variable
+DEFAULT_DEST = os.environ.get("MUSIC_LIBRARY_DIR", "")
 
 SUPPORTED_EXTS = {
     ".mp3",

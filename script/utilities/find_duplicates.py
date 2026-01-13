@@ -5,8 +5,15 @@ from collections import defaultdict
 from mutagen import File
 import sys
 import shlex
+from pathlib import Path
 
-FOLDER = "/Users/stephengeller/Music/rekordbox/ALL_SONGS"
+# Load .env file if available
+try:
+    from dotenv import load_dotenv
+    env_path = Path(__file__).parent.parent.parent / ".env"
+    load_dotenv(env_path)
+except ImportError:
+    pass
 EXTENSIONS = (".mp3", ".aiff")
 
 HEX_PREFIX = re.compile(r"^[0-9A-F]{8}_", re.IGNORECASE)
@@ -143,8 +150,24 @@ def report_and_emit_big_rm(buckets):
         print("No duplicates found.")
 
 if __name__ == "__main__":
+    # Get directory from command line or environment variable
+    if len(sys.argv) > 1 and not sys.argv[1].startswith("-"):
+        folder = sys.argv[1]
+    else:
+        folder = os.environ.get("MUSIC_LIBRARY_DIR")
+        if not folder:
+            print("Error: No directory specified.")
+            print("Usage: python3 find_duplicates.py <directory>")
+            print("Or set MUSIC_LIBRARY_DIR in your .env file")
+            sys.exit(1)
+
+    folder = os.path.expanduser(folder)
+    if not os.path.isdir(folder):
+        print(f"Error: Directory does not exist: {folder}")
+        sys.exit(1)
+
     buckets = defaultdict(list)
-    for root, _, files in os.walk(FOLDER):
+    for root, _, files in os.walk(folder):
         for f in files:
             if f.lower().endswith(EXTENSIONS):
                 path = os.path.join(root, f)
