@@ -26,8 +26,7 @@ try {
 export const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID ?? '';
 export const SPOTIFY_CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET ?? '';
 export const MUSIC_LIBRARY_DIR =
-  process.env.MUSIC_LIBRARY_DIR ??
-  path.join(process.env.HOME || '', 'Music', 'DJLibrary');
+  process.env.MUSIC_LIBRARY_DIR ?? path.join(process.env.HOME || '', 'Music', 'DJLibrary');
 
 // When true, place organised AIFFs directly under MUSIC_LIBRARY_DIR
 // as <Artist - Title>.aiff (no artist/genre parent folders).
