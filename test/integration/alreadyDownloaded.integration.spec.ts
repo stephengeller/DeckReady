@@ -10,14 +10,14 @@ describe.skip('runLuckyForTracklist: respects already-downloaded and skips fallb
   let tmp;
   beforeEach(async () => {
     tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'rl-already-'));
-    process.env.ORGANISED_AIFF_DIR = path.join(tmp, 'org');
-    await fs.mkdir(process.env.ORGANISED_AIFF_DIR, { recursive: true });
+    process.env.MUSIC_LIBRARY_DIR = path.join(tmp, 'org');
+    await fs.mkdir(process.env.MUSIC_LIBRARY_DIR, { recursive: true });
     jest.resetModules();
     jest.clearAllMocks();
   });
   afterEach(async () => {
     await fs.rm(tmp, { recursive: true, force: true });
-    delete process.env.ORGANISED_AIFF_DIR;
+    delete process.env.MUSIC_LIBRARY_DIR;
   });
 
   test('quality 6 already-downloaded short-circuits; quality 5 not attempted', async () => {

@@ -11,7 +11,7 @@ describe('audio metadata integration', () => {
 
   beforeEach(async () => {
     tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'qobuz-meta-'));
-    process.env.ORGANISED_AIFF_DIR = path.join(tmp, 'org');
+    process.env.MUSIC_LIBRARY_DIR = path.join(tmp, 'org');
     // Ensure organiser places files under <Artist>/<Title>.aiff for this test
     process.env.ORGANISED_FLAT = 'false';
     lastMetaArgs = null;
@@ -79,7 +79,7 @@ describe('audio metadata integration', () => {
   });
 
   afterEach(async () => {
-    delete process.env.ORGANISED_AIFF_DIR;
+    delete process.env.MUSIC_LIBRARY_DIR;
     delete process.env.ORGANISED_FLAT;
     jest.resetModules();
     jest.clearAllMocks();
@@ -96,7 +96,7 @@ describe('audio metadata integration', () => {
     });
     expect(res.ok).toBe(true);
     const dest = path.join(
-      process.env.ORGANISED_AIFF_DIR,
+      process.env.MUSIC_LIBRARY_DIR,
       probeMeta.artist,
       `${probeMeta.title}.aiff`,
     );

@@ -9,21 +9,21 @@ describe('short-circuit when AIFF already organised', () => {
   let tmp;
   beforeEach(async () => {
     tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'rl-sc-'));
-    process.env.ORGANISED_AIFF_DIR = path.join(tmp, 'org');
-    await fs.mkdir(process.env.ORGANISED_AIFF_DIR, { recursive: true });
+    process.env.MUSIC_LIBRARY_DIR = path.join(tmp, 'org');
+    await fs.mkdir(process.env.MUSIC_LIBRARY_DIR, { recursive: true });
     jest.resetModules();
     jest.clearAllMocks();
   });
   afterEach(async () => {
     await fs.rm(tmp, { recursive: true, force: true });
-    delete process.env.ORGANISED_AIFF_DIR;
+    delete process.env.MUSIC_LIBRARY_DIR;
   });
 
   test('skips qobuz when matching AIFF exists', async () => {
     // Create pre-existing organised file: default layout <ORG>/<artist>/<title>.aiff
     const artist = 'Cesco';
     const title = 'Big Fi Dem';
-    const artistDir = path.join(process.env.ORGANISED_AIFF_DIR, artist);
+    const artistDir = path.join(process.env.MUSIC_LIBRARY_DIR, artist);
     await fs.mkdir(artistDir, { recursive: true });
     const aiff = path.join(artistDir, `${title}.aiff`);
     await fs.writeFile(aiff, 'AIFF');

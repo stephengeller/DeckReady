@@ -8,7 +8,7 @@ async function setupTempDir() {
   const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'qobuz-test-'));
   const organised = path.join(dir, 'Organised_AIFF');
   await fs.mkdir(organised, { recursive: true });
-  process.env.ORGANISED_AIFF_DIR = organised;
+  process.env.MUSIC_LIBRARY_DIR = organised;
   return { dir, organised };
 }
 
@@ -69,7 +69,7 @@ describe('processDownloadedAudio (unit, mocked ffmpeg/ffprobe)', () => {
     await processDownloadedAudio(src, fakeRunner);
 
     // Expect organised file at Organised_AIFF/blkout. - brainDED.aiff (flat by default)
-    const expected = path.join(process.env.ORGANISED_AIFF_DIR, 'blkout. - brainDED.aiff');
+    const expected = path.join(process.env.MUSIC_LIBRARY_DIR, 'blkout. - brainDED.aiff');
     const exists = await fs
       .stat(expected)
       .then(() => true)

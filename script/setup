@@ -116,8 +116,8 @@ if [[ ! -f "$ENV_FILE" ]]; then
 SPOTIFY_CLIENT_ID=
 SPOTIFY_CLIENT_SECRET=
 
-# Where organised AIFF files are stored (defaults to ~/Music/rekordbox/DROP_NEW_SONGS_HERE)
-# ORGANISED_AIFF_DIR=
+# Your music library directory - where ALL organized files go
+# MUSIC_LIBRARY_DIR=~/Music/DJLibrary
 EOF
     echo -e "      ${GREEN}✓${NC} Created $ENV_FILE"
   fi
@@ -168,22 +168,70 @@ else
 fi
 echo ""
 
-# Step 6: Create output directory
-echo -e "${YELLOW}[6/6]${NC} Setting up output directory..."
-DEFAULT_ORG="$HOME/Music/rekordbox/DROP_NEW_SONGS_HERE"
+# Step 6: Set up music library directory
+echo -e "${YELLOW}[6/6]${NC} Setting up music library directory..."
+DEFAULT_DIR="$HOME/Music/DJLibrary"
 
-# Check if user has custom directory in .env
-CUSTOM_ORG=$(grep '^ORGANISED_AIFF_DIR=' "$ENV_FILE" | cut -d'=' -f2- || echo "")
+# Check current setting
+CURRENT_DIR=$(grep '^MUSIC_LIBRARY_DIR=' "$ENV_FILE" | cut -d'=' -f2- || echo "")
 
-if [[ -n "$CUSTOM_ORG" ]]; then
-  # Expand ~ to $HOME
-  CUSTOM_ORG="${CUSTOM_ORG/#\~/$HOME}"
-  mkdir -p "$CUSTOM_ORG" || true
-  echo -e "      ${GREEN}✓${NC} Using custom directory: $CUSTOM_ORG"
+echo ""
+echo "This is where ALL your organized music files will go."
+echo "Both downloaded tracks AND utility scripts will use this directory."
+echo ""
+
+if [[ -n "$CURRENT_DIR" ]]; then
+  # Expand ~ for display
+  DISPLAY_DIR="${CURRENT_DIR/#\~/$HOME}"
+  echo -e "Current setting: ${BLUE}$CURRENT_DIR${NC}"
+  echo ""
+  read -p "Keep this location? (y/n) " -n 1 -r
+  echo ""
+  if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    echo ""
+    read -p "Enter new directory path: " NEW_DIR
+    if [[ -n "$NEW_DIR" ]]; then
+      CURRENT_DIR="$NEW_DIR"
+      # Update .env
+      if grep -q '^MUSIC_LIBRARY_DIR=' "$ENV_FILE"; then
+        sed -i.bak "s|^MUSIC_LIBRARY_DIR=.*|MUSIC_LIBRARY_DIR=$CURRENT_DIR|" "$ENV_FILE"
+        rm -f "$ENV_FILE.bak"
+      else
+        echo "MUSIC_LIBRARY_DIR=$CURRENT_DIR" >> "$ENV_FILE"
+      fi
+      echo -e "      ${GREEN}✓${NC} Updated to: $CURRENT_DIR"
+    fi
+  else
+    echo -e "      ${GREEN}✓${NC} Keeping: $CURRENT_DIR"
+  fi
 else
-  mkdir -p "$DEFAULT_ORG" || true
-  echo -e "      ${GREEN}✓${NC} Using default directory: $DEFAULT_ORG"
+  echo -e "Default: ${BLUE}$DEFAULT_DIR${NC}"
+  echo ""
+  read -p "Use this directory? (y/n) " -n 1 -r
+  echo ""
+  if [[ $REPLY =~ ^[Yy]$ ]]; then
+    CURRENT_DIR="$DEFAULT_DIR"
+  else
+    echo ""
+    read -p "Enter your directory path: " CURRENT_DIR
+  fi
+
+  # Save to .env
+  if [[ -n "$CURRENT_DIR" ]]; then
+    if grep -q '^MUSIC_LIBRARY_DIR=' "$ENV_FILE"; then
+      sed -i.bak "s|^MUSIC_LIBRARY_DIR=.*|MUSIC_LIBRARY_DIR=$CURRENT_DIR|" "$ENV_FILE"
+      rm -f "$ENV_FILE.bak"
+    else
+      echo "MUSIC_LIBRARY_DIR=$CURRENT_DIR" >> "$ENV_FILE"
+    fi
+    echo -e "      ${GREEN}✓${NC} Set to: $CURRENT_DIR"
+  fi
 fi
+
+# Create the directory
+EXPANDED_DIR="${CURRENT_DIR/#\~/$HOME}"
+mkdir -p "$EXPANDED_DIR" 2>/dev/null || true
+echo -e "      ${GREEN}✓${NC} Directory ready: $EXPANDED_DIR"
 echo ""
 
 # Final summary
@@ -200,11 +248,7 @@ echo "  2. Download tracks for real:"
 echo "     ./script/run \"https://open.spotify.com/playlist/...\""
 echo ""
 echo "  3. Check your organized files in:"
-if [[ -n "$CUSTOM_ORG" ]]; then
-  echo "     $CUSTOM_ORG"
-else
-  echo "     $DEFAULT_ORG"
-fi
+echo "     $EXPANDED_DIR"
 echo ""
 echo "For more examples and options, see:"
 echo "  ./QUICKSTART.md  - Quick guide for DJs"

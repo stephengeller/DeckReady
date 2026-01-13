@@ -59,7 +59,7 @@ script/convert-flac-folder <dir> [--by-genre]        # Re-organize existing FLAC
 5. **Download** (`src/tidalRunner.ts`): For each candidate URL, run `tidal-dl-ng` with filesystem snapshots to detect new files
 6. **Validation** (`src/provider/validation.ts`): Compare downloaded file tags against expected artist/title; delete wrong matches
 7. **Conversion** (`src/lib/organiser.ts`, `src/organiser/ffmpeg.ts`): Convert to AIFF via ffmpeg with metadata preservation
-8. **Organization** (`src/lib/organiser.ts`): Move to `ORGANISED_AIFF_DIR` with configurable layout
+8. **Organization** (`src/lib/organiser.ts`): Move to `MUSIC_LIBRARY_DIR` with configurable layout
 
 ### Key Modules
 
@@ -119,9 +119,9 @@ script/convert-flac-folder <dir> [--by-genre]        # Re-organize existing FLAC
 
 Three modes (controlled by env vars and CLI flags):
 
-1. **Flat** (default, `ORGANISED_FLAT=true`): `ORGANISED_AIFF_DIR/Artist - Title.aiff`
-2. **By-genre** (`--by-genre` flag): `ORGANISED_AIFF_DIR/Genre/Artist/Title.aiff`
-3. **Nested** (`ORGANISED_FLAT=false`): `ORGANISED_AIFF_DIR/Artist/Title.aiff`
+1. **Flat** (default, `ORGANISED_FLAT=true`): `MUSIC_LIBRARY_DIR/Artist - Title.aiff`
+2. **By-genre** (`--by-genre` flag): `MUSIC_LIBRARY_DIR/Genre/Artist/Title.aiff`
+3. **Nested** (`ORGANISED_FLAT=false`): `MUSIC_LIBRARY_DIR/Artist/Title.aiff`
 
 ### Matching Strategy
 
@@ -142,7 +142,7 @@ Three modes (controlled by env vars and CLI flags):
 
 - `.env` (from `.env.example`):
   - `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`: Required for Spotify Web API (for scraping Spotify playlists/albums)
-  - `ORGANISED_AIFF_DIR`: Base folder for organized AIFFs (default: `~/Music/rekordbox/DROP_NEW_SONGS_HERE`)
+  - `MUSIC_LIBRARY_DIR`: Base folder for organized AIFFs (default: `~/Music/rekordbox/DROP_NEW_SONGS_HERE`)
   - `ORGANISED_FLAT`: Boolean toggle for flat vs nested layout (default: true)
 - External dependencies: `tidal-dl-ng`, `ffmpeg`, `ffprobe` must be in PATH
 - TIDAL authentication: Must run `tidal-dl-ng login` before first use

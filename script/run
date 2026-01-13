@@ -143,19 +143,41 @@ if [[ ! -f "$TRACKS_TXT" ]]; then
 fi
 
 # -----------------------
+# Check required configuration
+# -----------------------
+# Try to read MUSIC_LIBRARY_DIR from .env
+if [[ -f "$REPO_ROOT/.env" ]]; then
+  MUSIC_LIBRARY_DIR=$(grep '^MUSIC_LIBRARY_DIR=' "$REPO_ROOT/.env" | cut -d'=' -f2- | sed 's/^["'\'']\(.*\)["'\'']$/\1/')
+fi
+MUSIC_LIBRARY_DIR="${MUSIC_LIBRARY_DIR:-}"
+
+if [[ -z "$MUSIC_LIBRARY_DIR" ]]; then
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo "ERROR: MUSIC_LIBRARY_DIR not set"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo ""
+  echo "You need to set your music library directory."
+  echo "This is where all your organized AIFF files will go."
+  echo ""
+  echo "Quick fix:"
+  echo "  1. Run: ./script/setup"
+  echo "  2. Follow the prompts to set MUSIC_LIBRARY_DIR"
+  echo ""
+  echo "Or manually edit .env and add:"
+  echo "  MUSIC_LIBRARY_DIR=~/Music/YourLibrary"
+  echo ""
+  exit 1
+fi
+
+# -----------------------
 # Display configuration summary
 # -----------------------
-# Try to read ORGANISED_AIFF_DIR from .env
-if [[ -f "$REPO_ROOT/.env" ]]; then
-  ORGANISED_AIFF_DIR=$(grep '^ORGANISED_AIFF_DIR=' "$REPO_ROOT/.env" | cut -d'=' -f2- | sed 's/^["'\'']\(.*\)["'\'']$/\1/')
-fi
-ORGANISED_AIFF_DIR="${ORGANISED_AIFF_DIR:-$HOME/Music/rekordbox/DROP_NEW_SONGS_HERE}"
 
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "Configuration:"
 echo "  Tracklist:     $TRACKS_TXT"
 echo "  Downloads:     $OUT_DIR (temp FLAC storage)"
-echo "  Organized to:  $ORGANISED_AIFF_DIR"
+echo "  Library:       $MUSIC_LIBRARY_DIR"
 echo "  Quality:       $QUALITY"
 [[ "$DRY_RUN" -eq 1 ]] && echo "  Mode:          DRY RUN (no downloads)"
 [[ "$FLAC_ONLY" -eq 1 ]] && echo "  Mode:          FLAC-only (no conversion)"

@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { ORGANISED_AIFF_DIR, ORGANISED_FLAT } from './env';
+import { MUSIC_LIBRARY_DIR, ORGANISED_FLAT } from './env';
 import { spawnStreaming } from './proc';
 import { readTags, Runner } from './tags';
 import { pickGenre, sanitizeName } from '../organiser/names';
@@ -10,8 +10,8 @@ import { buildConvertArgs, buildMetaArgs, verifyAndInjectAiffTags } from '../org
 
 /**
  * Convert a downloaded audio file to AIFF (if needed), copy metadata, and move
- * it into the organised AIFF folder tree under ORGANISED_AIFF_DIR as
- * <Artist - Title>.aiff by default (flat layout), or under ORGANISED_AIFF_DIR/Genre/Artist/Title.aiff
+ * it into the organised AIFF folder tree under MUSIC_LIBRARY_DIR as
+ * <Artist - Title>.aiff by default (flat layout), or under MUSIC_LIBRARY_DIR/Genre/Artist/Title.aiff
  * when opts.byGenre is true.
  */
 export async function processDownloadedAudio(
@@ -19,7 +19,7 @@ export async function processDownloadedAudio(
   runner?: Runner,
   opts?: { quiet?: boolean; verbose?: boolean; byGenre?: boolean },
 ) {
-  const ORG_BASE = process.env.ORGANISED_AIFF_DIR || ORGANISED_AIFF_DIR;
+  const ORG_BASE = process.env.MUSIC_LIBRARY_DIR || MUSIC_LIBRARY_DIR;
   try {
     if (!inputPath) return;
     try {
@@ -110,7 +110,7 @@ export async function processDownloadedAudio(
 // pickGenre and sanitizeName now live in ../organiser/names
 
 /**
- * Locate an already-organised AIFF under ORGANISED_AIFF_DIR matching artist/title.
+ * Locate an already-organised AIFF under MUSIC_LIBRARY_DIR matching artist/title.
  * Checks for both legacy <Title>.aiff and new flat <Artist - Title>.aiff naming,
  * scanning genre and artist subdirectories as needed.
  */
@@ -120,7 +120,7 @@ export async function findOrganisedAiff(
   opts?: { byGenre?: boolean },
 ): Promise<string | null> {
   try {
-    const baseDir = process.env.ORGANISED_AIFF_DIR || ORGANISED_AIFF_DIR;
+    const baseDir = process.env.MUSIC_LIBRARY_DIR || MUSIC_LIBRARY_DIR;
     const artistDirName = sanitizeName(artist || '');
     const titleBase = sanitizeName(title || '');
 

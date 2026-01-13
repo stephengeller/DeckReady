@@ -8,11 +8,11 @@ describe('runQobuzLuckyStrict spawn integration (mocked spawn)', () => {
   let tmp: string;
   beforeEach(async () => {
     tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'qobuz-'));
-    process.env.ORGANISED_AIFF_DIR = path.join(tmp, 'org');
+    process.env.MUSIC_LIBRARY_DIR = path.join(tmp, 'org');
   });
   afterEach(async () => {
     await fs.rm(tmp, { recursive: true, force: true });
-    delete process.env.ORGANISED_AIFF_DIR;
+    delete process.env.MUSIC_LIBRARY_DIR;
     jest.resetModules();
     jest.clearAllMocks();
   });
